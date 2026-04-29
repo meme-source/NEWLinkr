@@ -1,5 +1,5 @@
 // Provider 接口定义
-import type { Creator, Platform } from "../types";
+import type { Creator, Platform } from "@/types/api";
 
 export type Post = {
   id: string;

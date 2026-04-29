@@ -9,8 +9,8 @@ import {
 import {
   useWorkspaceProject,
   WORKSPACE_UNASSIGNED_PROJECT_ID,
-} from "@/components/workspace/project-context";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
+} from "@/features/project/components/project-context";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import { cn } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────

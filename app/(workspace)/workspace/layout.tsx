@@ -22,9 +22,9 @@ import {
   Users,
 } from "lucide-react";
 
-import { WorkspaceProjectBar } from "@/components/workspace/project-bar";
-import { WorkspaceProjectProvider } from "@/components/workspace/project-context";
-import { CreatorProfileProvider } from "@/components/ui/creator-profile-context";
+import { WorkspaceProjectBar } from "@/features/project/components/project-bar";
+import { WorkspaceProjectProvider } from "@/features/project/components/project-context";
+import { CreatorProfileProvider } from "@/features/creator/components/creator-profile-context";
 import { cn } from "@/lib/utils";
 
 // ── Custom sidebar toggle icons ────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 // 假数据 —— 后端没做完前给前端用，前端可以直接 import 这里
 // 真实 API 上线后，把 import 替换成 fetch('/api/...')
-import type { Creator, CompetitorCreatorResult } from "../types";
+import type { Creator, CompetitorCreatorResult } from "@/types/api";
 
 export const mockCreators: Creator[] = [
   {

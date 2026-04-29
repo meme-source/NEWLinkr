@@ -6,7 +6,7 @@ import {
   formatProjectBudget,
   formatProjectTimeline,
   useWorkspaceProject,
-} from "@/components/workspace/project-context";
+} from "@/features/project/components/project-context";
 
 function getRouteGuidance(pathname: string) {
   if (pathname.startsWith("/workspace/library")) {

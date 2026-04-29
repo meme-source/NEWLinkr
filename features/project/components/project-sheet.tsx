@@ -17,7 +17,7 @@ import type {
   ProjectDrawerVariant,
   WorkspaceProject,
   WorkspaceProjectDraft,
-} from "@/components/workspace/project-context";
+} from "@/features/project/components/project-context";
 
 const CATEGORY_OPTIONS = [
   "美妆护肤",

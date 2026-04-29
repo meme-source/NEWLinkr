@@ -49,8 +49,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SimilarCardCarousel } from "@/components/ui/similar-card-carousel";
-import { SimilarSearchModule } from "@/components/ui/similar-search-module";
+import { SimilarCardCarousel } from "@/features/plugin/components/similar-card-carousel";
+import { SimilarSearchModule } from "@/features/plugin/components/similar-search-module";
 
 type DemoStage = "floating" | "card";
 type ReviewFlow = "idle" | "sequential";

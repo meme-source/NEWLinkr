@@ -3,12 +3,12 @@
 //   POST /api/discovery/scenario        action=parse  → 产品解析+场景推荐
 //   POST /api/discovery/scenario        action=match  → 按场景找达人
 // 文档：博主发现页实现逻辑.md §4
-import { ok, fail } from "@/lib/api";
+import { ok, fail } from "@/lib/api/envelope";
 import type {
   ScenarioParseRequest,
   ScenarioParseResponse,
   ScenarioCreatorResult,
-} from "@/lib/types";
+} from "@/types/api";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);

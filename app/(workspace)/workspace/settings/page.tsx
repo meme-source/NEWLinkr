@@ -29,8 +29,8 @@ import {
   formatProjectBudget,
   formatProjectTimeline,
   useWorkspaceProject,
-} from "@/components/workspace/project-context";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
+} from "@/features/project/components/project-context";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import { cn } from "@/lib/utils";
 
 type TabKey = "project" | "team" | "billing" | "integrations";

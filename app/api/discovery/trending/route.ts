@@ -1,12 +1,12 @@
 // 博主发现 —— 找爆款达人
 // POST /api/discovery/trending
 // 文档：博主发现页实现逻辑.md §5
-import { ok, fail } from "@/lib/api";
+import { ok, fail } from "@/lib/api/envelope";
 import type {
   TrendingDiscoveryRequest,
   TrendingCreatorResult,
   SearchBasis,
-} from "@/lib/types";
+} from "@/types/api";
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as TrendingDiscoveryRequest | null;

@@ -25,8 +25,8 @@ import {
   XCircle,
   Eye,
 } from "lucide-react";
-import { useWorkspaceProject } from "@/components/workspace/project-context";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
+import { useWorkspaceProject } from "@/features/project/components/project-context";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import { cn } from "@/lib/utils";
 
 type TabKey = "mail-mgmt" | "tasks" | "inbox" | "templates" | "stats" | "email-settings";

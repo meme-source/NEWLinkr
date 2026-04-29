@@ -12,10 +12,10 @@ import {
   formatProjectBudget,
   formatProjectTimeline,
   useWorkspaceProject,
-} from "@/components/workspace/project-context";
+} from "@/features/project/components/project-context";
 import { cn } from "@/lib/utils";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
-import type { CreatorProfileInput } from "@/components/ui/creator-profile-drawer";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
+import type { CreatorProfileInput } from "@/features/creator/components/creator-profile-drawer";
 
 function creatorToProfileInput(c: Creator): CreatorProfileInput {
   return {

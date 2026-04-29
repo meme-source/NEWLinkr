@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 
-import { ProjectSheet } from "@/components/workspace/project-sheet";
+import { ProjectSheet } from "@/features/project/components/project-sheet";
 
 export type ProjectDrawerMode = "create" | "edit";
 export type ProjectDrawerVariant = "quick" | "detailed";

@@ -1,6 +1,6 @@
 // 达人详情
 // GET /api/creators/:id
-import { ok, fail } from "@/lib/api";
+import { ok, fail } from "@/lib/api/envelope";
 
 export async function GET(
   _req: Request,
