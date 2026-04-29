@@ -9,13 +9,13 @@ import {
 } from "@/components/workspace/project-context";
 
 function getRouteGuidance(pathname: string) {
-  if (pathname.startsWith("/workspace-demo/library")) {
+  if (pathname.startsWith("/workspace/library")) {
     return "当前项目决定你在博主库里看到的名单、导入归属、移入项目和批量建联范围。";
   }
-  if (pathname.startsWith("/workspace-demo/outreach")) {
+  if (pathname.startsWith("/workspace/outreach")) {
     return "当前项目决定邮件任务、收件箱线索、发送进度和建联统计的查看范围。";
   }
-  if (pathname.startsWith("/workspace-demo/settings")) {
+  if (pathname.startsWith("/workspace/settings")) {
     return "在这里补全项目资料后，博主发现、博主库和建联中心都会共用这一套项目配置。";
   }
   return "当前项目会承接搜索、收藏、No 标记、相似达人查找和后续建联动作，确保每一步都有明确归属。";

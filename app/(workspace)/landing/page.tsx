@@ -68,10 +68,10 @@ export default function Home() {
             Linkr
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/workspace-demo" className="landing-secondary-btn hidden sm:inline-flex">
+            <Link href="/workspace" className="landing-secondary-btn hidden sm:inline-flex">
               进入工作台
             </Link>
-            <Link href="/plugin-demo" className="landing-nav-cta">
+            <Link href="/demo" className="landing-nav-cta">
               安装插件
             </Link>
           </div>
@@ -89,11 +89,11 @@ export default function Home() {
             </h1>
             <p className="landing-subtitle">找人、找邮箱、写邮件的脏活交给 AI。你只负责点发送，然后，准点下班。</p>
             <div className="landing-actions">
-              <Link href="/plugin-demo" className="landing-primary-btn">
+              <Link href="/demo" className="landing-primary-btn">
                 拿走这 100 个博主名单
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />
               </Link>
-              <Link href="/workspace-demo" className="landing-secondary-btn">
+              <Link href="/workspace" className="landing-secondary-btn">
                 进入工作台
               </Link>
             </div>
@@ -249,7 +249,7 @@ export default function Home() {
                 <h3>{s.title}</h3>
                 <p>{s.subtitle}</p>
                 {s.showPluginCta && (
-                  <Link href="/plugin-demo" className="landing-secondary-btn mt-4">
+                  <Link href="/demo" className="landing-secondary-btn mt-4">
                     ⬇ 下载 Chrome 插件
                   </Link>
                 )}
@@ -306,7 +306,7 @@ export default function Home() {
                 <li><Check aria-hidden="true" className="h-4 w-4" />AI 邮件生成</li>
                 <li><Check aria-hidden="true" className="h-4 w-4" />Chrome 插件完整功能</li>
               </ul>
-              <Link href="/plugin-demo" className="landing-price-cta">
+              <Link href="/demo" className="landing-price-cta">
                 ¥9.9 先试一个月
               </Link>
             </article>
@@ -328,7 +328,7 @@ export default function Home() {
                 <li><Check aria-hidden="true" className="h-4 w-4" />AI 个性化邮件</li>
                 <li><Check aria-hidden="true" className="h-4 w-4" />批量导出 CSV</li>
               </ul>
-              <Link href="/plugin-demo" className="landing-price-cta is-accent">
+              <Link href="/demo" className="landing-price-cta is-accent">
                 直接起飞 →
               </Link>
             </article>
@@ -359,11 +359,11 @@ export default function Home() {
               <span>或者花9块9，让Linkr替你翻。全功能用一个月，好不好用干一天就知道。</span>
             </div>
             <div className="landing-cta-actions relative z-10">
-              <Link href="/plugin-demo" className="landing-primary-btn">
+              <Link href="/demo" className="landing-primary-btn">
                 把破活交出去
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />
               </Link>
-              <Link href="/workspace-demo" className="landing-cta-link">
+              <Link href="/workspace" className="landing-cta-link">
                 进入工作台
               </Link>
             </div>
@@ -375,8 +375,8 @@ export default function Home() {
         <div className="landing-container landing-footer-inner">
           <span className="landing-brand-footer">Linkr</span>
           <div className="landing-footer-links">
-            <Link href="/plugin-demo">插件演示</Link>
-            <Link href="/workspace-demo">工作台</Link>
+            <Link href="/demo">插件演示</Link>
+            <Link href="/workspace">工作台</Link>
             <span>© 2026 Linkr</span>
           </div>
         </div>

@@ -53,24 +53,24 @@ type NavChild = { label: string; href: string; icon: React.ElementType };
 type NavItem = { label: string; href: string; icon: React.ElementType; children?: NavChild[] };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "博主发现", href: "/workspace-demo/discovery", icon: Compass },
-  { label: "博主库",   href: "/workspace-demo/library",   icon: Library },
+  { label: "博主发现", href: "/workspace/discovery", icon: Compass },
+  { label: "博主库",   href: "/workspace/library",   icon: Library },
   {
-    label: "建联中心", href: "/workspace-demo/outreach", icon: Mail,
+    label: "建联中心", href: "/workspace/outreach", icon: Mail,
     children: [
-      { label: "建联面板", href: "/workspace-demo/outreach?tab=mail-mgmt",     icon: BarChart2 },
-      { label: "收件箱",   href: "/workspace-demo/outreach?tab=inbox",         icon: Inbox },
-      { label: "邮件模板", href: "/workspace-demo/outreach?tab=templates",     icon: FileText },
-      { label: "邮箱设置", href: "/workspace-demo/outreach?tab=email-settings",icon: Settings2 },
+      { label: "建联面板", href: "/workspace/outreach?tab=mail-mgmt",     icon: BarChart2 },
+      { label: "收件箱",   href: "/workspace/outreach?tab=inbox",         icon: Inbox },
+      { label: "邮件模板", href: "/workspace/outreach?tab=templates",     icon: FileText },
+      { label: "邮箱设置", href: "/workspace/outreach?tab=email-settings",icon: Settings2 },
     ],
   },
   {
-    label: "设置", href: "/workspace-demo/settings", icon: Settings,
+    label: "设置", href: "/workspace/settings", icon: Settings,
     children: [
-      { label: "项目管理",   href: "/workspace-demo/settings?tab=project",      icon: Settings2 },
-      { label: "账户与计费", href: "/workspace-demo/settings?tab=billing",      icon: CreditCard },
-      { label: "集成与授权", href: "/workspace-demo/settings?tab=integrations", icon: Link2 },
-      { label: "团队管理",   href: "/workspace-demo/settings?tab=team",         icon: Users },
+      { label: "项目管理",   href: "/workspace/settings?tab=project",      icon: Settings2 },
+      { label: "账户与计费", href: "/workspace/settings?tab=billing",      icon: CreditCard },
+      { label: "集成与授权", href: "/workspace/settings?tab=integrations", icon: Link2 },
+      { label: "团队管理",   href: "/workspace/settings?tab=team",         icon: Users },
     ],
   },
 ];
@@ -376,7 +376,7 @@ export default function WorkspaceDemoLayout({ children }: { children: React.Reac
 
           {/* ── Main content ───────────────────────────────────────────────────── */}
           <main ref={mainScrollRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto px-6 py-8">
-            {pathname !== "/workspace-demo/discovery" ? (
+            {pathname !== "/workspace/discovery" ? (
               <WorkspaceProjectBar pathname={pathname} />
             ) : null}
             {children}

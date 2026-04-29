@@ -1397,7 +1397,7 @@ function MailMgmtTab() {
   const completedTasks  = projectTasks.filter(t => t.status === "已完成");
 
   const goInbox = (c: OutreachCreator, action: string) => {
-    router.push(`/workspace-demo/outreach?tab=inbox&blogger=${encodeURIComponent(c.handle)}&action=${action}`);
+    router.push(`/workspace/outreach?tab=inbox&blogger=${encodeURIComponent(c.handle)}&action=${action}`);
   };
 
   return (

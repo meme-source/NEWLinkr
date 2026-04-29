@@ -1273,7 +1273,7 @@ function buildDiscoveryResultsUrl({
   const fp = mapFollowersLabelToDiscoveryPreset(creator.followers);
   if (fp) params.set("fp", fp);
 
-  return `/workspace-demo/discovery?${params.toString()}`;
+  return `/workspace/discovery?${params.toString()}`;
 }
 
 /** 插件「找种子达人」→ 后台博主发现结果页深链（含筛选与直接进入结果） */
@@ -1605,7 +1605,7 @@ export default function PluginPathDemo() {
   };
 
   const openTaskList = () => {
-    window.open("/workspace-demo/outreach?tab=tasks", "_blank", "noopener,noreferrer");
+    window.open("/workspace/outreach?tab=tasks", "_blank", "noopener,noreferrer");
     setFeedback(`已打开项目「${selectedProject.name}」的 web 任务页`);
   };
 
@@ -4435,7 +4435,7 @@ function SimilarSidebar({
                     <button
                       type="button"
                       onClick={() => {
-                        window.open(`/workspace-demo?creator=${encodeURIComponent(creator.id)}&tab=audience`, "_blank");
+                        window.open(`/workspace?creator=${encodeURIComponent(creator.id)}&tab=audience`, "_blank");
                       }}
                       className="mt-2.5 flex w-full items-center justify-center gap-1 rounded-[12px] border border-[#e8e6dc] bg-white py-2 text-xs text-[#87867f] transition-all hover:border-[#d1cfc5] hover:bg-[#faf9f5] hover:text-[#5e5d59]"
                     >

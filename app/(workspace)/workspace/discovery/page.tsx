@@ -1939,7 +1939,7 @@ function buildQuickScreenHref(input: QuickScreenHrefInput): string {
   if (input.viewsFrom) params.set("vf", input.viewsFrom);
   if (input.viewsTo) params.set("vt", input.viewsTo);
   if (input.applicationConditions.length) params.set("ac", input.applicationConditions.join("|"));
-  return `/workspace-demo/discovery?${params.toString()}`;
+  return `/workspace/discovery?${params.toString()}`;
 }
 
 // ── Dimension preview card (thumbnail → jumps to quick-screen page) ───────────
