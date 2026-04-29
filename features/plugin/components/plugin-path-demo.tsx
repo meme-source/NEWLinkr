@@ -51,6 +51,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SimilarCardCarousel } from "@/features/plugin/components/similar-card-carousel";
 import { SimilarSearchModule } from "@/features/plugin/components/similar-search-module";
+import { SocialPlatformLogo } from "@/features/plugin/components/social-platform-logo";
+import { SideNavItem } from "@/features/plugin/components/side-nav-item";
+import { HoverStat } from "@/features/plugin/components/hover-stat";
+import { CreatorAvatar } from "@/features/plugin/components/creator-avatar";
+import { SidebarAnalysisSparkleIcon } from "@/features/plugin/components/sparkle-icon";
+import { AudienceBar } from "@/features/plugin/components/audience-bar";
 import type {
   AudienceHighlight,
   AudienceRegion,
@@ -141,51 +147,6 @@ function clampValue(value: number, min: number, max: number) {
 function getSuggestedCpmUsd(country: string, tier: RegionTierKey): string {
   const cpm = COUNTRY_CPM_OVERRIDE_USD[country] ?? REGION_TIER_BASE_CPM_USD[tier];
   return cpm.toFixed(2);
-}
-
-function SocialPlatformLogo({ platform, className }: { platform: SocialPlatformKey; className?: string }) {
-  if (platform === "youtube") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <path fill="#FF0000" d="M23.5 7.1a3.08 3.08 0 0 0-2.16-2.18C19.43 4.4 12 4.4 12 4.4s-7.43 0-9.34.52A3.08 3.08 0 0 0 .5 7.1 32.7 32.7 0 0 0 0 12a32.7 32.7 0 0 0 .5 4.9 3.08 3.08 0 0 0 2.16 2.18C4.57 19.6 12 19.6 12 19.6s7.43 0 9.34-.52a3.08 3.08 0 0 0 2.16-2.18A32.7 32.7 0 0 0 24 12a32.7 32.7 0 0 0-.5-4.9Z" />
-        <path fill="#fff" d="m9.6 15.2 6.2-3.2-6.2-3.2v6.4Z" />
-      </svg>
-    );
-  }
-
-  if (platform === "instagram") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <defs>
-          <linearGradient id="igGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#F58529" />
-            <stop offset="50%" stopColor="#DD2A7B" />
-            <stop offset="100%" stopColor="#515BD4" />
-          </linearGradient>
-        </defs>
-        <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igGradient)" />
-        <circle cx="12" cy="12" r="4.1" fill="none" stroke="#fff" strokeWidth="1.8" />
-        <circle cx="17.4" cy="6.8" r="1.2" fill="#fff" />
-      </svg>
-    );
-  }
-
-  if (platform === "x") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <rect x="2" y="2" width="20" height="20" rx="6" fill="#111" />
-        <path fill="#fff" d="M14.8 5h3.1l-4.8 5.5L18.8 19h-4.4l-3.4-4.8L6.7 19H3.6l5.1-5.8L3.2 5h4.5l3 4.3L14.8 5Zm-.8 12h1.2L8.1 6.9H6.8L14 17Z" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path fill="#25F4EE" d="M16.4 2.5v10.2a4.4 4.4 0 1 1-4.4-4.4c.3 0 .6 0 .9.1v2.4a2.1 2.1 0 1 0 1.2 1.9V2.5h2.3Z" />
-      <path fill="#FE2C55" d="M14.1 2.5h2.3c.7 2 2.1 3.5 4.1 4.2v2.3a8.1 8.1 0 0 1-4.1-1.6v5.3a4.4 4.4 0 1 1-4.4-4.4c.3 0 .6 0 .9.1v2.4a2.1 2.1 0 1 0 1.2 1.9V2.5Z" fillOpacity=".85" />
-      <path fill="#fff" d="M14.1 2.5v10.2a2.1 2.1 0 1 1-1.2-1.9V8.4a4.7 4.7 0 0 0-.9-.1 4.4 4.4 0 1 0 4.4 4.4V7.4a8.1 8.1 0 0 0 4.1 1.6V6.7a6.5 6.5 0 0 1-4.1-4.2h-2.3Z" />
-    </svg>
-  );
 }
 
 function focusWithoutScroll(element: { focus: (options?: FocusOptions) => void } | null) {
@@ -1785,23 +1746,6 @@ export default function PluginPathDemo() {
   );
 }
 
-function SideNavItem({ label, active }: { label: string; active?: boolean }) {
-  return (
-    <div className={cn("flex items-center gap-2", active ? "text-[#141413]" : "text-[#87867f]")}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      <span>{label}</span>
-    </div>
-  );
-}
-
-function HoverStat({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full border border-[#e8e6dc] bg-white px-3 py-1.5 text-[#4d4c48] transition-all duration-150 hover:border-[#d1cfc5] hover:bg-[#f5f4ed] hover:text-[#141413]">
-      {children}
-    </span>
-  );
-}
-
 type VideoCategory = "viral" | "flop" | "paid" | "normal";
 
 type SyntheticVideo = {
@@ -2460,45 +2404,6 @@ function FloatingPluginGroup({
         </div>
       </div>
     </div>
-  );
-}
-
-function CreatorAvatar({
-  creator,
-  className,
-  labelClassName,
-}: {
-  creator: CreatorProfile;
-  className?: string;
-  labelClassName?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-center rounded-full border-4 border-white bg-[radial-gradient(circle_at_30%_30%,#f6ddd1_0%,#d3b4a2_45%,#9c7c70_100%)] shadow-[0_10px_28px_-18px_rgba(77,76,72,0.35)]",
-        className
-      )}
-    >
-      <span className={cn("text-lg font-semibold leading-none tracking-tight text-white", labelClassName)}>
-        {creator.name[0]}
-      </span>
-    </div>
-  );
-}
-
-function SidebarAnalysisSparkleIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 1024 1024"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        d="M381.8496 206.8992a89.1392 89.1392 0 0 1 79.8208-63.4368 88.0128 88.0128 0 0 1 84.5824 56.0128l2.6624 7.4752 35.84 110.8992a183.3984 183.3984 0 0 0 100.5056 113.1008l9.5744 3.7376 104.3456 37.8368a93.3888 93.3888 0 0 1 59.648 84.7872 94.5152 94.5152 0 0 1-52.5824 89.9072l-7.0144 2.8672-104.3456 37.8368a181.5552 181.5552 0 0 0-106.4448 106.752l-3.5328 10.24-35.8912 110.5408a89.1392 89.1392 0 0 1-79.616 63.1808 88.0128 88.0128 0 0 1-84.5824-56.0128l-2.7648-7.168-35.84-110.7456a183.3984 183.3984 0 0 0-100.5056-113.2032l-9.5232-3.7888-104.2432-37.9904a93.3888 93.3888 0 0 1-59.648-84.736A94.464 94.464 0 0 1 124.7744 475.136l7.1168-2.9696 104.3968-37.9904a181.5552 181.5552 0 0 0 106.4448-106.752l3.6352-10.24 35.5328-110.8992z m83.6096 30.3104l-35.5328 110.8992a274.7904 274.7904 0 0 1-153.6 171.2128l-10.9568 4.2496-104.3456 37.7856 104.2944 37.7856a272.64 272.64 0 0 1 161.1264 163.4304l3.9936 11.6224 35.5328 110.8992 35.84-110.8992a274.7904 274.7904 0 0 1 153.6-171.2128l10.9568-4.1472 104.3456-37.8368-104.3456-37.8368a272.64 272.64 0 0 1-161.1776-163.5328l-3.9424-11.6224zM818.6368 45.056a43.5712 43.5712 0 0 1 39.68 26.2656l2.0992 5.4784 15.36 48.128 45.312 16.384a46.08 46.08 0 0 1 30.464 41.3184 47.2064 47.2064 0 0 1-24.8832 45.2608l-5.4784 2.2528-45.2608 16.4352-15.36 48.128a44.4416 44.4416 0 0 1-38.9632 32.0512 43.5712 43.5712 0 0 1-42.4448-26.5728l-2.0992-5.4784-15.36-48.128-45.312-16.384a46.08 46.08 0 0 1-30.464-41.3184 47.2064 47.2064 0 0 1 24.8832-45.2608l5.4784-2.2528 45.312-16.4352 15.36-48.128a44.1856 44.1856 0 0 1 41.6768-31.744z"
-        fill="currentColor"
-      />
-    </svg>
   );
 }
 
@@ -6352,23 +6257,6 @@ function AudienceHighlightBar({
         <div
           className="h-full rounded-full bg-gradient-to-r from-[#c96442] to-[#d97757]"
           style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function AudienceBar({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-3 text-xs text-[#87867f]">
-        <span>{label}</span>
-        <span className="font-medium text-[#4d4c48]">{value}</span>
-      </div>
-      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#e8e6dc]">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#c96442] to-[#d97757]"
-          style={{ width: value }}
         />
       </div>
     </div>
