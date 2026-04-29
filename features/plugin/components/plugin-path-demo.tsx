@@ -67,6 +67,23 @@ import {
   type SyntheticVideo,
   type VideoCategory,
 } from "@/features/plugin/lib/synthetic";
+import {
+  SIDEBAR_COLLAPSED_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+  buildQuickProjectName,
+  clampValue,
+  createEmptyProjectScopedState,
+  focusWithoutScroll,
+  formatFileSize,
+  formatScheduleLabel,
+  getDefaultScheduleAt,
+  getMedianNumber,
+  getSidebarWidthBounds,
+  getSuggestedCpmUsd,
+  mapFollowersLabelToDiscoveryPreset,
+  parseCpmAmount,
+  sortProjectsNewestFirst,
+} from "@/features/plugin/lib/format";
 import type {
   AudienceHighlight,
   AudienceRegion,
@@ -93,14 +110,12 @@ import type {
 import { searchModes } from "@/features/plugin/data/search-modes";
 import { emailTemplates } from "@/features/plugin/data/email-templates";
 import {
-  COUNTRY_CPM_OVERRIDE_USD,
   COUNTRY_OPTIONS,
   COUNTRY_TO_FLAG,
   CURRENCY_OPTIONS,
   CURRENCY_SYMBOLS,
   FLAG_TO_DISCOVERY_COUNTRY,
   LOCALE_REGION_TO_COUNTRY,
-  REGION_TIER_BASE_CPM_USD,
   REGION_TIER_OPTIONS,
 } from "@/features/plugin/data/countries";
 import {
@@ -118,9 +133,6 @@ import { searchResults } from "@/features/plugin/data/search-results";
 const SIDEBAR_CARD_RADIUS = "rounded-[24px]";
 const SIDEBAR_CONTROL_RADIUS = "rounded-[20px]";
 const SIDEBAR_METRIC_RADIUS = "rounded-[16px]";
-const SIDEBAR_COLLAPSED_WIDTH = 44;
-const SIDEBAR_MIN_WIDTH = 396;
-const SIDEBAR_MAX_WIDTH = 640;
 const SIDEBAR_PANEL_CARD_CLASSES = `${SIDEBAR_CARD_RADIUS} border border-[#e8e6dc] bg-white p-4`;
 const SIDEBAR_GRADIENT_CARD_CLASSES = `${SIDEBAR_CARD_RADIUS} border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#f5f4ed_100%)] p-4`;
 const SIDEBAR_SECTION_CARD_CLASSES = `${SIDEBAR_CARD_RADIUS} border border-[#e8e6dc] bg-[#f5f4ed] p-4`;
@@ -150,61 +162,6 @@ const DEFAULT_INLINE_DATA_KEYS: InlineDataKey[] = [
   "engagement",
   "publishedAt",
 ];
-function clampValue(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function getSuggestedCpmUsd(country: string, tier: RegionTierKey): string {
-  const cpm = COUNTRY_CPM_OVERRIDE_USD[country] ?? REGION_TIER_BASE_CPM_USD[tier];
-  return cpm.toFixed(2);
-}
-
-function focusWithoutScroll(element: { focus: (options?: FocusOptions) => void } | null) {
-  if (!element) return;
-  try {
-    element.focus({ preventScroll: true });
-  } catch {
-    element.focus();
-  }
-}
-
-function getSidebarWidthBounds(viewportWidth: number, compactViewport: boolean) {
-  const maxWidth = Math.max(
-    280,
-    Math.min(SIDEBAR_MAX_WIDTH, viewportWidth - (compactViewport ? 24 : 180))
-  );
-  const minWidth = Math.min(SIDEBAR_MIN_WIDTH, maxWidth);
-  return { min: minWidth, max: maxWidth };
-}
-
-function sortProjectsNewestFirst(projects: ProjectSummary[]) {
-  return [...projects].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-  );
-}
-
-function buildQuickProjectName(projects: ProjectSummary[]) {
-  const existingNames = new Set(projects.map((project) => project.name));
-  let index = projects.length + 1;
-  let name = `新项目 ${index}`;
-
-  while (existingNames.has(name)) {
-    index += 1;
-    name = `新项目 ${index}`;
-  }
-
-  return name;
-}
-
-function createEmptyProjectScopedState(): ProjectScopedState {
-  return {
-    savedCreatorIds: [],
-    dismissedCreatorIds: [],
-    creatorTags: {},
-  };
-}
-
-
 function getCreatorEmail(creator: CreatorProfile) {
   return creator.email ?? `${creator.handle.replace("@", "")}@mail.demo`;
 }
@@ -447,30 +404,6 @@ function inferCountryFromLocale(locale: string) {
   return LOCALE_REGION_TO_COUNTRY[region] ?? null;
 }
 
-function parseCpmAmount(cpm: string) {
-  const amount = Number.parseFloat(cpm.replace(/[^\d.]/g, ""));
-  return Number.isFinite(amount) && amount > 0 ? amount.toFixed(2) : "10.00";
-}
-
-function getMedianNumber(values: number[]) {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((left, right) => left - right);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
-}
-
-function mapFollowersLabelToDiscoveryPreset(followersLabel: string): string | null {
-  const m = followersLabel.match(/([\d.]+)\s*K/i);
-  if (!m) return null;
-  const k = parseFloat(m[1]);
-  if (k < 50) return "10K-50K";
-  if (k < 100) return "50K-100K";
-  if (k < 200) return "100K-200K";
-  if (k < 500) return "200K-500K";
-  if (k < 1000) return "500K-1M";
-  return "1M+";
-}
-
 function buildDiscoveryResultsUrl({
   creatorId,
   creator,
@@ -681,48 +614,6 @@ function getEmailTemplateSubject(
     .join("");
 }
 
-function getDefaultScheduleAt() {
-  const date = new Date();
-  date.setHours(date.getHours() + 2);
-  date.setMinutes(Math.ceil(date.getMinutes() / 15) * 15, 0, 0);
-
-  const pad = (value: number) => String(value).padStart(2, "0");
-
-  return [
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
-    `${pad(date.getHours())}:${pad(date.getMinutes())}`,
-  ].join("T");
-}
-
-function formatScheduleLabel(value: string) {
-  if (!value) {
-    return "";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) {
-    return `${bytes}B`;
-  }
-
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)}KB`;
-  }
-
-  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
-}
 
 function getTagTone(label: string): TagTone {
   const preset = noteTagPresets.find((item) => item.label.toLowerCase() === label.toLowerCase());
