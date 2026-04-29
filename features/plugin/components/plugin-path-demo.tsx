@@ -70,6 +70,10 @@ import { SidebarLocationInline } from "@/features/plugin/components/sidebar-loca
 import { SidebarContentTabButton } from "@/features/plugin/components/sidebar-content-tab-button";
 import { AudienceHighlightBar } from "@/features/plugin/components/audience-highlight-bar";
 import { SidebarAction } from "@/features/plugin/components/sidebar-action";
+import { SidebarCollapsibleSection } from "@/features/plugin/components/sidebar-collapsible-section";
+import { SidebarEmailCopy } from "@/features/plugin/components/sidebar-email-copy";
+import { DeleteProjectConfirm } from "@/features/plugin/components/delete-project-confirm";
+import { SearchResultPopup } from "@/features/plugin/components/search-result-popup";
 import {
   formatComments,
   formatDuration,
@@ -1201,7 +1205,6 @@ export default function PluginPathDemo() {
     </main>
   );
 }
-
 function FakeTiktokProfile({
   creator,
   dataCheckOn,
@@ -4818,103 +4821,6 @@ function SidebarTagRow({
   );
 }
 
-function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail: boolean }) {
-  const [copied, setCopied] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(email);
-  const [localEmail, setLocalEmail] = useState(email);
-
-  useEffect(() => {
-    setLocalEmail(email);
-    setEditValue(email);
-    setIsEditing(false);
-    setCopied(false);
-  }, [email]);
-
-  const effectiveEmail = localEmail.trim();
-  const effectiveHasEmail = hasEmail || effectiveEmail.length > 0;
-
-  const copy = () => {
-    if (!effectiveHasEmail || !effectiveEmail) return;
-    navigator.clipboard.writeText(effectiveEmail).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
-  };
-
-  const finishEdit = () => {
-    setLocalEmail(editValue.trim());
-    setIsEditing(false);
-  };
-
-  if (isEditing) {
-    return (
-      <input
-        autoFocus
-        value={editValue}
-        onChange={(event) => setEditValue(event.target.value)}
-        onBlur={finishEdit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            finishEdit();
-          }
-          if (event.key === "Escape") {
-            setEditValue(localEmail);
-            setIsEditing(false);
-          }
-        }}
-        placeholder="输入邮箱地址"
-        className="h-[26px] min-w-0 flex-1 rounded-[13px] border border-[#e8e6dc] bg-white px-[9px] text-[11px] font-medium text-[#141413] outline-none transition-colors focus:border-[#c96442]/35"
-      />
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        if (effectiveHasEmail) {
-          copy();
-        }
-      }}
-      onDoubleClick={() => {
-        if (!effectiveHasEmail) {
-          setEditValue(localEmail);
-          setIsEditing(true);
-        }
-      }}
-      aria-label={effectiveHasEmail ? "复制邮箱" : "暂无邮箱，双击添加邮箱"}
-      title={effectiveHasEmail ? effectiveEmail : "双击添加邮箱"}
-      className={cn(
-        "flex h-[26px] min-w-0 flex-1 items-center gap-1.5 rounded-[13px] px-[9px] text-[11px] transition-all select-none",
-        copied
-          ? "bg-emerald-50"
-          : effectiveHasEmail
-            ? "bg-[#f0ece4]"
-            : "bg-[#f5f4ed]",
-        effectiveHasEmail ? "cursor-pointer hover:bg-[#e8e3d8]" : "cursor-text"
-      )}
-    >
-      {copied ? (
-        <Check className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
-      ) : (
-        <Copy className={cn("h-3.5 w-3.5 shrink-0", effectiveHasEmail ? "text-[#87867f]" : "text-[#bcb7ad]")} />
-      )}
-      <span
-        className={cn(
-          "min-w-0 flex-1 truncate text-left font-medium",
-          copied
-            ? "text-emerald-700"
-            : effectiveHasEmail
-              ? "text-[#4d4c48]"
-              : "text-[#a39f95]"
-        )}
-      >
-        {copied ? "已复制" : effectiveHasEmail ? effectiveEmail : "双击添加邮箱"}
-      </span>
-    </button>
-  );
-}
 
 
 
@@ -4995,46 +4901,6 @@ function SidebarCreatorProfileCard({
 }
 
 
-function SidebarCollapsibleSection({
-  icon: Icon,
-  title,
-  open,
-  onToggle,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#e8e6dc] bg-white`}>
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between px-3 py-2.5 text-left transition-colors hover:bg-[#faf9f5]"
-      >
-        <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#141413]">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#f5f4ed] text-[#c96442]">
-            <Icon className="h-3.5 w-3.5" />
-          </span>
-          {title}
-        </span>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 text-[#87867f] transition-transform duration-200",
-            open && "rotate-180"
-          )}
-        />
-      </button>
-      {open ? (
-        <div className="border-t border-[#ececec] px-3 py-3">{children}</div>
-      ) : null}
-    </div>
-  );
-}
 
 
 function seededRandom(seed: number) {
@@ -5385,71 +5251,6 @@ function CreatorTopicSummaryRow({
 
 
 
-function DeleteProjectConfirm({
-  projectName,
-  onCancel,
-  onConfirm,
-}: {
-  projectName: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onCancel();
-      if (event.key === "Enter") onConfirm();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onCancel, onConfirm]);
-
-  return (
-    <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-[#141413]/22 px-4 backdrop-blur-sm"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onCancel();
-      }}
-    >
-      <div
-        role="alertdialog"
-        aria-modal="true"
-        aria-label="确认删除项目"
-        className="relative w-full max-w-sm overflow-hidden rounded-[24px] border border-[#e8e6dc] bg-white p-6 text-[#141413] shadow-[0_30px_120px_-40px_rgba(77,76,72,0.28)]"
-      >
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fbeae6] text-[#9c403a]">
-            <Trash2 className="h-5 w-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-base font-semibold">确认删除项目？</div>
-            <p className="mt-1.5 text-[13px] leading-5 text-[#5e5d59]">
-              即将删除项目
-              <span className="mx-1 font-medium text-[#141413]">「{projectName}」</span>
-              ，该项目的收藏、No、标签等数据将一并清除，且无法恢复。
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-full border border-[#e8e6dc] bg-white px-4 py-1.5 text-[13px] font-medium text-[#4d4c48] transition-colors hover:border-[#d1cfc5] hover:bg-[#f5f4ed]"
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="rounded-full bg-[#9c403a] px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#823531]"
-          >
-            确认删除
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function CreateProjectModal({
   closeButtonRef,
@@ -5600,108 +5401,6 @@ function CreateProjectModal({
             className={`${SIDEBAR_FILLED_BUTTON_CLASSES} disabled:cursor-not-allowed disabled:opacity-60`}
           >
             创建项目
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SearchResultPopup({
-  total,
-  modeLabel,
-  onQuickScreen,
-  onSequentialScreen,
-  onDelete,
-  onClose,
-  closeButtonRef,
-}: {
-  total: string;
-  modeLabel: string;
-  onQuickScreen: () => void;
-  onSequentialScreen: () => void;
-  onDelete: () => void;
-  onClose: () => void;
-  closeButtonRef: React.RefObject<HTMLButtonElement | null>;
-}) {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#141413]/18 px-4 backdrop-blur-sm"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onDelete();
-        }
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="搜索结果弹窗"
-        tabIndex={-1}
-        className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#faf9f5_55%,#f5f4ed_100%)] p-6 text-[#141413] shadow-[0_30px_120px_-40px_rgba(77,76,72,0.22)]"
-      >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,#c9644233,transparent_70%)]" />
-        <div className="relative z-10 flex items-start justify-between gap-4">
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#e8e6dc] bg-white px-3 py-1 text-xs text-[#c96442]">
-              <Send className="h-3.5 w-3.5" />
-              搜索完成，建议先确认下一步动作
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-semibold">共找到 {total} 位相似博主</div>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-[#5e5d59]">
-              当前模式为&ldquo;{modeLabel}&rdquo;。你可以直接去后台批量筛选，也可以进入逐个筛选路径，逐位查看创作者主页。
-            </p>
-          </div>
-          <button
-            type="button"
-            ref={closeButtonRef}
-            onClick={onDelete}
-            aria-label="关闭结果弹窗"
-            className="relative z-10 rounded-full border border-[#e8e6dc] bg-white p-2 text-[#87867f] hover:bg-[#f5f4ed]"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={onQuickScreen}
-            className="rounded-2xl border border-[#e8e6dc] bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:bg-[#f5f4ed]"
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Users className="h-4 w-4 text-[#87867f]" />
-              快速筛选
-            </div>
-            <div className="mt-2 text-xs leading-5 text-[#5e5d59]">
-              直接跳转后台，以列表方式查看全部相似博主并批量管理。
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={onSequentialScreen}
-            className="rounded-2xl border border-[#e8e6dc] bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:bg-[#f5f4ed]"
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <FileText className="h-4 w-4 text-[#87867f]" />
-              逐个筛选
-            </div>
-            <div className="mt-2 text-xs leading-5 text-[#5e5d59]">
-              逐一跳转博主主页，用悬浮助手完成找相似、收藏、No 和打标签。
-            </div>
           </button>
         </div>
       </div>
