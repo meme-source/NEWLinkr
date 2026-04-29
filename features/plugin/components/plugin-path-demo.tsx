@@ -28,15 +28,12 @@ import {
   Play,
   Pencil,
   Search,
-  PanelRight,
   Plus,
   Send,
-  Settings,
   CalendarClock,
   Clock3,
   ThumbsUp,
   Trash2,
-  User,
   Users,
   X,
 } from "lucide-react";
@@ -72,6 +69,7 @@ import { EmailReviewModal } from "@/features/plugin/components/email-review-moda
 import { CreateProjectModal } from "@/features/plugin/components/create-project-modal";
 import { QuickSettingsPanel } from "@/features/plugin/components/quick-settings-panel";
 import { FloatingPluginGroup } from "@/features/plugin/components/floating-plugin-group";
+import { SimilarSidebarNavRail } from "@/features/plugin/components/similar-sidebar-nav-rail";
 import {
   formatComments,
   formatLikes,
@@ -2551,115 +2549,12 @@ function SimilarSidebar({
           ) : null}
         </div>
       </div>
-
-      {/* ── Narrow vertical nav rail (right edge) ── */}
-      <div className="flex w-11 flex-shrink-0 flex-col items-center border-l border-[#e8e6dc] bg-[#f0ece4]">
-        {/* Icons start at same top offset as the scroll content (py-5 = 20px) */}
-        <div className="flex flex-col items-center gap-2 pt-5">
-          {/* Collapse / expand toggle */}
-          <div className="group relative">
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              aria-label={collapsed ? "打开侧边栏" : "收起侧边栏"}
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
-                "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
-              )}
-            >
-              <PanelRight className="h-3.5 w-3.5" />
-            </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-              {collapsed ? "打开侧边栏" : "收起侧边栏"}
-            </span>
-          </div>
-
-          {/* 找相似 — search icon */}
-          <div className="group relative">
-            <button
-              type="button"
-              onClick={() => { onSelectSidebarTab("similar"); if (collapsed) onToggleCollapse(); }}
-              aria-label="找相似"
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
-                !collapsed && activeSidebarTab === "similar"
-                  ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
-              )}
-            >
-              <Search className="h-3.5 w-3.5" />
-            </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-              找相似
-            </span>
-          </div>
-
-          {/* 博主分析 — person icon */}
-          <div className="group relative">
-            <button
-              type="button"
-              onClick={() => { onSelectSidebarTab("current"); if (collapsed) onToggleCollapse(); }}
-              aria-label="博主分析"
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
-                !collapsed && activeSidebarTab === "current"
-                  ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
-              )}
-            >
-              <User className="h-3.5 w-3.5" />
-            </button>
-            {/* Tooltip — points LEFT into content */}
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-              博主分析
-            </span>
-          </div>
-
-          {/* 邮件建联 — mail icon */}
-          <div className="group relative">
-            <button
-              type="button"
-              onClick={() => { onSelectSidebarTab("email"); if (collapsed) onToggleCollapse(); }}
-              aria-label="邮件建联"
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
-                !collapsed && activeSidebarTab === "email"
-                  ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
-              )}
-            >
-              <Mail className="h-3.5 w-3.5" />
-            </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-              邮件建联
-            </span>
-          </div>
-
-          {/* 速设看板 — quick settings */}
-          <div className="group relative">
-            <button
-              type="button"
-              onClick={() => { onSelectSidebarTab("quick"); if (collapsed) onToggleCollapse(); }}
-              aria-label="预览设置"
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
-                !collapsed && activeSidebarTab === "quick"
-                  ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
-              )}
-            >
-              <Settings className="h-3.5 w-3.5" />
-            </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-              预览设置
-            </span>
-          </div>
-        </div>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-      </div>
+      <SimilarSidebarNavRail
+        activeSidebarTab={activeSidebarTab}
+        collapsed={collapsed}
+        onSelectSidebarTab={onSelectSidebarTab}
+        onToggleCollapse={onToggleCollapse}
+      />
     </aside>
   );
 }
