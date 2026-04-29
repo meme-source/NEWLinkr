@@ -16,6 +16,35 @@ import {
 import { cn } from "@/lib/utils";
 import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import type { CreatorProfileInput } from "@/features/creator/components/creator-profile-drawer";
+import type {
+  Creator,
+  DiscoveryAnchor,
+  DiscoveryEntrySource,
+  FindSimilarMode,
+  ModeId,
+  PlatformId,
+} from "@/features/discovery/types";
+import {
+  EXIT_SCREEN_REMINDER_STORAGE_KEY,
+  FIND_SIMILAR_REMINDER_STORAGE_KEY,
+} from "@/features/discovery/data/tokens";
+import { PLATFORMS } from "@/features/discovery/data/platforms";
+import { LANGUAGES, REGIONS, REGION_CODE_TO_FLAG } from "@/features/discovery/data/regions";
+import {
+  APPLICATION_CONDITIONS,
+  CATEGORIES,
+  EMPTY_DISCOVERY_FILTERS,
+  FOLLOWER_STEPS,
+  GOALS,
+  VIEW_STEPS,
+} from "@/features/discovery/data/filter-options";
+import {
+  MOCK_AI_CATEGORY,
+  MOCK_OG_PREVIEW,
+  MOCK_SCENES,
+} from "@/features/discovery/data/scenes";
+import { FIND_SIMILAR_MODE_META } from "@/features/discovery/data/find-similar-modes";
+import { MOCK_CREATORS } from "@/features/discovery/data/mock-creators";
 
 function creatorToProfileInput(c: Creator): CreatorProfileInput {
   return {
@@ -29,23 +58,6 @@ function creatorToProfileInput(c: Creator): CreatorProfileInput {
     tags: c.smartTags,
   };
 }
-
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const T = {
-  ivory: "#faf9f5", parchment: "#f5f4ed", nearBlack: "#141413",
-  charcoal: "#4d4c48", stone: "#87867f", terracotta: "#c96442",
-  border: "#e8e6dc", borderLight: "#f0ece4",
-};
-const FIND_SIMILAR_REMINDER_STORAGE_KEY = "2linkr:discovery-find-similar-mode-switch-reminder-v2";
-const EXIT_SCREEN_REMINDER_STORAGE_KEY = "2linkr:discovery-exit-screen-reminder-v1";
-
-// ── Platform data ─────────────────────────────────────────────────────────────
-const PLATFORMS = [
-  { id: "tiktok" as const, label: "TikTok" },
-  { id: "instagram" as const, label: "Instagram" },
-  { id: "youtube" as const, label: "YouTube" },
-];
-type PlatformId = "tiktok" | "instagram" | "youtube";
 
 const MODES = [
   {
@@ -103,166 +115,6 @@ const MODES = [
     accent: "#5e5d59",
   },
 ];
-type ModeId = "competitor" | "scenario" | "viral";
-
-// ── Region / Language data ────────────────────────────────────────────────────
-const REGIONS = [
-  { label: "北美地区", countries: ["美国", "加拿大", "墨西哥", "格陵兰"] },
-  { label: "南美地区", countries: ["智利", "巴西", "阿根廷", "哥伦比亚", "秘鲁"] },
-  { label: "欧洲地区", countries: ["英国", "法国", "德国", "意大利", "西班牙", "荷兰", "瑞典", "挪威", "丹麦", "芬兰", "波兰"] },
-  { label: "亚太地区", countries: ["中国", "日本", "韩国", "印度", "澳大利亚", "新西兰", "新加坡", "马来西亚", "印尼", "泰国", "越南", "菲律宾"] },
-  { label: "中东&非洲", countries: ["沙特阿拉伯", "阿联酋", "以色列", "土耳其", "南非", "埃及", "尼日利亚"] },
-];
-const LANGUAGES = [
-  "阿布哈兹语","阿姆哈拉语","阿拉伯语","亚美尼亚语","阿塞拜疆语",
-  "巴斯克语","白俄罗斯语","孟加拉语","比哈里语","波斯尼亚语",
-  "保加利亚语","粤语","中文（简体）","中文（繁体）","克罗地亚语",
-  "捷克语","丹麦语","荷兰语","英语","爱沙尼亚语","芬兰语","法语",
-  "格鲁吉亚语","德语","希腊语","希伯来语","印地语","匈牙利语",
-  "印度尼西亚语","意大利语","日语","韩语","拉脱维亚语","立陶宛语",
-  "马来语","挪威语","波斯语","波兰语","葡萄牙语","罗马尼亚语","俄语",
-  "塞尔维亚语","西班牙语","瑞典语","塔加路语","泰米尔语","泰语",
-  "土耳其语","乌克兰语","乌尔都语","越南语",
-];
-const FOLLOWER_STEPS: { label: string; value: string | null }[] = [
-  { label: "不限",  value: null  },
-  { label: "1万+",  value: "1万+" },
-  { label: "5万+",  value: "5万+" },
-  { label: "10万+", value: "10万+" },
-  { label: "50万+", value: "50万+" },
-  { label: "100万+",value: "100万+" },
-  { label: "500万+",value: "500万+" },
-];
-const VIEW_STEPS: { label: string; value: string | null }[] = [
-  { label: "不限",   value: null    },
-  { label: "1千+",   value: "1千+"  },
-  { label: "1万+",   value: "1万+"  },
-  { label: "5万+",   value: "5万+"  },
-  { label: "10万+",  value: "10万+" },
-  { label: "100万+", value: "100万+"},
-  { label: "1000万+",value: "1000万+"},
-];
-
-// ── Application conditions (cooperation gating) ──────────────────────────────
-const APPLICATION_CONDITIONS: { id: string; label: string; hint: string }[] = [
-  { id: "gifting",    label: "接受免费寄样",     hint: "Gifting only" },
-  { id: "paid",       label: "接受付费合作",     hint: "Paid placement" },
-  { id: "affiliate",  label: "可走折扣码 / 联盟", hint: "Affiliate / Code" },
-  { id: "longterm",   label: "接受长期合作",     hint: "Long-term" },
-  { id: "email",      label: "公开商务邮箱",     hint: "Has business email" },
-];
-
-// ── Category taxonomy (L1 → L2) ──────────────────────────────────────────────
-const CATEGORIES: { l1: string; l2: string[] }[] = [
-  { l1: "美妆护肤", l2: ["护肤", "彩妆", "香水", "个护"] },
-  { l1: "服装穿搭", l2: ["街头", "商务", "运动", "复古"] },
-  { l1: "食品饮料", l2: ["健康食品", "零食", "咖啡茶饮", "调味品"] },
-  { l1: "家居生活", l2: ["家具", "家电", "装饰", "收纳"] },
-  { l1: "数码 3C", l2: ["手机配件", "智能家居", "耳机音响", "相机"] },
-  { l1: "运动健身", l2: ["跑步", "瑜伽", "力量训练", "户外"] },
-];
-
-// ── Marketing goals ─────────────────────────────────────────────────────────
-const GOALS: { id: string; label: string }[] = [
-  { id: "brand",    label: "品牌曝光" },
-  { id: "promo",    label: "促销转化" },
-  { id: "launch",   label: "新品推广" },
-  { id: "seeding",  label: "口碑种草" },
-];
-
-// ── Scene cards (AI-inferred from product) ───────────────────────────────────
-const MOCK_SCENES: { id: string; icon: string; name: string; type: string; reason: string; format: string; creatorCount: number; avgEngagement: string }[] = [
-  { id: "routine",  icon: "🌙", name: "晚间护肤 routine", type: "修复 / 舒缓", reason: "适合展示连续使用、肤感变化和第二天状态", format: "真人出镜 + 步骤教程", creatorCount: 342, avgEngagement: "8.2%" },
-  { id: "science",  icon: "🔬", name: "成分科普测评",    type: "信任建立", reason: "适合解释成分、功效机制和敏感肌顾虑", format: "成分讲解 + 近景质地", creatorCount: 156, avgEngagement: "6.7%" },
-  { id: "unbox",    icon: "📦", name: "开箱 & 初体验",    type: "新品种草", reason: "适合快速讲清包装、质地、第一印象和购买理由", format: "短视频 + 购买钩子", creatorCount: 289, avgEngagement: "11.3%" },
-  { id: "makeup",   icon: "💄", name: "GRWM 妆前护肤",    type: "生活方式", reason: "适合把产品自然嵌入妆前流程和日常场景", format: "GRWM + 使用前后", creatorCount: 201, avgEngagement: "9.8%" },
-];
-
-// ── AI mocks ─────────────────────────────────────────────────────────────────
-const MOCK_OG_PREVIEW = {
-  title: "防蓝光护眼面霜 · MyBrand 官网",
-  image: "https://picsum.photos/seed/product-thumb/240/240",
-  domain: "mybrand.com",
-};
-const MOCK_AI_CATEGORY = { l1: "美妆护肤", l2: "护肤" };
-
-// ── Mock creators (with real photo URLs) ──────────────────────────────────────
-type VideoClip = { age: string; er: string; plays: string; likes: string | number; seed: string };
-type Creator = { id: string; name: string; handle: string; avatarImg: number; region: string; followers: string; er: string; verified: boolean; email: string; smartTags: string[]; videos: VideoClip[]; status: "pending" | "no" | "saved" };
-type DiscoveryAnchor = { id: string; name: string; handle: string; avatarSeed: string };
-type FindSimilarMode = "找相似" | "找平替" | "找种子达人";
-type DiscoveryEntrySource = "quick-screen" | "seed-finder" | null;
-type DiscoveryFilters = {
-  region: string;
-  language: string;
-  followers: string;
-  verified: string;
-  email: string;
-};
-
-const FIND_SIMILAR_MODE_META: Record<FindSimilarMode, { icon: string; title: string; desc: string; accent: string; softBg: string; softBorder: string }> = {
-  "找相似": {
-    icon: "🪞",
-    title: "找相似",
-    desc: "风格、粉丝画像高度一致的博主",
-    accent: "#c96442",
-    softBg: "#fef3e8",
-    softBorder: "#f5d0a9",
-  },
-  "找平替": {
-    icon: "💰",
-    title: "找平替",
-    desc: "报价更低、效果相当的替代博主",
-    accent: "#8a6622",
-    softBg: "#fcf6e8",
-    softBorder: "#e8d5a0",
-  },
-  "找种子达人": {
-    icon: "🌱",
-    title: "找种子达人",
-    desc: "低重合、高潜力的种子达人",
-    accent: "#3f7d35",
-    softBg: "#eef6ef",
-    softBorder: "#b8d9bb",
-  },
-};
-
-const MOCK_CREATORS: Creator[] = [
-  { id: "mc1", name: "Magicofbrands", handle: "@magicofbrands", avatarImg: 47, region: "🇮🇳", followers: "18.9K", er: "6.5%", verified: true, email: "corporate", smartTags: ["爆款达人","英语","印地语","美妆种草"],
-    videos: [{ age: "5小时前", er: "9.5%", plays: "116", likes: 11, seed: "mc1v1" },{ age: "2天前", er: "6.4%", plays: "1.9K", likes: 50, seed: "mc1v2" },{ age: "3天前", er: "3.8%", plays: "1.3K", likes: 44, seed: "mc1v3" }], status: "pending" },
-  { id: "mc2", name: "Vinit Choudhury", handle: "@vinit.choudhury", avatarImg: 12, region: "🇮🇳", followers: "3.2K", er: "7.9%", verified: false, email: "personal", smartTags: ["种草达人","印地语","健身生活"],
-    videos: [{ age: "2天前", er: "7.9%", plays: "292", likes: 23, seed: "mc2v1" },{ age: "2天前", er: "3.8%", plays: "1.1K", likes: 41, seed: "mc2v2" },{ age: "24天前", er: "7.0%", plays: "781", likes: 54, seed: "mc2v3" }], status: "pending" },
-  { id: "mc3", name: "Sarah K Beauty", handle: "@sarakhbeauty", avatarImg: 9, region: "🇺🇸", followers: "245K", er: "4.2%", verified: true, email: "corporate", smartTags: ["爆款达人","英语","护肤教程","成分党"],
-    videos: [{ age: "1天前", er: "8.1%", plays: "52K", likes: "2.1K", seed: "mc3v1" },{ age: "3天前", er: "5.3%", plays: "28K", likes: "1.2K", seed: "mc3v2" },{ age: "5天前", er: "3.9%", plays: "19K", likes: 890, seed: "mc3v3" }], status: "pending" },
-  { id: "mc4", name: "GlowWithSun", handle: "@glowwithsun", avatarImg: 21, region: "🇬🇧", followers: "89K", er: "5.8%", verified: true, email: "corporate", smartTags: ["同行验证","英语","光泽肌","GRWM"],
-    videos: [{ age: "4小时前", er: "11.2%", plays: "7.8K", likes: 412, seed: "mc4v1" },{ age: "2天前", er: "6.7%", plays: "4.2K", likes: 198, seed: "mc4v2" },{ age: "7天前", er: "4.1%", plays: "2.9K", likes: 134, seed: "mc4v3" }], status: "pending" },
-  { id: "mc5", name: "FitnessByMara", handle: "@fitnessbymara", avatarImg: 44, region: "🇧🇷", followers: "132K", er: "6.1%", verified: false, email: "personal", smartTags: ["种草达人","葡萄牙语","健身","运动恢复"],
-    videos: [{ age: "6小时前", er: "7.4%", plays: "9.1K", likes: 678, seed: "mc5v1" },{ age: "3天前", er: "5.2%", plays: "5.6K", likes: 421, seed: "mc5v2" },{ age: "6天前", er: "4.8%", plays: "4.3K", likes: 312, seed: "mc5v3" }], status: "pending" },
-  { id: "mc6", name: "TechLifeJapan", handle: "@techlifejapan", avatarImg: 16, region: "🇯🇵", followers: "67K", er: "8.3%", verified: true, email: "corporate", smartTags: ["同行验证","日语","英语","美妆科技"],
-    videos: [{ age: "1天前", er: "12.1%", plays: "8.4K", likes: 921, seed: "mc6v1" },{ age: "4天前", er: "7.8%", plays: "5.2K", likes: 567, seed: "mc6v2" },{ age: "8天前", er: "5.9%", plays: "3.8K", likes: 389, seed: "mc6v3" }], status: "pending" },
-  { id: "mc7", name: "BeautyBySelin", handle: "@beautybyselin", avatarImg: 48, region: "🇹🇷", followers: "54K", er: "9.1%", verified: false, email: "corporate", smartTags: ["爆款达人","土耳其语","英语","护肤日常"],
-    videos: [{ age: "3小时前", er: "13.4%", plays: "6.2K", likes: 780, seed: "mc7v1" },{ age: "1天前", er: "8.7%", plays: "4.1K", likes: 498, seed: "mc7v2" },{ age: "5天前", er: "5.2%", plays: "2.6K", likes: 287, seed: "mc7v3" }], status: "pending" },
-  { id: "mc8", name: "NaturalGlowKim", handle: "@naturalglowkim", avatarImg: 25, region: "🇰🇷", followers: "310K", er: "3.8%", verified: true, email: "corporate", smartTags: ["同行验证","韩语","英语","素颜护肤"],
-    videos: [{ age: "2天前", er: "6.2%", plays: "32K", likes: "1.8K", seed: "mc8v1" },{ age: "4天前", er: "4.1%", plays: "18K", likes: 920, seed: "mc8v2" },{ age: "9天前", er: "2.9%", plays: "12K", likes: 614, seed: "mc8v3" }], status: "pending" },
-];
-
-const REGION_CODE_TO_FLAG: Record<string, string> = {
-  us: "🇺🇸",
-  gb: "🇬🇧",
-  in: "🇮🇳",
-  jp: "🇯🇵",
-  kr: "🇰🇷",
-  br: "🇧🇷",
-  tr: "🇹🇷",
-};
-
-const EMPTY_DISCOVERY_FILTERS: DiscoveryFilters = {
-  region: "all",
-  language: "all",
-  followers: "all",
-  verified: "all",
-  email: "all",
-};
 
 function normalizeHandle(value: string) {
   if (!value.trim()) return "@creator";
