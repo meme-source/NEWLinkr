@@ -164,39 +164,25 @@ import {
 } from "@/features/plugin/data/projects";
 import { creatorProfiles } from "@/features/plugin/data/creator-profiles";
 import { searchResults } from "@/features/plugin/data/search-results";
-
-const SIDEBAR_CARD_RADIUS = "rounded-[24px]";
-const SIDEBAR_CONTROL_RADIUS = "rounded-[20px]";
-const SIDEBAR_METRIC_RADIUS = "rounded-[16px]";
-const SIDEBAR_PANEL_CARD_CLASSES = `${SIDEBAR_CARD_RADIUS} border border-[#e8e6dc] bg-white p-4`;
-const SIDEBAR_GRADIENT_CARD_CLASSES = `${SIDEBAR_CARD_RADIUS} border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#f5f4ed_100%)] p-4`;
-const SIDEBAR_SECTION_CARD_CLASSES = `${SIDEBAR_CARD_RADIUS} border border-[#e8e6dc] bg-[#f5f4ed] p-4`;
-const SIDEBAR_CONTROL_CLASSES = `w-full appearance-none ${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-[#faf9f5] px-3 py-3 pr-10 text-sm text-[#141413] outline-none transition-colors focus:border-[#c96442]/35`;
-const SIDEBAR_SECONDARY_BUTTON_CLASSES = `${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-white px-4 py-2.5 text-sm font-semibold transition-all hover:border-[#d1cfc5] hover:bg-[#f5f4ed] active:scale-[0.98]`;
-const SIDEBAR_FILLED_BUTTON_CLASSES = `${SIDEBAR_CONTROL_RADIUS} bg-[#c96442] px-4 py-2.5 text-sm font-semibold text-[#faf9f5] transition-all hover:bg-[#d97757] active:scale-[0.98]`;
-const SCRAPE_COUNT_OPTIONS = [5, 10, 15];
-const HOVER_CARD_MAX_METRICS = 4;
-const DEFAULT_HOVER_METRICS: HoverMetricKey[] = ["rate", "likes", "comments", "engagementOrViews"];
-const DEFAULT_HOVER_METRIC_MODES: Record<HoverMetricKey, MetricAggregation> = {
-  rate: "average",
-  plays: "median",
-  likes: "median",
-  comments: "median",
-  engagementOrViews: "median",
-};
-const SOCIAL_PLATFORM_OPTIONS: Array<{ key: SocialPlatformKey; label: string }> = [
-  { key: "tiktok", label: "TikTok" },
-  { key: "instagram", label: "Instagram" },
-  { key: "youtube", label: "YouTube" },
-  { key: "x", label: "X" },
-];
-const DEFAULT_INLINE_DATA_KEYS: InlineDataKey[] = [
-  "plays",
-  "likes",
-  "comments",
-  "engagement",
-  "publishedAt",
-];
+import {
+  SIDEBAR_CARD_RADIUS,
+  SIDEBAR_CONTROL_CLASSES,
+  SIDEBAR_CONTROL_RADIUS,
+  SIDEBAR_FILLED_BUTTON_CLASSES,
+  SIDEBAR_GRADIENT_CARD_CLASSES,
+  SIDEBAR_METRIC_RADIUS,
+  SIDEBAR_PANEL_CARD_CLASSES,
+  SIDEBAR_SECONDARY_BUTTON_CLASSES,
+  SIDEBAR_SECTION_CARD_CLASSES,
+} from "@/features/plugin/lib/style-constants";
+import {
+  DEFAULT_HOVER_METRIC_MODES,
+  DEFAULT_HOVER_METRICS,
+  DEFAULT_INLINE_DATA_KEYS,
+  HOVER_CARD_MAX_METRICS,
+  SCRAPE_COUNT_OPTIONS,
+  SOCIAL_PLATFORM_OPTIONS,
+} from "@/features/plugin/data/sidebar-config";
 
 export default function PluginPathDemo() {
   const router = useRouter();
