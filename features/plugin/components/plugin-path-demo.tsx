@@ -105,6 +105,20 @@ import {
   getRegionTierLabel,
   inferCountryFromLocale,
 } from "@/features/plugin/lib/creator-helpers";
+import {
+  buildQuickScreenDiscoveryUrl,
+  buildSeedFinderDiscoveryUrl,
+} from "@/features/plugin/lib/discovery-url";
+import {
+  getEmailSubjectSegments,
+  getEmailTemplateDraft,
+  getEmailTemplateSegments,
+  getEmailTemplateSubject,
+} from "@/features/plugin/lib/email";
+import {
+  getTagChipClasses,
+  getTagTone,
+} from "@/features/plugin/lib/tags";
 import type {
   AudienceHighlight,
   AudienceRegion,
@@ -183,243 +197,6 @@ const DEFAULT_INLINE_DATA_KEYS: InlineDataKey[] = [
   "engagement",
   "publishedAt",
 ];
-function buildDiscoveryResultsUrl({
-  creatorId,
-  creator,
-  project,
-  entry,
-  mode,
-}: {
-  creatorId: string;
-  creator: CreatorProfile;
-  project?: ProjectSummary;
-  entry: "seed-finder" | "quick-screen";
-  mode?: "viral";
-}) {
-  const params = new URLSearchParams();
-  params.set("entry", entry);
-  params.set("results", "1");
-  params.set("creator", creatorId);
-  params.set("seedId", creatorId);
-  params.set("seedHandle", creator.handle);
-  params.set("seedName", creator.name);
-  params.set("seedAvatarSeed", creatorId);
-  params.set("platform", "tiktok");
-  if (project) {
-    params.set("projectId", project.id);
-    params.set("projectName", project.name);
-  }
-  if (mode) params.set("mode", mode);
-
-  const summary = getAudienceSummary(creator);
-  const countries = new Set<string>();
-  for (const flag of [...(summary.regionT1?.flags ?? []), ...(summary.regionT2?.flags ?? [])]) {
-    const name = FLAG_TO_DISCOVERY_COUNTRY[flag];
-    if (name) countries.add(name);
-  }
-  if (countries.size > 0) {
-    params.set("countries", Array.from(countries).join("|"));
-  }
-
-  const fp = mapFollowersLabelToDiscoveryPreset(creator.followers);
-  if (fp) params.set("fp", fp);
-
-  return `/workspace/discovery?${params.toString()}`;
-}
-
-/** 插件「找种子达人」→ 后台博主发现结果页深链（含筛选与直接进入结果） */
-function buildSeedFinderDiscoveryUrl(
-  creatorId: string,
-  creator: CreatorProfile,
-  project?: ProjectSummary
-) {
-  return buildDiscoveryResultsUrl({
-    creatorId,
-    creator,
-    project,
-    entry: "seed-finder",
-    mode: "viral",
-  });
-}
-
-function buildQuickScreenDiscoveryUrl(
-  creatorId: string,
-  creator: CreatorProfile,
-  project?: ProjectSummary
-) {
-  return buildDiscoveryResultsUrl({
-    creatorId,
-    creator,
-    project,
-    entry: "quick-screen",
-  });
-}
-
-function getCreatorOutreachPreview(creator: CreatorProfile) {
-  return (
-    creator.outreachPreview ??
-    `Hi ${creator.name}, 我们正在做一轮露营类内容合作，觉得你的内容调性和受众非常契合，想和你确认一下近期合作档期与报价。`
-  );
-}
-
-function getCreatorPersonalizationSummary(creator: CreatorProfile, project?: ProjectSummary) {
-  const location = getCreatorLocation(creator);
-  const primaryTopic =
-    creator.topics?.[0]?.label.replace(/^#/, "") ??
-    creator.statBadges[0] ??
-    getCreatorType(creator).replace("类", "");
-  const secondaryTopic =
-    creator.topics?.[1]?.label.replace(/^#/, "") ??
-    creator.statBadges[1] ??
-    "真实体验";
-  const projectAngle = project?.productDescription.trim() || "这轮内容合作";
-  const review = getCreatorReview(creator).replace(/[。.!！]$/, "");
-
-  return {
-    greetingName: creator.name,
-    locationLabel: `${location.flag} ${location.country}`,
-    primaryTopic,
-    secondaryTopic,
-    projectAngle,
-    creatorProof: `${creator.handle} 最近围绕「${primaryTopic}」的内容和我们的「${projectAngle}」很契合`,
-    aiReason: `${review}，适合用更自然的体验式内容切入`,
-    replyAsk: "近期档期、报价区间和更适合的合作形式",
-    email: getCreatorEmail(creator),
-  };
-}
-
-function getEmailTemplateSegments(
-  template: EmailTemplateKey,
-  creator: CreatorProfile,
-  project?: ProjectSummary
-): EmailTemplateSegment[] {
-  if (!template) {
-    return [];
-  }
-
-  const info = getCreatorPersonalizationSummary(creator, project);
-
-  if (template === "followup") {
-    return [
-      { text: "Hi " },
-      { text: info.greetingName, personalized: true },
-      { text: ",\n\n上次已经和你简单同步过合作方向，这边补充一下我们这轮的最新窗口。\n\n" },
-      { text: "我重新看了一下你的账号，" },
-      { text: info.creatorProof, personalized: true },
-      { text: "。\n\n" },
-      { text: "- 合作方向：" },
-      { text: info.projectAngle, personalized: true },
-      { text: "\n- 内容切入：" },
-      { text: `${info.primaryTopic} / ${info.secondaryTopic}`, personalized: true },
-      { text: "\n- 希望确认：近期档期、报价区间、可接受的合作形式\n\n如果方便的话，也可以直接回复到 " },
-      { text: info.email, personalized: true },
-      { text: "，我们会尽快跟进。\n\n谢谢！\n2Linkr 团队" },
-    ];
-  }
-
-  if (template === "gifted") {
-    return [
-      { text: "Hi " },
-      { text: info.greetingName, personalized: true },
-      { text: ",\n\n我们正在为 " },
-      { text: info.projectAngle, personalized: true },
-      { text: " 寻找适合先体验、再决定合作形式的创作者。\n\n" },
-      { text: "AI 觉得你很适合这轮寄样，是因为 " },
-      { text: info.aiReason, personalized: true },
-      { text: "。\n\n如果你愿意，我们可以先寄一份样品给你，等你体验后再一起确认是否做短视频、图文或长期合作。\n\n期待听听你的想法。\n2Linkr 团队" },
-    ];
-  }
-
-  return [
-    { text: "Hi " },
-    { text: info.greetingName, personalized: true },
-    { text: ",\n\n我们最近在筛选一批适合 " },
-    { text: info.projectAngle, personalized: true },
-    { text: " 的创作者，看到你的账号后觉得内容调性、受众画像和互动氛围都很匹配。\n\n" },
-    { text: "尤其是 " },
-    { text: info.creatorProof, personalized: true },
-    { text: "，这部分非常适合做第一轮合作沟通。\n\n想先和你确认三件事：\n- 你最近是否方便接合作\n- 当前的大致报价区间\n- 更适合的合作形式（短视频 / 组合发布 / 长期合作）\n\n如果方便的话，可以直接回复这封邮件，我们会把更具体的 brief 发给你。\n\n谢谢！\n2Linkr 团队" },
-  ];
-}
-
-function getEmailTemplateDraft(
-  template: EmailTemplateKey,
-  creator: CreatorProfile,
-  project?: ProjectSummary
-) {
-  return getEmailTemplateSegments(template, creator, project)
-    .map((segment) => segment.text)
-    .join("");
-}
-
-function getEmailSubjectSegments(
-  template: EmailTemplateKey,
-  creator: CreatorProfile,
-  project?: ProjectSummary
-): EmailTemplateSegment[] {
-  if (template === "followup") {
-    return [
-      { text: "跟进 " },
-      { text: creator.name, personalized: true },
-      { text: " 的合作档期" },
-    ];
-  }
-
-  if (template === "gifted") {
-    return [
-      { text: creator.name, personalized: true },
-      { text: "，想寄样给你体验 " },
-      { text: project?.name ?? "这轮新品", personalized: true },
-    ];
-  }
-
-  if (template === "intro") {
-    return [
-      { text: creator.name, personalized: true },
-      { text: " x 2Linkr 内容合作邀约" },
-    ];
-  }
-
-  return [];
-}
-
-function getEmailTemplateSubject(
-  template: EmailTemplateKey,
-  creator: CreatorProfile,
-  project?: ProjectSummary
-) {
-  return getEmailSubjectSegments(template, creator, project)
-    .map((segment) => segment.text)
-    .join("");
-}
-
-
-function getTagTone(label: string): TagTone {
-  const preset = noteTagPresets.find((item) => item.label.toLowerCase() === label.toLowerCase());
-  if (preset) {
-    return preset.tone;
-  }
-
-  const hash = Array.from(label).reduce((total, char) => total + char.charCodeAt(0), 0);
-  return tagToneOrder[hash % tagToneOrder.length];
-}
-
-function getTagChipClasses(tone: TagTone) {
-  switch (tone) {
-    case "amber":
-      return "border-amber-300/45 bg-amber-50 text-amber-800 hover:bg-amber-100";
-    case "blue":
-      return "border-sky-300/45 bg-sky-50 text-sky-800 hover:bg-sky-100";
-    case "emerald":
-      return "border-emerald-300/45 bg-emerald-50 text-emerald-800 hover:bg-emerald-100";
-    case "violet":
-      return "border-violet-300/45 bg-violet-50 text-violet-800 hover:bg-violet-100";
-    case "rose":
-      return "border-rose-300/45 bg-rose-50 text-rose-800 hover:bg-rose-100";
-    default:
-      return "border-[#e8e6dc] bg-white text-[#4d4c48] hover:bg-[#f5f4ed]";
-  }
-}
 
 export default function PluginPathDemo() {
   const router = useRouter();
