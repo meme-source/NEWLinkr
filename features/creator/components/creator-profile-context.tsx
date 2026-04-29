@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 import {
   CreatorProfileDrawer,
   type CreatorProfileInput,
-} from "@/components/ui/creator-profile-drawer";
+} from "@/features/creator/components/creator-profile-drawer";
 
 interface Ctx {
   openCreatorProfile: (input: CreatorProfileInput) => void;

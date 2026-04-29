@@ -12,10 +12,10 @@ import {
   formatProjectBudget,
   formatProjectTimeline,
   useWorkspaceProject,
-} from "@/components/workspace/project-context";
+} from "@/features/project/components/project-context";
 import { cn } from "@/lib/utils";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
-import type { CreatorProfileInput } from "@/components/ui/creator-profile-drawer";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
+import type { CreatorProfileInput } from "@/features/creator/components/creator-profile-drawer";
 
 function creatorToProfileInput(c: Creator): CreatorProfileInput {
   return {
@@ -1939,7 +1939,7 @@ function buildQuickScreenHref(input: QuickScreenHrefInput): string {
   if (input.viewsFrom) params.set("vf", input.viewsFrom);
   if (input.viewsTo) params.set("vt", input.viewsTo);
   if (input.applicationConditions.length) params.set("ac", input.applicationConditions.join("|"));
-  return `/workspace-demo/discovery?${params.toString()}`;
+  return `/workspace/discovery?${params.toString()}`;
 }
 
 // ── Dimension preview card (thumbnail → jumps to quick-screen page) ───────────

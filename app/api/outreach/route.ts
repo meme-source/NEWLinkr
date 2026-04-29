@@ -1,7 +1,7 @@
 // 建联 —— 发送邮件 / 记录状态
 // POST /api/outreach   发送
 // GET  /api/outreach   列出当前项目所有建联记录
-import { ok, fail } from "@/lib/api";
+import { ok, fail } from "@/lib/api/envelope";
 
 export async function GET() {
   // TODO Phase 5: 从 outreach_emails 表查

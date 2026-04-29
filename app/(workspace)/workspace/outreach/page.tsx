@@ -25,8 +25,8 @@ import {
   XCircle,
   Eye,
 } from "lucide-react";
-import { useWorkspaceProject } from "@/components/workspace/project-context";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
+import { useWorkspaceProject } from "@/features/project/components/project-context";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import { cn } from "@/lib/utils";
 
 type TabKey = "mail-mgmt" | "tasks" | "inbox" | "templates" | "stats" | "email-settings";
@@ -1397,7 +1397,7 @@ function MailMgmtTab() {
   const completedTasks  = projectTasks.filter(t => t.status === "已完成");
 
   const goInbox = (c: OutreachCreator, action: string) => {
-    router.push(`/workspace-demo/outreach?tab=inbox&blogger=${encodeURIComponent(c.handle)}&action=${action}`);
+    router.push(`/workspace/outreach?tab=inbox&blogger=${encodeURIComponent(c.handle)}&action=${action}`);
   };
 
   return (

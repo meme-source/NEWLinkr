@@ -1,8 +1,8 @@
 // 项目（产品/品牌）管理
 // GET  /api/projects     列出当前用户所有项目
 // POST /api/projects     创建项目
-import { ok, fail } from "@/lib/api";
-import type { Project } from "@/lib/types";
+import { ok, fail } from "@/lib/api/envelope";
+import type { Project } from "@/types/api";
 
 export async function GET() {
   // TODO Phase 1: 接 Supabase Auth 取 user_id，从 DB 查

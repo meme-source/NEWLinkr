@@ -14,7 +14,7 @@ import {
   MessageCircle,
   Share2,
 } from "lucide-react";
-import { useCreatorProfile } from "@/components/ui/creator-profile-context";
+import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import { cn } from "@/lib/utils";
 
 type TabKey = "list" | "dashboard";
