@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
@@ -53,7 +52,6 @@ import { SimilarCardCarousel } from "@/features/plugin/components/similar-card-c
 import { SimilarSearchModule } from "@/features/plugin/components/similar-search-module";
 import { SocialPlatformLogo } from "@/features/plugin/components/social-platform-logo";
 import { SideNavItem } from "@/features/plugin/components/side-nav-item";
-import { HoverStat } from "@/features/plugin/components/hover-stat";
 import { CreatorAvatar } from "@/features/plugin/components/creator-avatar";
 import { SidebarAnalysisSparkleIcon } from "@/features/plugin/components/sparkle-icon";
 import { AudienceBar } from "@/features/plugin/components/audience-bar";
@@ -77,15 +75,14 @@ import { SidebarProjectSelector } from "@/features/plugin/components/sidebar-pro
 import { SidebarCreatorProfileCard } from "@/features/plugin/components/sidebar-creator-profile-card";
 import { TopicWordCloud } from "@/features/plugin/components/topic-word-cloud";
 import { CreatorTopicSummaryRow } from "@/features/plugin/components/creator-topic-summary-row";
+import { FakeTiktokProfile } from "@/features/plugin/components/fake-tiktok-profile";
+import { EmailReviewModal } from "@/features/plugin/components/email-review-modal";
+import { CreateProjectModal } from "@/features/plugin/components/create-project-modal";
 import {
   formatComments,
-  formatDuration,
   formatLikes,
   formatPlays,
-  generateSyntheticVideos,
   parseMetricToNumber,
-  type SyntheticVideo,
-  type VideoCategory,
 } from "@/features/plugin/lib/synthetic";
 import {
   SIDEBAR_COLLAPSED_WIDTH,
@@ -129,7 +126,6 @@ import {
   buildSeedFinderDiscoveryUrl,
 } from "@/features/plugin/lib/discovery-url";
 import {
-  getEmailSubjectSegments,
   getEmailTemplateDraft,
   getEmailTemplateSegments,
   getEmailTemplateSubject,
@@ -181,11 +177,8 @@ import { creatorProfiles } from "@/features/plugin/data/creator-profiles";
 import { searchResults } from "@/features/plugin/data/search-results";
 import {
   SIDEBAR_CARD_RADIUS,
-  SIDEBAR_CONTROL_CLASSES,
-  SIDEBAR_FILLED_BUTTON_CLASSES,
   SIDEBAR_METRIC_RADIUS,
   SIDEBAR_PANEL_CARD_CLASSES,
-  SIDEBAR_SECONDARY_BUTTON_CLASSES,
   SIDEBAR_SECTION_CARD_CLASSES,
 } from "@/features/plugin/lib/style-constants";
 import {
@@ -1201,238 +1194,6 @@ export default function PluginPathDemo() {
     </main>
   );
 }
-function FakeTiktokProfile({
-  creator,
-  dataCheckOn,
-  scrapeCount,
-  inlineDataKeys,
-  playMedianMultiple,
-}: {
-  creator: CreatorProfile;
-  dataCheckOn: boolean;
-  scrapeCount: number;
-  inlineDataKeys: InlineDataKey[];
-  playMedianMultiple: number;
-}) {
-  const allVideos = generateSyntheticVideos(creator, Math.max(18, scrapeCount));
-  const averagePlays =
-    allVideos.reduce((sum, video) => sum + video.plays, 0) / Math.max(allVideos.length, 1);
-  const medianPlays = getMedianNumber(allVideos.map((video) => video.plays));
-  const flopThreshold = Math.max(0.35, 1 / Math.max(playMedianMultiple, 1));
-  const hasInlineData = (key: InlineDataKey) => inlineDataKeys.includes(key);
-  const getPlayMedianRatio = (video: SyntheticVideo) =>
-    medianPlays > 0 ? video.plays / medianPlays : 1;
-  // Rank by plays descending while using the creator's average plays as the comparison baseline.
-  const rankedByPlays = [...allVideos].sort((a, b) => b.plays - a.plays);
-  const rankMap = new Map<string, number>(rankedByPlays.map((v, i) => [v.id, i + 1]));
-  // Display in rank order (top N by play count vs. average)
-  const displayVideos = rankedByPlays.slice(0, scrapeCount);
-  const totalPlaysNumber = parseMetricToNumber(creator.totalPlays ?? creator.followers ?? "0");
-  const creatorErNumber = parseFloat(creator.er.replace("%", "")) || 0;
-
-  return (
-    <section className="mx-auto max-w-[980px] px-4 pb-10 pt-6 sm:px-8">
-      <div className="flex items-start gap-4">
-        <CreatorAvatar creator={creator} className="h-18 w-18 border border-[#e8e6dc]" labelClassName="text-3xl" />
-        <div className="min-w-0 flex-1">
-          <div className="break-words text-2xl font-semibold">{creator.handle}</div>
-          <div className="mt-1 break-words text-sm text-[#5e5d59]">{creator.name}</div>
-          <div className="mt-2 flex flex-wrap gap-4 text-sm text-[#5e5d59]">
-            <HoverStat>{creator.followers} 粉丝</HoverStat>
-            <HoverStat>{creator.likes} 获赞</HoverStat>
-            <HoverStat>{creator.videos} 视频</HoverStat>
-            <HoverStat>ER {creator.er}</HoverStat>
-          </div>
-          <div className="mt-3 max-w-2xl break-words text-sm leading-6 text-[#5e5d59]">
-            {creator.bio}
-          </div>
-          <div className="mt-4 flex gap-3">
-            <button className="rounded-xl bg-[#c96442] px-6 py-2 text-sm font-medium text-[#faf9f5] transition-colors hover:bg-[#d97757]">
-              关注
-            </button>
-            <button className="rounded-xl border border-[#e8e6dc] bg-white px-6 py-2 text-sm font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]">
-              发消息
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {dataCheckOn ? (
-        <div className="mt-8">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#bfd0ff] bg-[#eef2ff] px-4 py-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-[#4f6bff]" />
-              <span className="font-semibold text-[#2d3d99]">数据透视模式已开启</span>
-              <span className="text-[#5e6fb0]">· 按平均播放量排序前 {scrapeCount} 条</span>
-              <span className="text-[#5e6fb0]">· 爆量阈值 {playMedianMultiple.toFixed(1)}X</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[#2d3d99]">
-              {hasInlineData("plays") ? (
-                <>
-                  <span className="rounded-full bg-white/70 px-2.5 py-1">
-                    总播放 <span className="font-semibold">{formatPlays(totalPlaysNumber)}</span>
-                  </span>
-                  <span className="rounded-full bg-white/70 px-2.5 py-1">
-                    平均播放 <span className="font-semibold">{formatPlays(averagePlays)}</span>
-                  </span>
-                </>
-              ) : null}
-              {hasInlineData("engagement") ? (
-                <span className="rounded-full bg-white/70 px-2.5 py-1">
-                  互动率 <span className="font-semibold">{creatorErNumber.toFixed(1)}%</span>
-                </span>
-              ) : null}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {displayVideos.map((video) => {
-              const rank = rankMap.get(video.id) ?? 0;
-              const playMedianRatio = getPlayMedianRatio(video);
-              return (
-                <div
-                  key={video.id}
-                  className="relative aspect-[3/4] overflow-hidden rounded-[14px] bg-[linear-gradient(180deg,#7f9bff_0%,#6680f5_55%,#5269e0_100%)] text-white shadow-[0_12px_28px_-18px_rgba(60,82,196,0.55)] transition-transform duration-150 hover:-translate-y-0.5"
-                >
-                  {/* top row: speed + duration */}
-                  <div className="absolute left-0 right-0 top-0 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
-                    <span>{playMedianRatio.toFixed(1)}X</span>
-                    <span>{formatDuration(video.durationSec)}</span>
-                  </div>
-                  {/* days */}
-                  {hasInlineData("publishedAt") ? (
-                    <div className="absolute left-0 right-0 top-7 text-center text-[11px] opacity-85">
-                      {video.days} days
-                    </div>
-                  ) : null}
-                  {/* center: rank + plays */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-[20px] font-semibold tracking-tight text-white/80">
-                      #{rank}
-                    </div>
-                    {hasInlineData("plays") ? (
-                      <div className="mt-1 text-[30px] font-bold leading-none tracking-tight">
-                        {formatPlays(video.plays)}
-                      </div>
-                    ) : null}
-                  </div>
-                  {/* bottom: ER + stats */}
-                  <div className="absolute inset-x-0 bottom-0 px-3 pb-2.5">
-                    {hasInlineData("engagement") ? (
-                      <div className="text-[11px] font-semibold opacity-95">
-                        ER <span className="text-white">{video.erPct.toFixed(1)}%</span>
-                      </div>
-                    ) : null}
-                    <div className="mt-1 flex items-center gap-2 text-[10.5px] opacity-95">
-                      {hasInlineData("plays") ? (
-                        <span className="inline-flex items-center gap-0.5">
-                          <Play className="h-2.5 w-2.5" fill="currentColor" />
-                          {formatPlays(video.plays)}
-                        </span>
-                      ) : null}
-                      {hasInlineData("likes") ? (
-                        <span className="inline-flex items-center gap-0.5">
-                          <Heart className="h-2.5 w-2.5" />
-                          {formatLikes(video.likes)}
-                        </span>
-                      ) : null}
-                      {hasInlineData("comments") ? (
-                        <span className="inline-flex items-center gap-0.5">
-                          <MessageCircle className="h-2.5 w-2.5" />
-                          {formatComments(video.comments)}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-      <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {allVideos.slice(0, 9).map((video) => {
-          const ratio = getPlayMedianRatio(video);
-          const autoCategory: VideoCategory =
-            video.category === "paid"
-              ? "paid"
-              : ratio >= playMedianMultiple
-                ? "viral"
-                : ratio <= flopThreshold
-                  ? "flop"
-                  : "normal";
-          const cardGradient =
-            autoCategory === "viral"
-              ? "bg-[linear-gradient(180deg,#ff8a8a_0%,#ef4444_55%,#c92c2c_100%)]"
-              : autoCategory === "flop"
-                ? "bg-[linear-gradient(180deg,#7f9bff_0%,#4f6bff_55%,#2d4dd1_100%)]"
-                : autoCategory === "paid"
-                  ? "bg-[linear-gradient(180deg,#6dd58c_0%,#22c55e_55%,#148a3f_100%)]"
-                  : "bg-[linear-gradient(180deg,#a1a6b5_0%,#7a8194_55%,#5b6275_100%)]";
-          return (
-            <div
-              key={video.id}
-              className={cn(
-                "group relative aspect-[3/4] overflow-hidden rounded-[14px] text-white shadow-[0_12px_28px_-18px_rgba(60,82,196,0.45)] transition-transform duration-150 hover:-translate-y-0.5",
-                cardGradient
-              )}
-            >
-              {/* top row: speed + duration */}
-              <div className="absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
-                {/* speed with hover tooltip legend */}
-                <span className="group/speed relative cursor-help">
-                  <span className="underline decoration-dotted underline-offset-2">
-                    {ratio.toFixed(1)}X
-                  </span>
-                  <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-1.5 w-[180px] rounded-lg bg-black/85 px-2.5 py-2 text-left text-[10.5px] font-normal leading-[1.45] text-white opacity-0 shadow-lg transition-[opacity,visibility] duration-150 group-hover/speed:visible group-hover/speed:opacity-100">
-                    <span className="block font-semibold">
-                      This post views ÷ Average views
-                    </span>
-                    <span className="mt-1 block">
-                      <span className="text-[#ff8a8a]">Red:</span> viral
-                    </span>
-                    <span className="block">
-                      <span className="text-[#9fb5ff]">Blue:</span> flop
-                    </span>
-                    <span className="block">
-                      <span className="text-[#8ae3a2]">Green:</span> paid partnership
-                    </span>
-                  </span>
-                </span>
-                <span>{formatDuration(video.durationSec)}</span>
-              </div>
-              {/* hours ago */}
-              <div className="absolute left-0 right-0 top-7 text-center text-[11px] opacity-85">
-                {video.hoursAgo} hours
-              </div>
-              {/* bottom: ER + stats */}
-              <div className="absolute inset-x-0 bottom-0 px-3 pb-2.5">
-                <div className="text-[11px] font-semibold opacity-95">
-                  ER <span className="text-white">{video.erPct.toFixed(1)}%</span>
-                </div>
-                <div className="mt-1 flex items-center gap-2 text-[10.5px] opacity-95">
-                  <span className="inline-flex items-center gap-0.5">
-                    <Play className="h-2.5 w-2.5" fill="currentColor" />
-                    {formatPlays(video.plays)}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5">
-                    <Heart className="h-2.5 w-2.5" />
-                    {formatLikes(video.likes)}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5">
-                    <MessageCircle className="h-2.5 w-2.5" />
-                    {formatComments(video.comments)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      )}
-    </section>
-  );
-}
-
 type FloatingMenuAction = {
   id: "info" | "similar" | "tasks" | "mode";
   label: string;
@@ -1757,7 +1518,6 @@ function FloatingPluginGroup({
     </div>
   );
 }
-
 function FloatingCard({
   closeButtonRef,
   onOpenCurrentSidebar,
@@ -4345,345 +4105,6 @@ function QuickSettingsPanel({
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function EmailReviewModal({
-  templateKey,
-  templateLabel,
-  project,
-  recipients,
-  senderAddress,
-  subject,
-  attachmentCount,
-  sendMode,
-  scheduledAt,
-  onClose,
-  onConfirm,
-}: {
-  templateKey: EmailTemplateKey;
-  templateLabel: string;
-  project: ProjectSummary;
-  recipients: CreatorProfile[];
-  senderAddress: string;
-  subject: string;
-  attachmentCount: number;
-  sendMode: EmailSendOptions["mode"];
-  scheduledAt?: string;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  const [activeRecipientId, setActiveRecipientId] = useState(recipients[0]?.id ?? "");
-  const activeRecipient =
-    recipients.find((item) => item.id === activeRecipientId) ?? recipients[0];
-  const subjectSegments = activeRecipient
-    ? getEmailSubjectSegments(templateKey, activeRecipient, project)
-    : [{ text: subject }];
-  const generatedSubject = subjectSegments.map((segment) => segment.text).join("");
-  const displaySubjectSegments =
-    subject.trim() && subject.trim() !== generatedSubject.trim()
-      ? [{ text: subject }]
-      : subjectSegments;
-  const contentSegments = activeRecipient
-    ? getEmailTemplateSegments(templateKey, activeRecipient, project)
-    : [];
-  const highlightCount = contentSegments.filter((segment) => segment.personalized).length;
-
-  if (typeof document === "undefined") {
-    return null;
-  }
-
-  return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#141413]/26 px-4 backdrop-blur-[2px]">
-      <div className="absolute inset-0" onClick={onClose} />
-      <div className="relative flex max-h-[86vh] w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] border border-[#e8e6dc] bg-[#faf9f5] shadow-[0_28px_80px_-42px_rgba(20,20,19,0.55)]">
-        <div className="flex items-start justify-between gap-4 border-b border-[#e8e6dc] bg-white px-5 py-4">
-          <div className="min-w-0">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fff2b8] px-2.5 py-1 text-[11px] font-semibold text-[#765d14] ring-1 ring-[#f1d86f]">
-              <Sparkles className="h-3.5 w-3.5" />
-              黄色高亮为 AI 个性化内容
-            </div>
-            <h3 className="mt-2 text-lg font-semibold text-[#141413]">审核邮件建联</h3>
-            <p className="mt-1 text-xs leading-5 text-[#87867f]">
-              标准模板会保持一致，姓名、内容亮点、合作理由等黄色区域会按每位博主自动替换。
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="关闭审核窗口"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#87867f] transition-colors hover:bg-[#f5f4ed] hover:text-[#4d4c48]"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-5 py-4">
-          <div className="grid gap-2.5 sm:grid-cols-4">
-            <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
-              <div className="text-[10.5px] font-medium text-[#87867f]">模板</div>
-              <div className="mt-1 truncate text-sm font-semibold text-[#141413]">{templateLabel}</div>
-            </div>
-            <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
-              <div className="text-[10.5px] font-medium text-[#87867f]">收件人</div>
-              <div className="mt-1 text-sm font-semibold text-[#141413]">{recipients.length} 位</div>
-            </div>
-            <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
-              <div className="text-[10.5px] font-medium text-[#87867f]">发送方式</div>
-              <div className="mt-1 truncate text-sm font-semibold text-[#141413]">
-                {sendMode === "scheduled" && scheduledAt
-                  ? formatScheduleLabel(scheduledAt)
-                  : "立即发送"}
-              </div>
-            </div>
-            <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
-              <div className="text-[10.5px] font-medium text-[#87867f]">附件</div>
-              <div className="mt-1 text-sm font-semibold text-[#141413]">{attachmentCount} 个</div>
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-[22px] border border-[#e8e6dc] bg-white p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-xs font-semibold text-[#141413]">按博主预览个性化版本</div>
-              <div className="text-[11px] text-[#87867f]">发件：{senderAddress}</div>
-            </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
-              {recipients.map((recipient) => {
-                const active = recipient.id === activeRecipient?.id;
-                return (
-                  <button
-                    key={recipient.id}
-                    type="button"
-                    onClick={() => setActiveRecipientId(recipient.id)}
-                    className={cn(
-                      "flex min-w-[122px] items-center gap-2 rounded-[16px] border px-2 py-2 text-left transition-all",
-                      active
-                        ? "border-[#c96442]/40 bg-[#fff7f1]"
-                        : "border-[#e8e6dc] bg-[#faf9f5] hover:bg-white"
-                    )}
-                  >
-                    <CreatorAvatar creator={recipient} className="h-8 w-8 shrink-0 border border-white" labelClassName="text-[11px]" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[11px] font-semibold text-[#141413]">
-                        {recipient.handle}
-                      </span>
-                      <span className="block truncate text-[10px] text-[#87867f]">
-                        {getCreatorLocation(recipient).flag} {recipient.followers}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-[22px] border border-[#e8e6dc] bg-white p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-xs font-semibold text-[#141413]">邮件标题</div>
-              <span className="rounded-full bg-[#fff2b8] px-2 py-0.5 text-[10px] font-semibold text-[#765d14] ring-1 ring-[#f1d86f]">
-                标题也会替换姓名
-              </span>
-            </div>
-            <HighlightedEmailPreview
-              segments={displaySubjectSegments.length > 0 ? displaySubjectSegments : [{ text: subject }]}
-              emptyLabel="暂无标题"
-              compact
-            />
-          </div>
-
-          <div className="mt-3 rounded-[22px] border border-[#e8e6dc] bg-white p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-xs font-semibold text-[#141413]">邮件正文</div>
-              <span className="rounded-full bg-[#fff2b8] px-2 py-0.5 text-[10px] font-semibold text-[#765d14] ring-1 ring-[#f1d86f]">
-                {highlightCount} 处个性化
-              </span>
-            </div>
-            <HighlightedEmailPreview segments={contentSegments} emptyLabel="暂无正文" />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 border-t border-[#e8e6dc] bg-white px-5 py-4">
-          <div className="min-w-0 text-[11px] leading-5 text-[#87867f]">
-            确认后将按当前高亮规则为每位博主生成独立邮件。
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-9 rounded-full border border-[#e8e6dc] bg-white px-4 text-sm font-semibold text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"
-            >
-              返回修改
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#c96442] px-4 text-sm font-semibold text-white transition-all hover:bg-[#b85a3b] active:scale-[0.98]"
-            >
-              <Send className="h-3.5 w-3.5" />
-              确认发送
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-function CreateProjectModal({
-  closeButtonRef,
-  projectName,
-  onProjectNameChange,
-  productDescription,
-  onProductDescriptionChange,
-  files,
-  onFilesChange,
-  onClose,
-  onSubmit,
-}: {
-  closeButtonRef: React.RefObject<HTMLButtonElement | null>;
-  projectName: string;
-  onProjectNameChange: (value: string) => void;
-  productDescription: string;
-  onProductDescriptionChange: (value: string) => void;
-  files: File[];
-  onFilesChange: (files: File[]) => void;
-  onClose: () => void;
-  onSubmit: () => void;
-}) {
-  const canSubmit = projectName.trim().length > 0 && productDescription.trim().length > 0;
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#141413]/18 px-4 backdrop-blur-sm"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="快速新建项目"
-        tabIndex={-1}
-        className="relative w-full max-w-xl overflow-hidden rounded-[30px] border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#faf9f5_55%,#f5f4ed_100%)] p-6 text-[#141413] shadow-[0_30px_120px_-40px_rgba(77,76,72,0.22)]"
-      >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,#c9644233,transparent_70%)]" />
-        <div className="relative flex items-start justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#e8e6dc] bg-white px-3 py-1 text-xs text-[#c96442]">
-              <FileText className="h-3.5 w-3.5" />
-              快速新建项目
-            </div>
-            <div className="mt-3 text-2xl font-semibold">填写项目基本信息</div>
-            <p className="mt-2 text-sm leading-6 text-[#5e5d59]">
-              项目名和产品信息为必填项。已有达人名单可以选填上传，方便后续继续处理。
-            </p>
-          </div>
-          <button
-            type="button"
-            ref={closeButtonRef}
-            onClick={onClose}
-            aria-label="关闭新建项目弹窗"
-            className="relative z-10 rounded-full border border-[#e8e6dc] bg-white p-2 text-[#87867f] hover:bg-[#f5f4ed]"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="relative mt-6 space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[#141413]">
-              项目名 / 推广项目名
-              <span className="ml-1 text-[#c96442]">*</span>
-            </label>
-            <input
-              value={projectName}
-              onChange={(event) => onProjectNameChange(event.target.value)}
-              placeholder="例如：春季露营灯新品推广"
-              className={SIDEBAR_CONTROL_CLASSES}
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[#141413]">
-              具体是什么产品
-              <span className="ml-1 text-[#c96442]">*</span>
-            </label>
-            <textarea
-              value={productDescription}
-              onChange={(event) => onProductDescriptionChange(event.target.value)}
-              placeholder="例如：主推便携露营灯、折叠桌和配套收纳包，本轮想找户外露营场景达人做新品曝光。"
-              className="min-h-[108px] w-full rounded-[20px] border border-[#e8e6dc] bg-[#faf9f5] px-3 py-3 text-sm leading-6 text-[#141413] outline-none transition-colors focus:border-[#c96442]/35"
-            />
-          </div>
-
-          <div className="rounded-[24px] border border-dashed border-[#d1cfc5] bg-white/80 p-4">
-            <div className="text-sm font-semibold text-[#141413]">上传已有达人名单</div>
-            <p className="mt-1 text-xs leading-5 text-[#87867f]">
-              如果你已经整理过一版达人名单，可在这上传，方便在插件页快速进行筛选和分析。
-            </p>
-            <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-4 py-2 text-sm font-medium text-[#4d4c48] transition-colors hover:border-[#d1cfc5] hover:bg-white">
-              <FileText className="h-4 w-4 text-[#87867f]" />
-              选择文件
-              <input
-                type="file"
-                multiple
-                className="hidden"
-                onChange={(event) =>
-                  onFilesChange(Array.from(event.target.files ?? []))
-                }
-              />
-            </label>
-            {files.length > 0 ? (
-              <div className="mt-3 rounded-[18px] border border-[#e8e6dc] bg-[#faf9f5] px-3 py-2">
-                <div className="text-xs font-medium text-[#5e5d59]">
-                  已选择 {files.length} 个文件
-                </div>
-                <div className="mt-1 space-y-1">
-                  {files.map((file) => (
-                    <div key={`${file.name}-${file.size}`} className="truncate text-xs text-[#87867f]">
-                      {file.name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="relative mt-6 flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className={SIDEBAR_SECONDARY_BUTTON_CLASSES}
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={!canSubmit}
-            className={`${SIDEBAR_FILLED_BUTTON_CLASSES} disabled:cursor-not-allowed disabled:opacity-60`}
-          >
-            创建项目
-          </button>
         </div>
       </div>
     </div>
