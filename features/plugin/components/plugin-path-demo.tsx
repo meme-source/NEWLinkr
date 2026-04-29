@@ -51,126 +51,53 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SimilarCardCarousel } from "@/features/plugin/components/similar-card-carousel";
 import { SimilarSearchModule } from "@/features/plugin/components/similar-search-module";
-
-type DemoStage = "floating" | "card";
-type ReviewFlow = "idle" | "sequential";
-type SidebarTab = "similar" | "current" | "email" | "quick";
-type CurrentDetailTab = "pricing" | "audience";
-type RegionTierKey = "developed" | "developing" | "underdeveloped";
-type MetricAggregation = "median" | "average";
-type HoverMetricKey = "rate" | "plays" | "likes" | "comments" | "engagementOrViews";
-type InlineDataKey = "plays" | "likes" | "comments" | "engagement" | "publishedAt";
-type SocialPlatformKey = "tiktok" | "instagram" | "youtube" | "x";
-type SearchModeKey =
-  | "comprehensive"
-  | "budget"
-  | "seed"
-  | "tier"
-  | "geo"
-  | "brand";
-type EmailTemplateKey = "intro" | "followup" | "gifted" | "";
-type EmailTemplateSegment = { text: string; personalized?: boolean };
-type EmailTemplateMeta = {
-  key: Exclude<EmailTemplateKey, "">;
-  label: string;
-  category: string;
-  summary: string;
-};
-type TagTone = "amber" | "blue" | "emerald" | "violet" | "rose";
-type AudienceRegion = { pct: number; flag?: string; flags?: string[] };
-type EmailSendOptions = {
-  subject: string;
-  attachmentCount: number;
-  mode: "now" | "scheduled";
-  scheduledAt?: string;
-  senderAddress?: string;
-  recipientCreatorIds?: string[];
-};
-type ProjectSummary = {
-  id: string;
-  name: string;
-  productDescription: string;
-  createdAt: string;
-  createdLabel: string;
-  uploadedListNames?: string[];
-};
-type ProjectScopedState = {
-  savedCreatorIds: string[];
-  dismissedCreatorIds: string[];
-  creatorTags: Record<string, string[]>;
-};
-
-type AudienceSummary = {
-  gender?: { female: number; male: number };
-  age?: Array<{ range: string; pct: number }>;
-  regionT1?: AudienceRegion;
-  regionT2?: AudienceRegion;
-};
-
-type CreatorProfile = {
-  id: string;
-  handle: string;
-  name: string;
-  country?: string;
-  creatorType?: string;
-  followers: string;
-  likes: string;
-  videos: string;
-  er: string;
-  rate: string;
-  bio: string;
-  statBadges: string[];
-  email?: string;
-  totalPlays?: string;
-  cpm?: string;
-  review?: string;
-  audienceBreakdown?: Array<{ label: string; value: string }>;
-  audienceSummary?: AudienceSummary;
-  outreachPreview?: string;
-  topics?: Array<{ label: string; weight: number }>;
-};
-
-const searchModes = [
-  {
-    key: "comprehensive" as const,
-    label: "找相似",
-    summary: "内容和调性风格相近的博主推荐。",
-    eta: "预计 8-12 秒",
-  },
-  {
-    key: "budget" as const,
-    label: "找平替",
-    summary: "风格/受众相似，但报价更低的博主。",
-    eta: "预计 6-10 秒",
-  },
-  {
-    key: "seed" as const,
-    label: "找种子达人",
-    summary: "围绕当前达人扩展低重合、高潜力的种子达人。",
-    eta: "预计 8-12 秒",
-  },
-];
-
-const emailTemplates: EmailTemplateMeta[] = [
-  {
-    key: "intro",
-    label: "初次建联",
-    category: "自建模板",
-    summary: "适合首次触达，AI 会补入姓名、内容亮点和合作切入点。",
-  },
-  {
-    key: "followup",
-    label: "二次催促",
-    category: "自建模板",
-    summary: "适合已触达但未回复对象，突出上次沟通与下一步动作。",
-  },
-  {
-    key: "gifted",
-    label: "寄样邀约",
-    category: "自建模板",
-    summary: "适合先寄样再确认合作，AI 会生成更具体的试用理由。",
-  },
-];
+import type {
+  AudienceHighlight,
+  AudienceRegion,
+  AudienceSummary,
+  CreatorProfile,
+  CurrentDetailTab,
+  DemoStage,
+  EmailSendOptions,
+  EmailTemplateKey,
+  EmailTemplateMeta,
+  EmailTemplateSegment,
+  HoverMetricKey,
+  InlineDataKey,
+  MetricAggregation,
+  ProjectScopedState,
+  ProjectSummary,
+  RegionTierKey,
+  ReviewFlow,
+  SearchModeKey,
+  SidebarTab,
+  SocialPlatformKey,
+  TagTone,
+} from "@/features/plugin/types";
+import { searchModes } from "@/features/plugin/data/search-modes";
+import { emailTemplates } from "@/features/plugin/data/email-templates";
+import {
+  COUNTRY_CPM_OVERRIDE_USD,
+  COUNTRY_OPTIONS,
+  COUNTRY_TO_FLAG,
+  CURRENCY_OPTIONS,
+  CURRENCY_SYMBOLS,
+  FLAG_TO_DISCOVERY_COUNTRY,
+  LOCALE_REGION_TO_COUNTRY,
+  REGION_TIER_BASE_CPM_USD,
+  REGION_TIER_OPTIONS,
+} from "@/features/plugin/data/countries";
+import {
+  PROJECTS_STORAGE_KEY,
+  PROJECT_SCOPED_STATE_KEY,
+  SELECTED_PROJECT_STORAGE_KEY,
+  defaultProjectScopedState,
+  defaultProjects,
+  noteTagPresets,
+  tagToneOrder,
+} from "@/features/plugin/data/projects";
+import { creatorProfiles } from "@/features/plugin/data/creator-profiles";
+import { searchResults } from "@/features/plugin/data/search-results";
 
 const SIDEBAR_CARD_RADIUS = "rounded-[24px]";
 const SIDEBAR_CONTROL_RADIUS = "rounded-[20px]";
@@ -207,73 +134,6 @@ const DEFAULT_INLINE_DATA_KEYS: InlineDataKey[] = [
   "engagement",
   "publishedAt",
 ];
-const REGION_TIER_OPTIONS: Array<{ key: RegionTierKey; label: string }> = [
-  { key: "developed", label: "发达地区" },
-  { key: "developing", label: "发展中地区" },
-  { key: "underdeveloped", label: "欠发达地区" },
-];
-const COUNTRY_OPTIONS: Array<{ name: string; flag: string; tier: RegionTierKey }> = [
-  { name: "美国", flag: "🇺🇸", tier: "developed" },
-  { name: "加拿大", flag: "🇨🇦", tier: "developed" },
-  { name: "英国", flag: "🇬🇧", tier: "developed" },
-  { name: "德国", flag: "🇩🇪", tier: "developed" },
-  { name: "日本", flag: "🇯🇵", tier: "developed" },
-  { name: "澳大利亚", flag: "🇦🇺", tier: "developed" },
-  { name: "中国", flag: "🇨🇳", tier: "developing" },
-  { name: "巴西", flag: "🇧🇷", tier: "developing" },
-  { name: "印尼", flag: "🇮🇩", tier: "developing" },
-  { name: "菲律宾", flag: "🇵🇭", tier: "developing" },
-  { name: "墨西哥", flag: "🇲🇽", tier: "developing" },
-  { name: "印度", flag: "🇮🇳", tier: "developing" },
-  { name: "孟加拉国", flag: "🇧🇩", tier: "underdeveloped" },
-  { name: "尼泊尔", flag: "🇳🇵", tier: "underdeveloped" },
-];
-const LOCALE_REGION_TO_COUNTRY: Record<string, string> = {
-  US: "美国",
-  CA: "加拿大",
-  GB: "英国",
-  DE: "德国",
-  JP: "日本",
-  AU: "澳大利亚",
-  CN: "中国",
-  BR: "巴西",
-  ID: "印尼",
-  PH: "菲律宾",
-  MX: "墨西哥",
-  IN: "印度",
-  BD: "孟加拉国",
-  NP: "尼泊尔",
-};
-const CURRENCY_OPTIONS = ["USD", "EUR", "GBP", "JPY", "CNY"] as const;
-const CURRENCY_SYMBOLS: Record<(typeof CURRENCY_OPTIONS)[number], string> = {
-  USD: "$",
-  EUR: "€",
-  GBP: "£",
-  JPY: "¥",
-  CNY: "¥",
-};
-const REGION_TIER_BASE_CPM_USD: Record<RegionTierKey, number> = {
-  developed: 16,
-  developing: 10,
-  underdeveloped: 6,
-};
-const COUNTRY_CPM_OVERRIDE_USD: Partial<Record<string, number>> = {
-  美国: 18,
-  加拿大: 15,
-  英国: 16,
-  德国: 15,
-  日本: 14,
-  澳大利亚: 15,
-  中国: 10,
-  巴西: 9,
-  印尼: 8,
-  菲律宾: 8,
-  墨西哥: 9,
-  印度: 8,
-  孟加拉国: 6,
-  尼泊尔: 6,
-};
-
 function clampValue(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
@@ -346,40 +206,6 @@ function getSidebarWidthBounds(viewportWidth: number, compactViewport: boolean) 
   return { min: minWidth, max: maxWidth };
 }
 
-const noteTagPresets: Array<{ label: string; tone: TagTone }> = [
-  { label: "Project 1", tone: "amber" },
-  { label: "Project 2", tone: "blue" },
-  { label: "Campaign", tone: "violet" },
-];
-
-const PROJECTS_STORAGE_KEY = "2linkr:sidebar-projects";
-const PROJECT_SCOPED_STATE_KEY = "2linkr:sidebar-project-state";
-const SELECTED_PROJECT_STORAGE_KEY = "2linkr:sidebar-selected-project";
-
-const defaultProjects: ProjectSummary[] = [
-  {
-    id: "spring-camping-launch",
-    name: "春季露营新品投放",
-    productDescription: "便携露营灯与折叠桌新品组合推广",
-    createdAt: "2026-04-20T11:40:00+08:00",
-    createdLabel: "最新创建",
-  },
-  {
-    id: "evergreen-camping-seeding",
-    name: "Evergreen 露营达人种草",
-    productDescription: "Evergreen 系列露营装备达人种草合作",
-    createdAt: "2026-04-15T18:20:00+08:00",
-    createdLabel: "4 月 15 日创建",
-  },
-  {
-    id: "summer-gear-budget",
-    name: "夏季装备平替补量",
-    productDescription: "夏季露营装备平替款达人扩量计划",
-    createdAt: "2026-04-09T14:10:00+08:00",
-    createdLabel: "4 月 9 日创建",
-  },
-];
-
 function sortProjectsNewestFirst(projects: ProjectSummary[]) {
   return [...projects].sort(
     (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
@@ -407,533 +233,6 @@ function createEmptyProjectScopedState(): ProjectScopedState {
   };
 }
 
-const defaultProjectScopedState: Record<string, ProjectScopedState> = {
-  "spring-camping-launch": {
-    savedCreatorIds: [],
-    dismissedCreatorIds: [],
-    creatorTags: {
-      "camping-aurora": ["Project 1", "Warm Lead"],
-    },
-  },
-};
-
-const tagToneOrder: TagTone[] = ["amber", "blue", "emerald", "violet", "rose"];
-
-const creatorProfiles: Record<string, CreatorProfile> = {
-  "camping-aurora": {
-    id: "camping-aurora",
-    handle: "@camping.aurora",
-    name: "Aurora Camp Notes",
-    country: "美国",
-    followers: "125K",
-    likes: "1.2M",
-    videos: "198",
-    er: "4.2%",
-    rate: "~$280",
-    email: "hello@creator.co",
-    bio: "户外露营 / 装备评测 / 公路旅行 Vlog，内容偏暖色治愈系，近期主要分享露营装备和周末短途路线。",
-    statBadges: ["爆款", "带货中", "视频"],
-    topics: [
-      { label: "#露营", weight: 9 },
-      { label: "#户外装备", weight: 8 },
-      { label: "#公路旅行", weight: 7 },
-      { label: "#装备测评", weight: 7 },
-      { label: "#治愈系", weight: 6 },
-      { label: "#周末出行", weight: 6 },
-      { label: "#帐篷", weight: 5 },
-      { label: "#自驾游", weight: 5 },
-      { label: "#徒步", weight: 4 },
-      { label: "#野餐", weight: 4 },
-      { label: "#Vlog", weight: 3 },
-    ],
-  },
-  "outdoor-jane": {
-    id: "outdoor-jane",
-    handle: "@outdoor_jane",
-    name: "Outdoor Jane",
-    country: "美国",
-    followers: "98K",
-    likes: "860K",
-    videos: "154",
-    er: "3.8%",
-    rate: "~$220",
-    bio: "轻户外 / 徒步装备 / 周末露营，内容稳定，商业化节奏较轻，适合作为性价比矩阵补充。",
-    statBadges: ["内容相近", "报价更低", "视频"],
-    topics: [
-      { label: "#徒步", weight: 9 },
-      { label: "#轻户外", weight: 8 },
-      { label: "#装备", weight: 7 },
-      { label: "#周末露营", weight: 7 },
-      { label: "#背包客", weight: 6 },
-      { label: "#登山", weight: 5 },
-      { label: "#户外穿搭", weight: 5 },
-      { label: "#露营食谱", weight: 4 },
-      { label: "#野外生存", weight: 3 },
-    ],
-  },
-  "camp-mike": {
-    id: "camp-mike",
-    handle: "@camp_mike",
-    name: "Camp Mike",
-    country: "美国",
-    followers: "210K",
-    likes: "2.4M",
-    videos: "243",
-    er: "4.5%",
-    rate: "~$450",
-    email: "partnerships@campmike.co",
-    bio: "重度户外玩家，视频节奏更强，画面风格成熟，适合作为更高量级搭配创作者。",
-    statBadges: ["风格接近", "量级更高", "视频"],
-    topics: [
-      { label: "#极限户外", weight: 9 },
-      { label: "#专业装备", weight: 8 },
-      { label: "#攀岩", weight: 7 },
-      { label: "#探险", weight: 7 },
-      { label: "#露营", weight: 6 },
-      { label: "#野外生存", weight: 6 },
-      { label: "#钓鱼", weight: 5 },
-      { label: "#户外摄影", weight: 5 },
-      { label: "#越野", weight: 4 },
-      { label: "#冰川徒步", weight: 3 },
-    ],
-  },
-  "trail-daily": {
-    id: "trail-daily",
-    handle: "@trail.daily",
-    name: "Trail Daily",
-    country: "美国",
-    followers: "76K",
-    likes: "540K",
-    videos: "102",
-    er: "4.1%",
-    rate: "~$180",
-    bio: "轻量徒步和周边露营内容，预算更友好，适合作为平替备选。",
-    statBadges: ["平替", "预算友好", "视频"],
-  },
-  "camping-weekend": {
-    id: "camping-weekend",
-    handle: "@camping.weekend",
-    name: "Camping Weekend",
-    country: "加拿大",
-    followers: "92K",
-    likes: "610K",
-    videos: "132",
-    er: "3.9%",
-    rate: "~$210",
-    bio: "家庭向露营内容较多，风格接近，适合作为中腰部补充账号。",
-    statBadges: ["性价比高", "家庭向", "视频"],
-  },
-  "north-woods-ava": {
-    id: "north-woods-ava",
-    handle: "@north.woods.ava",
-    name: "North Woods Ava",
-    country: "美国",
-    followers: "88K",
-    likes: "770K",
-    videos: "118",
-    er: "5.1%",
-    rate: "~$240",
-    bio: "粉丝画像重合度很高，评论质量优秀，适合做受众相近的高互动合作。",
-    statBadges: ["受众接近", "评论质量高", "视频"],
-  },
-  "roam-family": {
-    id: "roam-family",
-    handle: "@roam.family",
-    name: "Roam Family",
-    country: "英国",
-    followers: "134K",
-    likes: "1.1M",
-    videos: "207",
-    er: "4.0%",
-    rate: "~$260",
-    email: "team@roamfamily.co",
-    bio: "旅行家庭向受众更强，调性略有差异，但触达人群相近。",
-    statBadges: ["社群氛围好", "女性占比高", "视频"],
-  },
-  "camp-headline": {
-    id: "camp-headline",
-    handle: "@camp.headline",
-    name: "Camp Headline",
-    country: "美国",
-    followers: "420K",
-    likes: "3.3M",
-    videos: "280",
-    er: "3.2%",
-    rate: "~$900",
-    bio: "头部量级创作者，适合作为矩阵放大器，覆盖面更广。",
-    statBadges: ["头部量级", "覆盖更广", "视频"],
-  },
-  "micro-camp-log": {
-    id: "micro-camp-log",
-    handle: "@micro.camp.log",
-    name: "Micro Camp Log",
-    country: "美国",
-    followers: "32K",
-    likes: "220K",
-    videos: "84",
-    er: "6.0%",
-    rate: "~$95",
-    bio: "长尾创作者但互动率高，适合作为低成本补充。",
-    statBadges: ["长尾补充", "ER 更高", "视频"],
-  },
-  "alpine-escape-de": {
-    id: "alpine-escape-de",
-    handle: "@alpine.escape.de",
-    name: "Alpine Escape DE",
-    country: "德国",
-    followers: "102K",
-    likes: "790K",
-    videos: "144",
-    er: "4.3%",
-    rate: "~$250",
-    bio: "适合欧洲市场扩展，视觉语言和生活方式表达接近。",
-    statBadges: ["德国", "风格接近", "视频"],
-  },
-  "forest-weekend-jp": {
-    id: "forest-weekend-jp",
-    handle: "@forest.weekend.jp",
-    name: "Forest Weekend JP",
-    country: "日本",
-    followers: "95K",
-    likes: "730K",
-    videos: "136",
-    er: "4.7%",
-    rate: "~$230",
-    bio: "日系户外生活方式账号，适合做海外地区扩展参考。",
-    statBadges: ["日本", "调性接近", "视频"],
-  },
-  "gear-partner": {
-    id: "gear-partner",
-    handle: "@gear.partner",
-    name: "Gear Partner",
-    country: "美国",
-    followers: "118K",
-    likes: "980K",
-    videos: "172",
-    er: "4.4%",
-    rate: "~$320",
-    bio: "合作品牌相近，商业内容自然度高，适合快速进入建联。",
-    statBadges: ["品牌相近", "自然度高", "视频"],
-  },
-  "camp-review-lab": {
-    id: "camp-review-lab",
-    handle: "@camp.review.lab",
-    name: "Camp Review Lab",
-    country: "加拿大",
-    followers: "140K",
-    likes: "1.3M",
-    videos: "196",
-    er: "3.6%",
-    rate: "~$360",
-    bio: "商业成熟度高，适合直接进入报价和合作流程。",
-    statBadges: ["商业成熟", "历史合作多", "视频"],
-  },
-};
-
-const searchResults: Record<
-  SearchModeKey,
-  {
-    total: string;
-    helper: string;
-    cards: Array<{
-      id: string;
-      name: string;
-      email: string;
-      country: string;
-      fans: string;
-      views: string;
-      er: string;
-      price: string;
-      score: string;
-      reason: string;
-      reasons?: string[];
-      tradeoffs?: string[];
-      savingPct?: string;
-      seedPrice?: string;
-      tags: string[];
-      subscores?: {
-        topic: number;
-        format: number;
-        visual: number;
-        data: number;
-        activity: number;
-        contact: number;
-      };
-      altSubscores?: {
-        similarity: number;
-        costAdvantage: number;
-        dataPerformance: number;
-        contactabilityRisk: number;
-      };
-      seedComparison?: {
-        medianViews?: { seed: string; candidate: string };
-        er?: { seed: string; candidate: string };
-        price?: { seed: string; candidate: string };
-        cpm?: { seed: string; candidate: string };
-        cpe?: { seed: string; candidate: string };
-        emailStatus?: string;
-        systemConclusion?: string;
-      };
-      visualPending?: boolean;
-      emailStatusLabel?: string;
-    }>;
-  }
-> = {
-  comprehensive: {
-    total: "86",
-    helper: "系统按内容、风格、受众和商业特征综合排序。",
-    cards: [
-      {
-        id: "outdoor-jane",
-        name: "@outdoor_jane",
-        email: "outdoor.jane@creatormail.com",
-        country: "美国",
-        fans: "98K",
-        views: "28K",
-        er: "3.8%",
-        price: "~$220",
-        score: "87%",
-        reason: "内容主题高度重合，商业化更轻，预算有限时的高性价比选择。",
-        reasons: [
-          "近 10 条均聚焦护肤 routine / 户外随拍",
-          "中位播放接近：28K vs 当前 31K",
-          "互动率 3.8%，活跃度高于赛道均值",
-        ],
-        tradeoffs: ["粉丝量更小", "品牌合作历史较少"],
-        tags: ["内容 95%", "受众 82%", "报价更低"],
-        subscores: {
-          topic: 92,
-          format: 78,
-          visual: 85,
-          data: 82,
-          activity: 100,
-          contact: 70,
-        },
-        emailStatusLabel: "已找到",
-      },
-      {
-        id: "camp-mike",
-        name: "@camp_mike",
-        email: "camp.mike@creatormail.com",
-        country: "美国",
-        fans: "210K",
-        views: "55K",
-        er: "4.5%",
-        price: "~$450",
-        score: "82%",
-        reason: "视觉风格很接近，但量级更大，适合作为矩阵中的头部搭配。",
-        tags: ["内容 88%", "风格 91%", "量级更高"],
-      },
-    ],
-  },
-  budget: {
-    total: "43",
-    helper: "系统优先过滤高报价和高广告密度创作者。",
-    cards: [
-      {
-        id: "trail-daily",
-        name: "@trail.daily",
-        email: "trail.daily@creatormail.com",
-        country: "美国",
-        fans: "76K",
-        views: "25K",
-        er: "4.1%",
-        price: "~$180",
-        score: "84",
-        savingPct: "55%",
-        seedPrice: "~$420",
-        reason: "风格接近，报价更轻，更适合预算敏感项目。",
-        reasons: [
-          "内容主题相似：露营装备 / 周末测评",
-          "预估 CPM $14 vs 当前 $24，更省钱",
-          "近 30 天保持活跃，发文稳定",
-        ],
-        tradeoffs: ["粉丝量更小", "品牌合作密度低"],
-        tags: ["报价更低", "内容接近", "广告频率低"],
-        altSubscores: {
-          similarity: 82,
-          costAdvantage: 88,
-          dataPerformance: 76,
-          contactabilityRisk: 70,
-        },
-        seedComparison: {
-          medianViews: { seed: "38K", candidate: "25K" },
-          er: { seed: "4.2%", candidate: "4.1%" },
-          price: { seed: "~$420", candidate: "~$180" },
-          cpm: { seed: "$24", candidate: "$14" },
-          cpe: { seed: "$0.65", candidate: "$0.34" },
-          emailStatus: "已验证",
-          systemConclusion:
-            "适合预算敏感的测试型项目；如目标是大曝光，当前博主更稳；如目标是低成本测试，这个平替更合适。",
-        },
-        emailStatusLabel: "已验证",
-      },
-      {
-        id: "camping-weekend",
-        name: "@camping.weekend",
-        email: "camping.weekend@creatormail.com",
-        country: "加拿大",
-        fans: "92K",
-        views: "31K",
-        er: "3.9%",
-        price: "~$210",
-        score: "80",
-        savingPct: "45%",
-        seedPrice: "~$420",
-        reason: "受众略分散，但整体性价比更好，适合作为平替补充。",
-        reasons: [
-          "中位播放 31K，与当前博主接近",
-          "预估 CPM $13，明显低于当前",
-          "邮箱已找到，建联门槛低",
-        ],
-        tradeoffs: ["受众重合略低", "ER 略低"],
-        tags: ["性价比高", "互动稳定", "量级接近"],
-        visualPending: true,
-        altSubscores: {
-          similarity: 78,
-          costAdvantage: 80,
-          dataPerformance: 72,
-          contactabilityRisk: 90,
-        },
-        seedComparison: {
-          medianViews: { seed: "38K", candidate: "31K" },
-          er: { seed: "4.2%", candidate: "3.9%" },
-          price: { seed: "~$420", candidate: "~$210" },
-          cpm: { seed: "$24", candidate: "$13" },
-          emailStatus: "已找到",
-        },
-      },
-    ],
-  },
-  seed: {
-    total: "28",
-    helper: "系统优先筛出低重合、高潜力的种子达人，便于首轮测试。",
-    cards: [
-      {
-        id: "north-woods-ava",
-        name: "@north.woods.ava",
-        email: "north.woods.ava@creatormail.com",
-        country: "美国",
-        fans: "88K",
-        views: "22K",
-        er: "5.1%",
-        price: "~$240",
-        score: "89%",
-        reason: "互动质量稳定、受众重合更低，适合作为首批测试的种子达人。",
-        tags: ["低重合", "互动质量高", "适合首测"],
-      },
-      {
-        id: "roam-family",
-        name: "@roam.family",
-        email: "roam.family@creatormail.com",
-        country: "英国",
-        fans: "134K",
-        views: "35K",
-        er: "4.0%",
-        price: "~$260",
-        score: "78%",
-        reason: "内容切入点贴近当前赛道，能补充新受众，适合作为扩列种子。",
-        tags: ["新受众补充", "调性贴近", "社群氛围好"],
-      },
-    ],
-  },
-  tier: {
-    total: "64",
-    helper: "同赛道创作者已按不同量级自动分层，方便搭配投放。",
-    cards: [
-      {
-        id: "camp-headline",
-        name: "@camp.headline",
-        email: "camp.headline@creatormail.com",
-        country: "美国",
-        fans: "420K",
-        views: "88K",
-        er: "3.2%",
-        price: "~$900",
-        score: "81%",
-        reason: "适合作为头部创作者补量，视觉和主题仍保持一致。",
-        tags: ["头部量级", "主题接近", "覆盖更广"],
-      },
-      {
-        id: "micro-camp-log",
-        name: "@micro.camp.log",
-        email: "micro.camp.log@creatormail.com",
-        country: "美国",
-        fans: "32K",
-        views: "12K",
-        er: "6.0%",
-        price: "~$95",
-        score: "79%",
-        reason: "适合作为长尾创作者补充，互动率更高。",
-        tags: ["长尾补充", "ER 更高", "预算轻"],
-      },
-    ],
-  },
-  geo: {
-    total: "31",
-    helper: "系统保留相似内容特征，并扩展到目标国家的同类创作者。",
-    cards: [
-      {
-        id: "alpine-escape-de",
-        name: "@alpine.escape.de",
-        email: "alpine.escape.de@creatormail.com",
-        country: "德国",
-        fans: "102K",
-        views: "30K",
-        er: "4.3%",
-        price: "~$250",
-        score: "83%",
-        reason: "视觉和生活方式表达相近，适合欧洲市场扩展。",
-        tags: ["德国", "风格接近", "旅行受众"],
-      },
-      {
-        id: "forest-weekend-jp",
-        name: "@forest.weekend.jp",
-        email: "forest.weekend.jp@creatormail.com",
-        country: "日本",
-        fans: "95K",
-        views: "26K",
-        er: "4.7%",
-        price: "~$230",
-        score: "80%",
-        reason: "内容拍摄方式相近，但受众偏日系户外生活方式。",
-        tags: ["日本", "调性接近", "内容稳定"],
-      },
-    ],
-  },
-  brand: {
-    total: "19",
-    helper: "系统优先筛出接过同类品牌、合作形式相近的创作者。",
-    cards: [
-      {
-        id: "gear-partner",
-        name: "@gear.partner",
-        email: "gear.partner@creatormail.com",
-        country: "美国",
-        fans: "118K",
-        views: "34K",
-        er: "4.4%",
-        price: "~$320",
-        score: "88%",
-        reason: "近 90 天有户外品牌合作记录，商业内容自然度较高。",
-        tags: ["合作品牌相近", "自然度高", "转化信号强"],
-      },
-      {
-        id: "camp-review-lab",
-        name: "@camp.review.lab",
-        email: "camp.review.lab@creatormail.com",
-        country: "加拿大",
-        fans: "140K",
-        views: "38K",
-        er: "3.6%",
-        price: "~$360",
-        score: "79%",
-        reason: "商业成熟度高，适合快速进入建联和报价流程。",
-        tags: ["商业成熟", "历史合作多", "类目契合"],
-      },
-    ],
-  },
-};
 
 function getCreatorEmail(creator: CreatorProfile) {
   return creator.email ?? `${creator.handle.replace("@", "")}@mail.demo`;
@@ -1126,8 +425,6 @@ function getAudienceSummary(creator: CreatorProfile): AudienceSummary {
   };
 }
 
-type AudienceHighlight = { label: string; pct: number; flag?: string; flags?: string[] };
-
 function computeAudienceHighlights(summary: AudienceSummary): AudienceHighlight[] {
   const out: AudienceHighlight[] = [];
   // Gender — show female if ≥ 60%
@@ -1160,35 +457,6 @@ function computeAudienceHighlights(summary: AudienceSummary): AudienceHighlight[
   }
   return out;
 }
-
-/** Map plugin audience flags → 博主发现页「国家/地区」筛选项（与 discovery REGIONS 中文名一致） */
-const FLAG_TO_DISCOVERY_COUNTRY: Record<string, string> = {
-  "🇺🇸": "美国",
-  "🇨🇦": "加拿大",
-  "🇬🇧": "英国",
-  "🇩🇪": "德国",
-  "🇯🇵": "日本",
-  "🇵🇭": "菲律宾",
-  "🇮🇩": "印尼",
-  "🇧🇷": "巴西",
-};
-
-const COUNTRY_TO_FLAG: Record<string, string> = {
-  美国: "🇺🇸",
-  加拿大: "🇨🇦",
-  英国: "🇬🇧",
-  德国: "🇩🇪",
-  日本: "🇯🇵",
-  澳大利亚: "🇦🇺",
-  中国: "🇨🇳",
-  菲律宾: "🇵🇭",
-  印尼: "🇮🇩",
-  巴西: "🇧🇷",
-  墨西哥: "🇲🇽",
-  印度: "🇮🇳",
-  孟加拉国: "🇧🇩",
-  尼泊尔: "🇳🇵",
-};
 
 function getCountryFlag(country: string) {
   return COUNTRY_TO_FLAG[country] ?? COUNTRY_OPTIONS.find((item) => item.name === country)?.flag ?? "🌐";
