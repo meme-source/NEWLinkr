@@ -64,6 +64,12 @@ import {
   SidebarMetricInline,
 } from "@/features/plugin/components/sidebar-metrics";
 import { SidebarCreatorTypeTag } from "@/features/plugin/components/sidebar-creator-type-tag";
+import { FloatingStatCell } from "@/features/plugin/components/floating-stat-cell";
+import { HighlightedEmailPreview } from "@/features/plugin/components/highlighted-email-preview";
+import { SidebarLocationInline } from "@/features/plugin/components/sidebar-location-inline";
+import { SidebarContentTabButton } from "@/features/plugin/components/sidebar-content-tab-button";
+import { AudienceHighlightBar } from "@/features/plugin/components/audience-highlight-bar";
+import { SidebarAction } from "@/features/plugin/components/sidebar-action";
 import {
   formatComments,
   formatDuration,
@@ -2247,37 +2253,6 @@ function FloatingCard({
   );
 }
 
-function FloatingStatCell({
-  icon: Icon,
-  iconClassName,
-  label,
-  value,
-  borderTop,
-  borderRight,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  iconClassName?: string;
-  label: string;
-  value: string;
-  borderTop?: boolean;
-  borderRight?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "px-3 py-3 flex flex-col items-center text-center",
-        borderTop && "border-t border-[#e8e6dc]",
-        borderRight && "border-r border-[#e8e6dc]"
-      )}
-    >
-      <div className="flex items-center gap-1 text-xs font-medium text-[#87867f]">
-        <Icon className={cn("h-3.5 w-3.5", iconClassName)} />
-        {label}
-      </div>
-      <div className="mt-1.5 text-lg font-semibold tracking-tight text-[#1f2937]">{value}</div>
-    </div>
-  );
-}
 
 
 function SimilarSidebar({
@@ -4377,44 +4352,6 @@ function QuickSettingsPanel({
   );
 }
 
-function HighlightedEmailPreview({
-  segments,
-  emptyLabel,
-  compact = false,
-}: {
-  segments: EmailTemplateSegment[];
-  emptyLabel: string;
-  compact?: boolean;
-}) {
-  if (segments.length === 0) {
-    return (
-      <div className="rounded-[16px] border border-dashed border-[#ddd9ce] bg-white px-3 py-5 text-center text-sm text-[#87867f]">
-        {emptyLabel}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "whitespace-pre-wrap break-words rounded-[16px] border border-[#efe6d7] bg-white text-[#141413]",
-        compact ? "px-3 py-2.5 text-[12px] leading-5" : "min-h-[140px] px-3 py-3 text-sm leading-6"
-      )}
-    >
-      {segments.map((segment, index) => (
-        <span
-          key={`${index}-${segment.text.slice(0, 10)}`}
-          className={cn(
-            segment.personalized &&
-              "rounded-[5px] bg-[#fff2a8] px-0.5 font-semibold text-[#624c0b] ring-1 ring-[#edd36b]/70"
-          )}
-        >
-          {segment.text}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function EmailReviewModal({
   templateKey,
@@ -4979,31 +4916,6 @@ function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail: boolea
   );
 }
 
-function SidebarLocationInline({
-  flag,
-  country,
-  compact = false,
-}: {
-  flag: string;
-  country: string;
-  compact?: boolean;
-}) {
-  return (
-    <span
-      aria-label={`地区 ${country}`}
-      title={country}
-      className={cn(
-        "inline-flex items-center rounded-full border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#fbf8f2_100%)] text-[#4d4c48] shadow-[0_1px_2px_rgba(20,20,19,0.04)]",
-        compact ? "h-5 gap-1 px-2" : "h-[22px] gap-1.5 px-2.5"
-      )}
-    >
-      <span className={cn("leading-none", compact ? "text-[11px]" : "text-[12px]")}>{flag}</span>
-      <span className={cn("font-medium leading-none text-[#4d4c48]", compact ? "text-[10px]" : "text-[11px]")}>
-        {country}
-      </span>
-    </span>
-  );
-}
 
 
 function SidebarCreatorProfileCard({
@@ -5470,108 +5382,8 @@ function CreatorTopicSummaryRow({
   );
 }
 
-function SidebarContentTabButton({
-  icon: Icon,
-  label,
-  active,
-  onClick,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors",
-        active
-          ? "border-[#c96442] text-[#141413]"
-          : "border-transparent text-[#87867f] hover:text-[#4d4c48]"
-      )}
-    >
-      <Icon className={cn("h-4 w-4", active ? "text-[#c96442]" : "text-[#9b9a93]")} />
-      {label}
-    </button>
-  );
-}
 
-function AudienceHighlightBar({
-  label,
-  pct,
-  flag,
-  flags,
-}: {
-  label: string;
-  pct: number;
-  flag?: string;
-  flags?: string[];
-}) {
-  const visibleFlags = flags && flags.length > 0 ? flags : flag ? [flag] : [];
 
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-3 text-xs">
-        <span className="flex items-center gap-1 text-[#5e5d59]">
-          {label}
-          {visibleFlags.length > 0 ? (
-            <span className="ml-1 inline-flex items-center">
-              {visibleFlags.map((item, index) => (
-                <span
-                  key={`${label}-${item}-${index}`}
-                  className={cn(
-                    "inline-flex h-5 w-5 items-center justify-center rounded-full border border-white bg-[#faf9f5] text-[11px] leading-none shadow-sm",
-                    index > 0 && "-ml-1.5"
-                  )}
-                >
-                  {item}
-                </span>
-              ))}
-            </span>
-          ) : null}
-        </span>
-        <span className="font-semibold text-[#141413]">{pct}%</span>
-      </div>
-      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#e8e6dc]">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#c96442] to-[#d97757]"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function SidebarAction({
-  text,
-  primary,
-  active,
-  onClick,
-}: {
-  text: string;
-  primary?: boolean;
-  active?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex rounded-full px-3 py-2 text-xs font-medium transition-all duration-150 hover:-translate-y-0.5",
-        primary
-          ? "bg-[#c96442] text-[#faf9f5] hover:bg-[#d97757]"
-          : active
-            ? "border border-emerald-300/45 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-            : "border border-[#e8e6dc] bg-white text-[#5e5d59] hover:bg-[#f5f4ed]"
-      )}
-    >
-      {text}
-    </button>
-  );
-}
 
 function DeleteProjectConfirm({
   projectName,
