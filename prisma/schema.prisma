@@ -1,0 +1,157 @@
+// Prisma 数据表定义
+// Phase 0 跑：npx prisma migrate dev --name init
+// 文档：博主发现页实现逻辑.md §6 + 找相似与找平替实现逻辑.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== 用户 =====
+// Supabase Auth 已经有 auth.users 表，这里只放业务相关补充信息
+model User {
+  id        String   @id // 对应 supabase auth uid
+  email     String   @unique
+  createdAt DateTime @default(now())
+  projects  Project[]
+}
+
+// ===== 项目 =====
+model Project {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  productUrl   String?
+  category     String
+  platform     String   // tiktok | instagram | youtube
+  sellingPoints Json?   // string[]
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+  actions      ProjectAction[]
+
+  @@index([userId])
+}
+
+// ===== 达人 =====
+model Creator {
+  id              String   @id @default(cuid())
+  handle          String
+  platform        String
+  avatar          String?
+  followers       Int      @default(0)
+  medianViews     Int      @default(0)
+  engagementRate  Float    @default(0)
+  estimatedPrice  String?
+  email           String?
+  emailStatus     String   @default("missing") // found | verified | missing
+  recentActiveAt  DateTime?
+  riskLevel       String   @default("low")
+  rawData         Json?    // provider 返回的原始数据
+  fetchedAt       DateTime @default(now())
+
+  posts           Post[]
+  brandMentions   BrandMention[]
+  sceneStats      CreatorSceneStat[]
+  actions         ProjectAction[]
+
+  @@unique([handle, platform])
+  @@index([platform])
+}
+
+// ===== 帖子 =====
+model Post {
+  id            String   @id @default(cuid())
+  creatorId     String
+  platform      String
+  url           String
+  caption       String   @db.Text
+  hashtags      String[] // postgres array
+  mentions      String[]
+  externalLinks String[]
+  publishedAt   DateTime
+  views         Int      @default(0)
+  likes         Int      @default(0)
+  comments      Int      @default(0)
+  shares        Int      @default(0)
+  category      String?
+  sceneTags     String[]
+
+  creator       Creator  @relation(fields: [creatorId], references: [id])
+  brandMentions BrandMention[]
+
+  @@index([creatorId])
+  @@index([publishedAt])
+  @@index([category])
+}
+
+// ===== 品牌提及（找同行用） =====
+model BrandMention {
+  id                String   @id @default(cuid())
+  postId            String
+  creatorId         String
+  brandName         String
+  brandMentionType  String   // hashtag | @mention | caption | link | discount_code
+  evidenceStrength  String   // high | medium | low
+  adDisclosure      Boolean  @default(false)
+  discountCode      String?
+  detectedAt        DateTime @default(now())
+
+  post     Post     @relation(fields: [postId], references: [id])
+  creator  Creator  @relation(fields: [creatorId], references: [id])
+
+  @@index([brandName])
+  @@index([creatorId])
+}
+
+// ===== 营销场景库 =====
+model Scene {
+  id            String   @id @default(cuid())
+  name          String
+  category      String
+  description   String   @db.Text
+  contentFormat String?
+  keywords      String[]
+  exampleHooks  String[]
+  bestForTraits String[]
+
+  creatorStats  CreatorSceneStat[]
+
+  @@index([category])
+}
+
+// ===== 达人场景表现 =====
+model CreatorSceneStat {
+  id              String  @id @default(cuid())
+  creatorId       String
+  sceneId         String
+  postCount       Int     @default(0)
+  medianViews     Int     @default(0)
+  engagementRate  Float   @default(0)
+  viralRate       Float   @default(0)
+
+  creator  Creator  @relation(fields: [creatorId], references: [id])
+  scene    Scene    @relation(fields: [sceneId], references: [id])
+
+  @@unique([creatorId, sceneId])
+}
+
+// ===== 项目内对达人的操作（收藏 / No / 已建联） =====
+model ProjectAction {
+  id         String   @id @default(cuid())
+  projectId  String
+  creatorId  String
+  status     String   // saved | no | contacted | replied | deal
+  note       String?  @db.Text
+  updatedAt  DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id])
+  creator   Creator @relation(fields: [creatorId], references: [id])
+
+  @@unique([projectId, creatorId])
+  @@index([projectId, status])
+}

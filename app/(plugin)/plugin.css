@@ -1,0 +1,12 @@
+/* Plugin design tokens — edit freely without touching workspace styles */
+:root {
+  --plugin-bg: #ffffff;
+  --plugin-surface: #f9f9f9;
+  --plugin-text: #1a1a1a;
+  --plugin-text-muted: #6b6b6b;
+  --plugin-accent: #f25c3a;
+  --plugin-accent-hover: #d94f2f;
+  --plugin-border: rgba(0, 0, 0, 0.08);
+  --plugin-radius: 0.75rem;
+  --plugin-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}

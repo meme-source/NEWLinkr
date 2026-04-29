@@ -1,0 +1,16 @@
+/* Workspace design tokens — edit freely without touching plugin styles */
+:root {
+  --ws-bg: #f5f4ed;
+  --ws-surface: #faf9f5;
+  --ws-surface-hover: #f0ece4;
+  --ws-surface-active: #f5ede8;
+  --ws-text: #141413;
+  --ws-text-muted: #87867f;
+  --ws-text-secondary: #4d4c48;
+  --ws-accent: #c96442;
+  --ws-accent-light: #f5ede8;
+  --ws-border: #e8e6dc;
+  --ws-radius: 0.75rem;
+  --ws-sidebar-width: 14rem;
+  --ws-sidebar-collapsed: 3.5rem;
+}
