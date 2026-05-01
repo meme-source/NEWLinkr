@@ -125,3 +125,19 @@ types/
 - [ ] If touching a Client Component with effects: deps array passes exhaustive-deps without disable
 
 If you cannot satisfy a checkbox, surface it to the user **before** committing.
+
+## Known god components — split, do not extend
+
+The 2026-05 refactor stopped at stage 7. The following files exceed the size budget and **must not be edited in place** for new features. Instead: extract the part you're touching into a new component under `features/<feature>/components/`, then wire it back in.
+
+| File | Lines | Suggested split direction |
+|---|---|---|
+| `features/plugin/components/plugin-path-demo.tsx` | ~6,979 | Per-panel: SidebarPanel, EmailModule, CreatorCard, SearchModule. Data already in `features/plugin/data/`. |
+| `app/(workspace)/workspace/discovery/page.tsx` | ~4,190 | Per discovery flow: CompetitorSearch, ScenarioSearch, TrendingSearch, SimilarSearch, plus a shared ResultsList + QuickFilters. |
+| `app/(workspace)/workspace/library/page.tsx` | ~2,774 | LibraryToolbar, LibraryTable, ImportFlow, BulkOutreachComposer. |
+| `app/(workspace)/workspace/outreach/page.tsx` | ~2,542 | OutreachInbox, MailTemplates, EmailSettings, OutreachDashboard (one per `?tab=` value). |
+| `app/(workspace)/workspace/settings/page.tsx` | ~2,274 | Per tab: ProjectsTab, BillingTab, IntegrationsTab, TeamTab. |
+
+When you split, **keep DOM and classNames byte-identical** — these are refactors, not redesigns. Verify with the user that the page looks the same in `npm run dev` before merging.
+
+If a request would force you to add code inside one of these files, tell the user: *"this would extend a known oversized file — let me split the part I need first, then add the new behavior into the new file."* Don't just edit in place.
