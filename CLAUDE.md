@@ -23,9 +23,9 @@ The backend is currently stubbed. API routes exist but return mock or `TODO` res
 
 ### 2. API routes use `zod`
 
-- Every `app/api/**/route.ts` must `zod.parse()` the request body. **No `as XxxRequest`** type casts — they bypass validation.
-- Request and response schemas live next to the route in `lib/api/schemas.ts` (or are imported from `types/api.ts`).
-- Use the `apiOk()` / `apiError()` helpers from `lib/api/respond.ts` for responses. Do not return ad-hoc `NextResponse.json` shapes.
+- Every `app/api/**/route.ts` must call `Schema.safeParse(body)` on input. **No `as XxxRequest`** type casts — they bypass validation.
+- Request schemas live in **`lib/api/schemas.ts`**, named `<TypeName>Schema`, and `satisfies z.ZodType<TypeName>` so they stay in sync with `types/api.ts`.
+- Use **`ok()` / `fail()` / `failValidation()`** from `lib/api/envelope.ts` for responses. Do not return ad-hoc `NextResponse.json` shapes. Do not echo the raw request body back in the response.
 
 ### 3. Business logic does not live in `route.ts`
 

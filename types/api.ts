@@ -66,12 +66,23 @@ export type CompetitorCreatorResult = {
 };
 
 // ===== 博主发现 - 按营销场景找 =====
+// /api/discovery/scenario uses an `action` discriminator to multiplex two flows.
 export type ScenarioParseRequest = {
+  action: "parse";
   projectId: string;
   productUrl?: string;
   productDescription?: string;
   platform: Platform;
 };
+
+export type ScenarioMatchRequest = {
+  action: "match";
+  projectId: string;
+  platform: Platform;
+  sceneIds: string[];
+};
+
+export type ScenarioRequest = ScenarioParseRequest | ScenarioMatchRequest;
 
 export type Scene = {
   id: string;
@@ -116,6 +127,22 @@ export type TrendingCreatorResult = {
     vsCreatorBaseline: string;
     vsCategoryBaseline: string;
   };
+};
+
+// ===== 项目管理 =====
+export type CreateProjectInput = {
+  name: string;
+  productUrl?: string;
+  category: string;
+  platform: Platform;
+};
+
+// ===== 建联 (outreach) =====
+export type OutreachSendRequest = {
+  creatorId: string;
+  subject: string;
+  content: string;
+  projectId?: string;
 };
 
 // ===== 搜索依据（结果页顶部展示） =====

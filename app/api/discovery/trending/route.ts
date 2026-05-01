@@ -1,14 +1,17 @@
 // 博主发现 —— 找爆款达人
 // POST /api/discovery/trending
 // 文档：博主发现页实现逻辑.md §5
-import { ok, fail } from "@/lib/api/envelope";
-import type { TrendingDiscoveryRequest, TrendingCreatorResult, SearchBasis } from "@/types/api";
+import { ok, fail, failValidation } from "@/lib/api/envelope";
+import { TrendingDiscoveryRequestSchema } from "@/lib/api/schemas";
+import type { SearchBasis, TrendingCreatorResult } from "@/types/api";
 
 export async function POST(req: Request) {
-  const body = (await req.json().catch(() => null)) as TrendingDiscoveryRequest | null;
-  if (!body?.platform || !body?.category) {
-    return fail("platform 和 category 必填");
-  }
+  const json = await req.json().catch(() => null);
+  if (json === null) return fail("Request body must be valid JSON");
+
+  const parsed = TrendingDiscoveryRequestSchema.safeParse(json);
+  if (!parsed.success) return failValidation(parsed.error);
+  const input = parsed.data;
 
   // TODO Phase 4 实现步骤：
   // 1. 拉时间范围内品类相关 posts
@@ -18,9 +21,9 @@ export async function POST(req: Request) {
   // 5. 用 lib/scoring/trending.ts 算分
 
   const basis: SearchBasis = {
-    platform: body.platform,
-    category: body.category,
-    timeRangeDays: body.timeRangeDays,
+    platform: input.platform,
+    category: input.category,
+    timeRangeDays: input.timeRangeDays,
     postsAnalyzed: 0,
     candidatesFound: 0,
   };

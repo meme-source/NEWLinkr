@@ -1,14 +1,17 @@
 // 博主发现 —— 找同行投过的
 // POST /api/discovery/competitor
 // 文档：博主发现页实现逻辑.md §3
-import { ok, fail } from "@/lib/api/envelope";
-import type { CompetitorDiscoveryRequest, CompetitorCreatorResult, SearchBasis } from "@/types/api";
+import { ok, fail, failValidation } from "@/lib/api/envelope";
+import { CompetitorDiscoveryRequestSchema } from "@/lib/api/schemas";
+import type { CompetitorCreatorResult, SearchBasis } from "@/types/api";
 
 export async function POST(req: Request) {
-  const body = (await req.json().catch(() => null)) as CompetitorDiscoveryRequest | null;
-  if (!body?.brandQuery || !body?.platform) {
-    return fail("brandQuery 和 platform 必填");
-  }
+  const json = await req.json().catch(() => null);
+  if (json === null) return fail("Request body must be valid JSON");
+
+  const parsed = CompetitorDiscoveryRequestSchema.safeParse(json);
+  if (!parsed.success) return failValidation(parsed.error);
+  const input = parsed.data;
 
   // TODO Phase 3 实现步骤：
   // 1. 用品牌名扩展别名 / 官方账号 / 域名
@@ -18,9 +21,9 @@ export async function POST(req: Request) {
   // 5. 用 lib/scoring/competitor.ts 算分排序
 
   const basis: SearchBasis = {
-    platform: body.platform,
-    category: body.category,
-    timeRangeDays: body.timeRangeDays,
+    platform: input.platform,
+    category: input.category,
+    timeRangeDays: input.timeRangeDays,
     postsAnalyzed: 0,
     candidatesFound: 0,
   };
