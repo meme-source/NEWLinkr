@@ -9,11 +9,11 @@
 // + 商业可用性   10%
 
 export type TrendingScoreInput = {
-  burstMultiplier: number;       // 0-100
-  categoryRelevance: number;     // 0-100
-  growthSpeed: number;           // 0-100
-  stability: number;             // 0-100
-  commercialAvailability: number;// 0-100
+  burstMultiplier: number; // 0-100
+  categoryRelevance: number; // 0-100
+  growthSpeed: number; // 0-100
+  stability: number; // 0-100
+  commercialAvailability: number; // 0-100
 };
 
 export function trendingScore(input: TrendingScoreInput): number {
@@ -28,10 +28,10 @@ export function trendingScore(input: TrendingScoreInput): number {
 
 // 达人类型标签判断
 export function classifyTrendType(args: {
-  highPerfPostCount: number;     // 近期高于本人基线 2x 的帖子数
+  highPerfPostCount: number; // 近期高于本人基线 2x 的帖子数
   followers: number;
   engagementRate: number;
-  growth30d: number;             // 近 30 天涨幅
+  growth30d: number; // 近 30 天涨幅
 }): "持续增长" | "单条爆款" | "高互动小号" | "新晋潜力" | "稳定高表现" {
   if (args.highPerfPostCount >= 3) return "持续增长";
   if (args.followers < 50_000 && args.engagementRate > 0.06) return "高互动小号";

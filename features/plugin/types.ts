@@ -6,26 +6,10 @@ export type SidebarTab = "similar" | "current" | "email" | "quick";
 export type CurrentDetailTab = "pricing" | "audience";
 export type RegionTierKey = "developed" | "developing" | "underdeveloped";
 export type MetricAggregation = "median" | "average";
-export type HoverMetricKey =
-  | "rate"
-  | "plays"
-  | "likes"
-  | "comments"
-  | "engagementOrViews";
-export type InlineDataKey =
-  | "plays"
-  | "likes"
-  | "comments"
-  | "engagement"
-  | "publishedAt";
+export type HoverMetricKey = "rate" | "plays" | "likes" | "comments" | "engagementOrViews";
+export type InlineDataKey = "plays" | "likes" | "comments" | "engagement" | "publishedAt";
 export type SocialPlatformKey = "tiktok" | "instagram" | "youtube" | "x";
-export type SearchModeKey =
-  | "comprehensive"
-  | "budget"
-  | "seed"
-  | "tier"
-  | "geo"
-  | "brand";
+export type SearchModeKey = "comprehensive" | "budget" | "seed" | "tier" | "geo" | "brand";
 export type EmailTemplateKey = "intro" | "followup" | "gifted" | "";
 export type EmailTemplateSegment = { text: string; personalized?: boolean };
 export type EmailTemplateMeta = {

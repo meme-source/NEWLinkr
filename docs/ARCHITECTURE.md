@@ -116,11 +116,11 @@ features/*/components/*   → UI
 
 ### 数据成本三层模型
 
-| Tier | 成本 | 用途 |
-|---|---|---|
-| Tier 1 | 极低（免费/几乎免费） | Apify/TikHub 一次抓全：粉丝、帖子原始字段 |
-| Tier 2 | 几乎免费 | 后端纯算：中位播放、ER、活跃天数、hashtag 重叠 |
-| Tier 3 | 高（Claude） | bio embedding、内容形式标签、视觉向量 |
+| Tier   | 成本                  | 用途                                           |
+| ------ | --------------------- | ---------------------------------------------- |
+| Tier 1 | 极低（免费/几乎免费） | Apify/TikHub 一次抓全：粉丝、帖子原始字段      |
+| Tier 2 | 几乎免费              | 后端纯算：中位播放、ER、活跃天数、hashtag 重叠 |
+| Tier 3 | 高（Claude）          | bio embedding、内容形式标签、视觉向量          |
 
 **严格收口**：每个种子博主 3-5 次 AI 调用，与候选数无关。
 
@@ -151,6 +151,7 @@ main          ← 稳定发布版
 ```
 
 **纪律**：
+
 - 各自在 `feat/*` 上开发 → PR 到 `dev`
 - 稳定后从 `dev` 合到 `main`
 - 视觉文件（`app/(plugin)/`、`app/(workspace)/`、`features/*/components/`）仅前端改
@@ -159,15 +160,15 @@ main          ← 稳定发布版
 
 ## 七、后续 Roadmap
 
-| Phase | 内容 | 关键产出 |
-|---|---|---|
-| 0 | Prisma + Supabase 真接入 | DB 可读写 + 用户能登录 |
-| 1 | 项目 CRUD + 鉴权 | `/api/projects` 落地 |
-| 2 | Claude SDK + 场景解析 | `/api/discovery/scenario?action=parse` 可用 |
-| 3 | 第一个 Provider（建议 Modash） | `/api/discovery/competitor` 可用 |
-| 4 | 找爆款 trending | `/api/discovery/trending` 可用 |
-| 5 | 建联 + Resend 邮件 | `/api/outreach` 可用 |
-| 6 | 插件打包（Vite + CRX） | 真正的 Chrome 扩展上线 |
+| Phase | 内容                           | 关键产出                                    |
+| ----- | ------------------------------ | ------------------------------------------- |
+| 0     | Prisma + Supabase 真接入       | DB 可读写 + 用户能登录                      |
+| 1     | 项目 CRUD + 鉴权               | `/api/projects` 落地                        |
+| 2     | Claude SDK + 场景解析          | `/api/discovery/scenario?action=parse` 可用 |
+| 3     | 第一个 Provider（建议 Modash） | `/api/discovery/competitor` 可用            |
+| 4     | 找爆款 trending                | `/api/discovery/trending` 可用              |
+| 5     | 建联 + Resend 邮件             | `/api/outreach` 可用                        |
+| 6     | 插件打包（Vite + CRX）         | 真正的 Chrome 扩展上线                      |
 
 ### 横向架构改进（任意时机推进）
 

@@ -9,11 +9,11 @@
 // + 可联系性     10%
 
 export type CompetitorScoreInput = {
-  evidenceStrength: number;     // 0-100，强证据=100，中=60，弱=30
-  collabPerformance: number;    // 合作帖播放 / 本人中位播放，归一到 0-100
-  categoryRelevance: number;    // 0-100
-  recentActivity: number;       // 0-100，近 30 天有发帖=100
-  contactability: number;       // 0-100，邮箱已验证=100
+  evidenceStrength: number; // 0-100，强证据=100，中=60，弱=30
+  collabPerformance: number; // 合作帖播放 / 本人中位播放，归一到 0-100
+  categoryRelevance: number; // 0-100
+  recentActivity: number; // 0-100，近 30 天有发帖=100
+  contactability: number; // 0-100，邮箱已验证=100
 };
 
 export function competitorScore(input: CompetitorScoreInput): number {

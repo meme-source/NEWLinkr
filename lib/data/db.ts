@@ -5,7 +5,9 @@
 // receive `undefined` and continue. Replace with a real PrismaClient in Phase 0.
 
 const stubError = () => {
-  throw new Error("[stub] db not implemented — install @prisma/client and replace lib/data/db.ts in Phase 0");
+  throw new Error(
+    "[stub] db not implemented — install @prisma/client and replace lib/data/db.ts in Phase 0",
+  );
 };
 
 export const db: never = new Proxy({} as never, {

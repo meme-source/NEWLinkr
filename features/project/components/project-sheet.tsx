@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  CalendarDays,
-  Coins,
-  FolderKanban,
-  Link2,
-  Package2,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { CalendarDays, Coins, FolderKanban, Link2, Package2, Sparkles, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type {
@@ -39,13 +31,7 @@ const CURRENCY_OPTIONS = [
   { value: "CNY", label: "CNY" },
 ] as const;
 
-type FieldKey =
-  | "name"
-  | "productName"
-  | "category"
-  | "startDate"
-  | "endDate"
-  | "budgetAmount";
+type FieldKey = "name" | "productName" | "category" | "startDate" | "endDate" | "budgetAmount";
 
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
@@ -103,7 +89,7 @@ function TextInput({
         placeholder={placeholder}
         className={cn(
           "w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-[#141413] placeholder:text-[#b0aea6] focus:outline-none",
-          error ? "border-[#c96442]/45" : "border-[#e8e6dc] focus:border-[#c96442]/35"
+          error ? "border-[#c96442]/45" : "border-[#e8e6dc] focus:border-[#c96442]/35",
         )}
       />
       {error ? <p className="mt-1.5 text-[11px] text-[#c96442]">{error}</p> : null}
@@ -140,9 +126,10 @@ export function ProjectSheet({
   }, [open, project]);
 
   const title = mode === "create" ? "新建项目" : "编辑项目";
-  const description = mode === "create"
-    ? "当前项目会同步贯穿博主发现、博主库和建联中心。先建立项目，再让所有动作有归属。"
-    : "修改后的项目资料会同步到当前项目视角，帮助团队统一筛选标准、节奏和预算。";
+  const description =
+    mode === "create"
+      ? "当前项目会同步贯穿博主发现、博主库和建联中心。先建立项目，再让所有动作有归属。"
+      : "修改后的项目资料会同步到当前项目视角，帮助团队统一筛选标准、节奏和预算。";
 
   const optionalSummary = useMemo(() => {
     const tags: string[] = [];
@@ -158,7 +145,10 @@ export function ProjectSheet({
     return tags;
   }, [draft]);
 
-  const updateField = <K extends keyof WorkspaceProjectDraft>(key: K, value: WorkspaceProjectDraft[K]) => {
+  const updateField = <K extends keyof WorkspaceProjectDraft>(
+    key: K,
+    value: WorkspaceProjectDraft[K],
+  ) => {
     setDraft((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: undefined }));
   };
@@ -215,7 +205,7 @@ export function ProjectSheet({
   return (
     <>
       <div className="fixed inset-0 z-[70] bg-black/18 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="fixed right-0 top-0 z-[80] flex h-full w-full max-w-[560px] flex-col border-l border-[#e8e6dc] bg-[#faf9f5] shadow-[0_24px_60px_-18px_rgba(20,20,19,0.28)]">
+      <div className="fixed top-0 right-0 z-[80] flex h-full w-full max-w-[560px] flex-col border-l border-[#e8e6dc] bg-[#faf9f5] shadow-[0_24px_60px_-18px_rgba(20,20,19,0.28)]">
         <div className="border-b border-[#e8e6dc] bg-white px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -237,10 +227,12 @@ export function ProjectSheet({
 
           {mode === "create" ? (
             <div className="mt-4 inline-flex rounded-2xl border border-[#e8e6dc] bg-[#faf9f5] p-1">
-              {([
-                { key: "quick", label: "快捷新建" },
-                { key: "detailed", label: "详细信息卡片" },
-              ] as const).map((item) => (
+              {(
+                [
+                  { key: "quick", label: "快捷新建" },
+                  { key: "detailed", label: "详细信息卡片" },
+                ] as const
+              ).map((item) => (
                 <button
                   key={item.key}
                   type="button"
@@ -249,7 +241,7 @@ export function ProjectSheet({
                     "rounded-xl px-3.5 py-2 text-sm transition-colors",
                     variant === item.key
                       ? "bg-white font-medium text-[#141413] shadow-sm"
-                      : "text-[#87867f] hover:text-[#4d4c48]"
+                      : "text-[#87867f] hover:text-[#4d4c48]",
                   )}
                 >
                   {item.label}
@@ -268,9 +260,12 @@ export function ProjectSheet({
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#141413]">先把项目立起来，再开始动作</p>
+                    <p className="text-sm font-semibold text-[#141413]">
+                      先把项目立起来，再开始动作
+                    </p>
                     <p className="mt-1.5 text-xs leading-5 text-[#5e5d59]">
-                      快捷新建只保留最关键的 3 项必填信息。创建完成后，系统就会以这个项目承接搜索、收藏、建联和后续协作。
+                      快捷新建只保留最关键的 3
+                      项必填信息。创建完成后，系统就会以这个项目承接搜索、收藏、建联和后续协作。
                     </p>
                   </div>
                 </div>
@@ -302,7 +297,9 @@ export function ProjectSheet({
                     onChange={(event) => updateField("category", event.target.value)}
                     className={cn(
                       "w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-[#141413] focus:outline-none",
-                      errors.category ? "border-[#c96442]/45" : "border-[#e8e6dc] focus:border-[#c96442]/35"
+                      errors.category
+                        ? "border-[#c96442]/45"
+                        : "border-[#e8e6dc] focus:border-[#c96442]/35",
                     )}
                   >
                     <option value="">请选择品类</option>
@@ -312,7 +309,9 @@ export function ProjectSheet({
                       </option>
                     ))}
                   </select>
-                  {errors.category ? <p className="mt-1.5 text-[11px] text-[#c96442]">{errors.category}</p> : null}
+                  {errors.category ? (
+                    <p className="mt-1.5 text-[11px] text-[#c96442]">{errors.category}</p>
+                  ) : null}
                 </div>
               </div>
 
@@ -320,7 +319,9 @@ export function ProjectSheet({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-[#141413]">补充信息</p>
-                    <p className="mt-1 text-xs text-[#87867f]">以下内容均为选填，但越完整，越方便后续团队协作和节奏安排。</p>
+                    <p className="mt-1 text-xs text-[#87867f]">
+                      以下内容均为选填，但越完整，越方便后续团队协作和节奏安排。
+                    </p>
                   </div>
                   {optionalSummary.length > 0 ? (
                     <span className="rounded-full bg-[#eef0e2] px-2.5 py-1 text-[10px] font-medium text-[#5a6a4a]">
@@ -362,7 +363,12 @@ export function ProjectSheet({
                       />
                       <select
                         value={draft.budgetCurrency}
-                        onChange={(event) => updateField("budgetCurrency", event.target.value as WorkspaceProjectDraft["budgetCurrency"])}
+                        onChange={(event) =>
+                          updateField(
+                            "budgetCurrency",
+                            event.target.value as WorkspaceProjectDraft["budgetCurrency"],
+                          )
+                        }
                         className="rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] focus:border-[#c96442]/35 focus:outline-none"
                       >
                         {CURRENCY_OPTIONS.map((option) => (
@@ -434,7 +440,9 @@ export function ProjectSheet({
                       onChange={(event) => updateField("category", event.target.value)}
                       className={cn(
                         "w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-[#141413] focus:outline-none",
-                        errors.category ? "border-[#c96442]/45" : "border-[#e8e6dc] focus:border-[#c96442]/35"
+                        errors.category
+                          ? "border-[#c96442]/45"
+                          : "border-[#e8e6dc] focus:border-[#c96442]/35",
                       )}
                     >
                       <option value="">请选择品类</option>
@@ -444,7 +452,9 @@ export function ProjectSheet({
                         </option>
                       ))}
                     </select>
-                    {errors.category ? <p className="mt-1.5 text-[11px] text-[#c96442]">{errors.category}</p> : null}
+                    {errors.category ? (
+                      <p className="mt-1.5 text-[11px] text-[#c96442]">{errors.category}</p>
+                    ) : null}
                   </div>
                 </div>
               </section>
@@ -454,7 +464,9 @@ export function ProjectSheet({
                   <CalendarDays className="h-4 w-4 text-[#c96442]" />
                   时间范围
                 </div>
-                <p className="mt-1.5 text-xs text-[#87867f]">让团队知道当前项目从什么时候启动，到什么时候收口，方便安排发现与跟进节奏。</p>
+                <p className="mt-1.5 text-xs text-[#87867f]">
+                  让团队知道当前项目从什么时候启动，到什么时候收口，方便安排发现与跟进节奏。
+                </p>
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <FieldLabel label="开始时间" />
@@ -484,7 +496,9 @@ export function ProjectSheet({
                   <Coins className="h-4 w-4 text-[#c96442]" />
                   预算与补充信息
                 </div>
-                <p className="mt-1.5 text-xs text-[#87867f]">预算和产品资料不是必填，但它们会直接影响筛选标准、建联优先级和报价判断。</p>
+                <p className="mt-1.5 text-xs text-[#87867f]">
+                  预算和产品资料不是必填，但它们会直接影响筛选标准、建联优先级和报价判断。
+                </p>
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <FieldLabel label="预算" />
@@ -498,7 +512,12 @@ export function ProjectSheet({
                       />
                       <select
                         value={draft.budgetCurrency}
-                        onChange={(event) => updateField("budgetCurrency", event.target.value as WorkspaceProjectDraft["budgetCurrency"])}
+                        onChange={(event) =>
+                          updateField(
+                            "budgetCurrency",
+                            event.target.value as WorkspaceProjectDraft["budgetCurrency"],
+                          )
+                        }
                         className="rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] focus:border-[#c96442]/35 focus:outline-none"
                       >
                         {CURRENCY_OPTIONS.map((option) => (
@@ -521,7 +540,7 @@ export function ProjectSheet({
                 <div className="mt-4">
                   <FieldLabel label="产品链接" />
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#87867f]">
+                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#87867f]">
                       <Link2 className="h-3.5 w-3.5" />
                     </span>
                     <input
@@ -529,7 +548,7 @@ export function ProjectSheet({
                       value={draft.productLink}
                       onChange={(event) => updateField("productLink", event.target.value)}
                       placeholder="https://"
-                      className="w-full rounded-xl border border-[#e8e6dc] bg-white py-2.5 pl-9 pr-3.5 text-sm text-[#141413] placeholder:text-[#b0aea6] focus:border-[#c96442]/35 focus:outline-none"
+                      className="w-full rounded-xl border border-[#e8e6dc] bg-white py-2.5 pr-3.5 pl-9 text-sm text-[#141413] placeholder:text-[#b0aea6] focus:border-[#c96442]/35 focus:outline-none"
                     />
                   </div>
                 </div>

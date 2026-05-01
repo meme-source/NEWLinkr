@@ -153,7 +153,7 @@ export function SimilarSearchModule({
                     onSelectMode(mode.key);
                   }}
                   className={[
-                    "relative isolate inline-flex min-h-[36px] items-center justify-center gap-1 overflow-hidden px-2 py-0 text-[11.5px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#c96442]/30",
+                    "relative isolate inline-flex min-h-[36px] items-center justify-center gap-1 overflow-hidden px-2 py-0 text-[11.5px] font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#c96442]/30 focus-visible:outline-none focus-visible:ring-inset",
                     isActive ? "z-10 text-[#2a2927]" : "text-[#87867f] hover:text-[#2a2927]",
                   ].join(" ")}
                 >
@@ -182,9 +182,7 @@ export function SimilarSearchModule({
 
           {/* Header strip */}
           <div className="px-4 pt-3 pb-2">
-            <div className="text-[11px] leading-snug text-[#87867f]">
-              {active.summary}
-            </div>
+            <div className="text-[11px] leading-snug text-[#87867f]">{active.summary}</div>
           </div>
 
           {isSeed ? (
@@ -272,7 +270,6 @@ export function SimilarSearchModule({
             <PointsIcon className="h-3 w-3 text-[#8f745a]" />
             <span className="font-semibold tracking-[0.01em] text-[#9a7550]">3</span>
           </div>
-
         </div>
       ) : null}
     </div>
@@ -281,12 +278,7 @@ export function SimilarSearchModule({
 
 function PointsIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 1024 1024"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
+    <svg viewBox="0 0 1024 1024" fill="none" aria-hidden="true" className={className}>
       <path
         d="M512 455.111111c157.070222 0 284.444444-50.915556 284.444444-113.777778s-127.374222-113.777778-284.444444-113.777777-284.444444 50.915556-284.444444 113.777777 127.374222 113.777778 284.444444 113.777778zM227.555556 512c0-17.237333 11.377778-36.238222 30.947555-51.598222q14.449778 7.452444 31.288889 14.222222Q383.146667 512 512 512q128.796444 0 222.264889-37.376 16.782222-6.769778 31.288889-14.222222c19.512889 15.36 30.890667 34.360889 30.890666 51.598222 0 62.862222-127.374222 113.777778-284.444444 113.777778s-284.444444-50.915556-284.444444-113.777778z m0 170.666667c0-17.237333 11.377778-36.238222 30.947555-51.598223q14.449778 7.452444 31.288889 14.222223Q383.146667 682.666667 512 682.666667q128.796444 0 222.264889-37.376 16.782222-6.769778 31.288889-14.222223c19.512889 15.36 30.890667 34.360889 30.890666 51.598223 0 62.862222-127.374222 113.777778-284.444444 113.777777s-284.444444-50.915556-284.444444-113.777777z"
         fill="currentColor"
@@ -309,7 +301,7 @@ function SelectField({
   const id = useId();
   return (
     <label htmlFor={id} className="block">
-      <span className="mb-1 block text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#a8a69c]">
+      <span className="mb-1 block text-[9.5px] font-semibold tracking-[0.12em] text-[#a8a69c] uppercase">
         {label}
       </span>
       <div className="relative">
@@ -317,7 +309,7 @@ function SelectField({
           id={id}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full cursor-pointer appearance-none rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-1.5 pr-7 text-[12px] font-medium text-[#2a2927] outline-none transition-colors hover:border-[#c96442]/40 focus:border-[#c96442]/60"
+          className="w-full cursor-pointer appearance-none rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-1.5 pr-7 text-[12px] font-medium text-[#2a2927] transition-colors outline-none hover:border-[#c96442]/40 focus:border-[#c96442]/60"
         >
           {options.map((option) => (
             <option key={option} value={option}>
@@ -325,7 +317,7 @@ function SelectField({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#87867f]" />
+        <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-3 w-3 -translate-y-1/2 text-[#87867f]" />
       </div>
     </label>
   );
@@ -356,11 +348,11 @@ function RangeField({
       <div className="mb-0.5 flex items-baseline justify-between">
         <label
           htmlFor={id}
-          className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#a8a69c]"
+          className="text-[9.5px] font-semibold tracking-[0.12em] text-[#a8a69c] uppercase"
         >
           {label}
         </label>
-        <span className="text-[12px] font-bold leading-none text-[#2a2927]">
+        <span className="text-[12px] leading-none font-bold text-[#2a2927]">
           {formatter(value)}
         </span>
       </div>

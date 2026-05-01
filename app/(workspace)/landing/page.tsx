@@ -63,7 +63,13 @@ export default function Home() {
         <div className="landing-container landing-nav-inner">
           <Link href="/landing" className="landing-brand">
             <span className="landing-logo">
-              <Image src="/2linkr-logo.png" alt="Linkr" fill sizes="40px" className="rounded-[14px] object-cover" />
+              <Image
+                src="/2linkr-logo.png"
+                alt="Linkr"
+                fill
+                sizes="40px"
+                className="rounded-[14px] object-cover"
+              />
             </span>
             Linkr
           </Link>
@@ -87,7 +93,9 @@ export default function Home() {
               <br />
               复制博主了。
             </h1>
-            <p className="landing-subtitle">找人、找邮箱、写邮件的脏活交给 AI。你只负责点发送，然后，准点下班。</p>
+            <p className="landing-subtitle">
+              找人、找邮箱、写邮件的脏活交给 AI。你只负责点发送，然后，准点下班。
+            </p>
             <div className="landing-actions">
               <Link href="/demo" className="landing-primary-btn">
                 拿走这 100 个博主名单
@@ -165,9 +173,21 @@ export default function Home() {
           </div>
           <div className="landing-pain-grid">
             {[
-              ["😩", "TikTok翻完翻Instagram，Instagram翻完翻YouTube。翻了500个主页，存下来不到20个。", "更气的是，有几个一看数据就是假粉，白翻了。你花半天做的事，AI能做得更快，还自带假粉过滤。"],
-              ["😱", "邮箱不在简介里。不在About页。不在链接树。一个博主的联系方式，你找了20分钟。", "你打开了ta的个人网站，翻到页脚，终于找到了一个mailto链接。整个过程20分钟。一个博主。"],
-              ["🤯", "群发了100封邮件，回了2封。其中一封是退订。", "群发模板博主看都不看。一封一封手写，一天写不了几封。你知道个性化邮件回复率高，但谁有那个时间？"],
+              [
+                "😩",
+                "TikTok翻完翻Instagram，Instagram翻完翻YouTube。翻了500个主页，存下来不到20个。",
+                "更气的是，有几个一看数据就是假粉，白翻了。你花半天做的事，AI能做得更快，还自带假粉过滤。",
+              ],
+              [
+                "😱",
+                "邮箱不在简介里。不在About页。不在链接树。一个博主的联系方式，你找了20分钟。",
+                "你打开了ta的个人网站，翻到页脚，终于找到了一个mailto链接。整个过程20分钟。一个博主。",
+              ],
+              [
+                "🤯",
+                "群发了100封邮件，回了2封。其中一封是退订。",
+                "群发模板博主看都不看。一封一封手写，一天写不了几封。你知道个性化邮件回复率高，但谁有那个时间？",
+              ],
             ].map((p) => (
               <article key={p[0]} className="landing-pain-card">
                 <span className="landing-pain-index">{p[0]}</span>
@@ -267,10 +287,22 @@ export default function Home() {
           </div>
           <div className="landing-fit-grid">
             {[
-              ["跨境电商媒介", "早上TikTok找人，下午Instagram找邮箱，晚上YouTube做备选。到了十点，表格里还是那几个名字。"],
-              ["品牌营销经理", "品牌方给了调性要求，老板给了deadline，你夹在中间对着Excel发呆。你需要的不是更多选择，是更少但更准的选择。"],
-              ["MCN 商务", "签约靠眼光，但发现靠体力。你知道什么样的博主有潜力，问题是从哪里批量找到他们。"],
-              ["独立开发者 / 独立站卖家", "没有媒介团队，没有Agency预算，产品推广、博主建联全靠你一个人扛。"],
+              [
+                "跨境电商媒介",
+                "早上TikTok找人，下午Instagram找邮箱，晚上YouTube做备选。到了十点，表格里还是那几个名字。",
+              ],
+              [
+                "品牌营销经理",
+                "品牌方给了调性要求，老板给了deadline，你夹在中间对着Excel发呆。你需要的不是更多选择，是更少但更准的选择。",
+              ],
+              [
+                "MCN 商务",
+                "签约靠眼光，但发现靠体力。你知道什么样的博主有潜力，问题是从哪里批量找到他们。",
+              ],
+              [
+                "独立开发者 / 独立站卖家",
+                "没有媒介团队，没有Agency预算，产品推广、博主建联全靠你一个人扛。",
+              ],
             ].map((u) => (
               <article key={u[0]} className="landing-fit-card">
                 <h3>{u[0]}</h3>
@@ -301,10 +333,22 @@ export default function Home() {
                 <small>/ 首月</small>
               </div>
               <ul className="landing-price-list">
-                <li><Check aria-hidden="true" className="h-4 w-4" />每日 30 次 AI 搜索</li>
-                <li><Check aria-hidden="true" className="h-4 w-4" />每日 20 次邮箱抓取</li>
-                <li><Check aria-hidden="true" className="h-4 w-4" />AI 邮件生成</li>
-                <li><Check aria-hidden="true" className="h-4 w-4" />Chrome 插件完整功能</li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  每日 30 次 AI 搜索
+                </li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  每日 20 次邮箱抓取
+                </li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  AI 邮件生成
+                </li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  Chrome 插件完整功能
+                </li>
               </ul>
               <Link href="/demo" className="landing-price-cta">
                 ¥9.9 先试一个月
@@ -323,10 +367,22 @@ export default function Home() {
                 <small>/ 月</small>
               </div>
               <ul className="landing-price-list">
-                <li><Check aria-hidden="true" className="h-4 w-4" />无限 AI 搜索</li>
-                <li><Check aria-hidden="true" className="h-4 w-4" />无限邮箱抓取</li>
-                <li><Check aria-hidden="true" className="h-4 w-4" />AI 个性化邮件</li>
-                <li><Check aria-hidden="true" className="h-4 w-4" />批量导出 CSV</li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  无限 AI 搜索
+                </li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  无限邮箱抓取
+                </li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  AI 个性化邮件
+                </li>
+                <li>
+                  <Check aria-hidden="true" className="h-4 w-4" />
+                  批量导出 CSV
+                </li>
               </ul>
               <Link href="/demo" className="landing-price-cta is-accent">
                 直接起飞 →
@@ -383,73 +439,501 @@ export default function Home() {
       </footer>
 
       <style jsx global>{`
-        .landing-page{background:radial-gradient(80% 60% at 10% 5%,#e86a581f,#0000),radial-gradient(60% 50% at 90% 10%,#1e7a721a,#0000),linear-gradient(#fff8f2 0%,#fff5ed 44%,#fff8f2 100%);color:#2d2a32;overflow-x:clip}
-        .landing-container{width:min(1160px,100% - 32px);margin:0 auto}
-        .landing-nav{position:sticky;top:0;z-index:40;background:#fff8f2b8;backdrop-filter:blur(20px);border-bottom:1px solid #2d2a320f}
-        .landing-nav-inner{display:flex;align-items:center;justify-content:space-between;min-height:74px}
-        .landing-brand{display:inline-flex;gap:10px;align-items:center;font-weight:700}
-        .landing-logo{position:relative;width:40px;height:40px;border-radius:14px;overflow:hidden;box-shadow:0 8px 16px #2d2a321f}
-        .landing-nav-cta,.landing-primary-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#e86a58,#d45a49);color:#fff;border-radius:14px;padding:12px 18px;font-weight:700;box-shadow:0 14px 30px #e86a5838;transition:.25s transform,.25s box-shadow}
-        .landing-nav-cta:hover,.landing-primary-btn:hover{transform:translateY(-2px);box-shadow:0 18px 38px #e86a5852}
-        .landing-secondary-btn,.landing-cta-link,.landing-price-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#ffffffcc;border:1px solid #2d2a321f;border-radius:14px;padding:12px 18px}
-        .landing-hero{padding:56px 0 92px}
-        .landing-hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);align-items:center;gap:52px}
-        .landing-eyebrow,.landing-section-head p,.landing-cta-kicker{display:inline-flex;padding:8px 14px;border-radius:999px;border:1px solid #2d2a3214;background:#ffffffb3;font-size:.88rem;font-weight:700;color:#1e7a72}
-        .landing-title{margin:0;line-height:1.08;letter-spacing:-.05em;font-size:clamp(2.6rem,6vw,4.8rem)}
-        .landing-subtitle{margin-top:20px;color:#6b6573;font-size:1.08rem;line-height:1.85;max-width:650px}
-        .landing-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
-        .landing-trust-row{display:flex;flex-wrap:wrap;gap:18px;margin-top:22px;color:#6b6573}
-        .landing-stage{position:relative;min-height:620px}
-        .landing-screen{position:relative;background:#ffffffcc;backdrop-filter:blur(14px);border:1px solid #2d2a3214;border-radius:30px;padding:18px;width:min(100%,560px);margin:48px auto 0;box-shadow:0 24px 70px #2d2a321f;animation:landing-breathe 6s ease-in-out infinite}
-        .landing-screen-frame{border:1px solid #2d2a3214;border-radius:20px;overflow:hidden;background:#fff}
-        .landing-screen-bar{display:flex;gap:8px;padding:4px 4px 12px}.landing-screen-bar span{width:10px;height:10px;border-radius:999px;background:#2d2a322e}
-        .landing-screen-foot{display:flex;justify-content:space-between;align-items:center;padding-top:14px;gap:14px}
-        .landing-screen-foot span{color:#6b6573}.landing-screen-pill,.landing-price-badge{border-radius:999px;background:#e86a581f;padding:8px 12px;color:#d45a49;font-weight:700}
-        .landing-stage-card{position:absolute;max-width:240px;background:#fff8f2d4;backdrop-filter:blur(16px);border:1px solid #2d2a3214;border-radius:20px;padding:16px;box-shadow:0 22px 38px #2d2a321a}
-        .landing-stage-card-top{top:10px;right:8px;animation:landing-float 6.2s ease-in-out infinite}
-        .landing-stage-card-left{top:280px;left:0;animation:landing-float 6.8s ease-in-out .2s infinite}
-        .landing-stage-card-bottom{bottom:18px;right:36px;animation:landing-float 7.1s ease-in-out .45s infinite}
-        .landing-stage-kicker{margin:0 0 8px;font-size:.78rem;color:#8c8692}
-        .landing-stage-card strong{display:block;line-height:1.5}.landing-stage-card span{display:block;margin-top:8px;color:#6b6573;font-size:.9rem}
-        .landing-section{padding:88px 0}.landing-section-contrast{background:#ffffff73}
-        .landing-section-head{max-width:860px;display:grid;gap:12px;margin-bottom:34px}.landing-section-head h2,.landing-cta-panel h2{font-size:clamp(2rem,4vw,3rem);line-height:1.2;letter-spacing:-.04em;margin:0}
-        .landing-section-head span,.landing-cta-panel span{color:#6b6573;line-height:1.9}
-        .landing-pain-grid,.landing-workflow-grid,.landing-fit-grid,.landing-pricing-grid{display:grid;gap:20px}
-        .landing-pain-grid,.landing-workflow-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-        .landing-fit-grid,.landing-pricing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-        .landing-pain-card,.landing-workflow-card,.landing-fit-card,.landing-price-card,.landing-faq-item{background:#ffffffb8;backdrop-filter:blur(12px);border:1px solid #2d2a3214;border-radius:24px;padding:22px;transition:.3s transform,.3s box-shadow}
-        .landing-pain-card:hover,.landing-workflow-card:hover,.landing-fit-card:hover,.landing-price-card:hover{transform:translateY(-4px);box-shadow:0 24px 48px #2d2a321a}
-        .landing-pain-index{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:#e86a581a;color:#d45a49;font-weight:700}
-        .landing-compare-table{border:1px solid #2d2a3214;border-radius:28px;overflow:hidden;background:#ffffffc7}
-        .landing-compare-row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:16px 20px;border-top:1px solid #2d2a3214}
-        .landing-compare-row:first-child{border-top:none}.landing-compare-head{background:#2d2a320a;font-weight:700;color:#6b6573}
-        .landing-compare-cell{border-radius:16px;padding:12px 14px;line-height:1.7}.landing-compare-cell.is-highlight{background:#e86a581a;color:#d45a49}.landing-compare-cell.is-highlight-secondary{background:#1e7a721a;color:#1e7a72}
-        .landing-workflow-icon{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#1e7a7226,#e86a5814)}
-        .landing-price-card.is-accent{background:linear-gradient(145deg,#fffffff5,#e86a5814);border-color:#e86a5847}
-        .landing-price-head{display:flex;justify-content:space-between;gap:14px}
-        .landing-price-value{display:flex;align-items:baseline;gap:10px;margin-top:18px}
-        .landing-price-value span{font-size:clamp(2.5rem,5vw,3.6rem);font-weight:700;letter-spacing:-.05em}
-        .landing-price-list{display:grid;gap:12px;margin:18px 0 0;padding:0;list-style:none}
-        .landing-price-list li{display:inline-flex;align-items:flex-start;gap:8px}
-        .landing-price-cta{width:100%;margin-top:20px}.landing-price-cta.is-accent{background:linear-gradient(135deg,#e86a58,#d45a49);color:#fff;border:none;box-shadow:0 10px 28px #e86a5838}
-        .landing-faq-list{display:grid;gap:14px}.landing-faq-question{width:100%;text-align:left;background:transparent;border:none;display:flex;justify-content:space-between;align-items:center;padding:20px 22px;font-weight:700}
-        .landing-faq-answer{margin:0;padding:0 22px 22px;color:#6b6573;line-height:1.85}
-        .landing-cta-section{padding:0 0 82px}
-        .landing-cta-panel{display:flex;justify-content:space-between;align-items:center;gap:24px;background:linear-gradient(135deg,#2d2a32f5,#3c3842f2);color:#fff;border-radius:32px;padding:38px;position:relative;overflow:hidden}
-        .landing-cta-panel:before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle,#e86a5838 0,#0000 60%);animation:landing-aurora 16s linear infinite}
-        .landing-cta-actions{display:flex;flex-wrap:wrap;gap:12px}
-        .landing-footer{padding:0 0 30px}.landing-footer-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;padding-top:16px;border-top:1px solid #2d2a3214;color:#6b6573}
-        .landing-footer-links{display:flex;gap:14px;flex-wrap:wrap}
-        @keyframes landing-float{0%,to{transform:translateY(0)}50%{transform:translateY(-10px)}}
-        @keyframes landing-breathe{0%,to{transform:scale(1)}50%{transform:scale(1.015)}}
-        @keyframes landing-aurora{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-        @media (max-width:920px){
-          .landing-hero-grid,.landing-pain-grid,.landing-workflow-grid,.landing-fit-grid,.landing-pricing-grid,.landing-compare-row,.landing-cta-panel{grid-template-columns:1fr;display:grid}
-          .landing-stage{min-height:0;padding-top:14px}.landing-stage-card{position:static;max-width:none;margin-bottom:14px;animation:none}
-          .landing-screen{margin-top:24px}.landing-container{width:min(100% - 24px,1160px)}
+        .landing-page {
+          background:
+            radial-gradient(80% 60% at 10% 5%, #e86a581f, #0000),
+            radial-gradient(60% 50% at 90% 10%, #1e7a721a, #0000),
+            linear-gradient(#fff8f2 0%, #fff5ed 44%, #fff8f2 100%);
+          color: #2d2a32;
+          overflow-x: clip;
         }
-        @media (prefers-reduced-motion: reduce){
-          *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+        .landing-container {
+          width: min(1160px, 100% - 32px);
+          margin: 0 auto;
+        }
+        .landing-nav {
+          position: sticky;
+          top: 0;
+          z-index: 40;
+          background: #fff8f2b8;
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid #2d2a320f;
+        }
+        .landing-nav-inner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          min-height: 74px;
+        }
+        .landing-brand {
+          display: inline-flex;
+          gap: 10px;
+          align-items: center;
+          font-weight: 700;
+        }
+        .landing-logo {
+          position: relative;
+          width: 40px;
+          height: 40px;
+          border-radius: 14px;
+          overflow: hidden;
+          box-shadow: 0 8px 16px #2d2a321f;
+        }
+        .landing-nav-cta,
+        .landing-primary-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #e86a58, #d45a49);
+          color: #fff;
+          border-radius: 14px;
+          padding: 12px 18px;
+          font-weight: 700;
+          box-shadow: 0 14px 30px #e86a5838;
+          transition:
+            0.25s transform,
+            0.25s box-shadow;
+        }
+        .landing-nav-cta:hover,
+        .landing-primary-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 18px 38px #e86a5852;
+        }
+        .landing-secondary-btn,
+        .landing-cta-link,
+        .landing-price-cta {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: #ffffffcc;
+          border: 1px solid #2d2a321f;
+          border-radius: 14px;
+          padding: 12px 18px;
+        }
+        .landing-hero {
+          padding: 56px 0 92px;
+        }
+        .landing-hero-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+          align-items: center;
+          gap: 52px;
+        }
+        .landing-eyebrow,
+        .landing-section-head p,
+        .landing-cta-kicker {
+          display: inline-flex;
+          padding: 8px 14px;
+          border-radius: 999px;
+          border: 1px solid #2d2a3214;
+          background: #ffffffb3;
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: #1e7a72;
+        }
+        .landing-title {
+          margin: 0;
+          line-height: 1.08;
+          letter-spacing: -0.05em;
+          font-size: clamp(2.6rem, 6vw, 4.8rem);
+        }
+        .landing-subtitle {
+          margin-top: 20px;
+          color: #6b6573;
+          font-size: 1.08rem;
+          line-height: 1.85;
+          max-width: 650px;
+        }
+        .landing-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px;
+          margin-top: 30px;
+        }
+        .landing-trust-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 18px;
+          margin-top: 22px;
+          color: #6b6573;
+        }
+        .landing-stage {
+          position: relative;
+          min-height: 620px;
+        }
+        .landing-screen {
+          position: relative;
+          background: #ffffffcc;
+          backdrop-filter: blur(14px);
+          border: 1px solid #2d2a3214;
+          border-radius: 30px;
+          padding: 18px;
+          width: min(100%, 560px);
+          margin: 48px auto 0;
+          box-shadow: 0 24px 70px #2d2a321f;
+          animation: landing-breathe 6s ease-in-out infinite;
+        }
+        .landing-screen-frame {
+          border: 1px solid #2d2a3214;
+          border-radius: 20px;
+          overflow: hidden;
+          background: #fff;
+        }
+        .landing-screen-bar {
+          display: flex;
+          gap: 8px;
+          padding: 4px 4px 12px;
+        }
+        .landing-screen-bar span {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          background: #2d2a322e;
+        }
+        .landing-screen-foot {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 14px;
+          gap: 14px;
+        }
+        .landing-screen-foot span {
+          color: #6b6573;
+        }
+        .landing-screen-pill,
+        .landing-price-badge {
+          border-radius: 999px;
+          background: #e86a581f;
+          padding: 8px 12px;
+          color: #d45a49;
+          font-weight: 700;
+        }
+        .landing-stage-card {
+          position: absolute;
+          max-width: 240px;
+          background: #fff8f2d4;
+          backdrop-filter: blur(16px);
+          border: 1px solid #2d2a3214;
+          border-radius: 20px;
+          padding: 16px;
+          box-shadow: 0 22px 38px #2d2a321a;
+        }
+        .landing-stage-card-top {
+          top: 10px;
+          right: 8px;
+          animation: landing-float 6.2s ease-in-out infinite;
+        }
+        .landing-stage-card-left {
+          top: 280px;
+          left: 0;
+          animation: landing-float 6.8s ease-in-out 0.2s infinite;
+        }
+        .landing-stage-card-bottom {
+          bottom: 18px;
+          right: 36px;
+          animation: landing-float 7.1s ease-in-out 0.45s infinite;
+        }
+        .landing-stage-kicker {
+          margin: 0 0 8px;
+          font-size: 0.78rem;
+          color: #8c8692;
+        }
+        .landing-stage-card strong {
+          display: block;
+          line-height: 1.5;
+        }
+        .landing-stage-card span {
+          display: block;
+          margin-top: 8px;
+          color: #6b6573;
+          font-size: 0.9rem;
+        }
+        .landing-section {
+          padding: 88px 0;
+        }
+        .landing-section-contrast {
+          background: #ffffff73;
+        }
+        .landing-section-head {
+          max-width: 860px;
+          display: grid;
+          gap: 12px;
+          margin-bottom: 34px;
+        }
+        .landing-section-head h2,
+        .landing-cta-panel h2 {
+          font-size: clamp(2rem, 4vw, 3rem);
+          line-height: 1.2;
+          letter-spacing: -0.04em;
+          margin: 0;
+        }
+        .landing-section-head span,
+        .landing-cta-panel span {
+          color: #6b6573;
+          line-height: 1.9;
+        }
+        .landing-pain-grid,
+        .landing-workflow-grid,
+        .landing-fit-grid,
+        .landing-pricing-grid {
+          display: grid;
+          gap: 20px;
+        }
+        .landing-pain-grid,
+        .landing-workflow-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .landing-fit-grid,
+        .landing-pricing-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .landing-pain-card,
+        .landing-workflow-card,
+        .landing-fit-card,
+        .landing-price-card,
+        .landing-faq-item {
+          background: #ffffffb8;
+          backdrop-filter: blur(12px);
+          border: 1px solid #2d2a3214;
+          border-radius: 24px;
+          padding: 22px;
+          transition:
+            0.3s transform,
+            0.3s box-shadow;
+        }
+        .landing-pain-card:hover,
+        .landing-workflow-card:hover,
+        .landing-fit-card:hover,
+        .landing-price-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 24px 48px #2d2a321a;
+        }
+        .landing-pain-index {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          background: #e86a581a;
+          color: #d45a49;
+          font-weight: 700;
+        }
+        .landing-compare-table {
+          border: 1px solid #2d2a3214;
+          border-radius: 28px;
+          overflow: hidden;
+          background: #ffffffc7;
+        }
+        .landing-compare-row {
+          display: grid;
+          grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 1fr);
+          gap: 16px;
+          padding: 16px 20px;
+          border-top: 1px solid #2d2a3214;
+        }
+        .landing-compare-row:first-child {
+          border-top: none;
+        }
+        .landing-compare-head {
+          background: #2d2a320a;
+          font-weight: 700;
+          color: #6b6573;
+        }
+        .landing-compare-cell {
+          border-radius: 16px;
+          padding: 12px 14px;
+          line-height: 1.7;
+        }
+        .landing-compare-cell.is-highlight {
+          background: #e86a581a;
+          color: #d45a49;
+        }
+        .landing-compare-cell.is-highlight-secondary {
+          background: #1e7a721a;
+          color: #1e7a72;
+        }
+        .landing-workflow-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 52px;
+          height: 52px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #1e7a7226, #e86a5814);
+        }
+        .landing-price-card.is-accent {
+          background: linear-gradient(145deg, #fffffff5, #e86a5814);
+          border-color: #e86a5847;
+        }
+        .landing-price-head {
+          display: flex;
+          justify-content: space-between;
+          gap: 14px;
+        }
+        .landing-price-value {
+          display: flex;
+          align-items: baseline;
+          gap: 10px;
+          margin-top: 18px;
+        }
+        .landing-price-value span {
+          font-size: clamp(2.5rem, 5vw, 3.6rem);
+          font-weight: 700;
+          letter-spacing: -0.05em;
+        }
+        .landing-price-list {
+          display: grid;
+          gap: 12px;
+          margin: 18px 0 0;
+          padding: 0;
+          list-style: none;
+        }
+        .landing-price-list li {
+          display: inline-flex;
+          align-items: flex-start;
+          gap: 8px;
+        }
+        .landing-price-cta {
+          width: 100%;
+          margin-top: 20px;
+        }
+        .landing-price-cta.is-accent {
+          background: linear-gradient(135deg, #e86a58, #d45a49);
+          color: #fff;
+          border: none;
+          box-shadow: 0 10px 28px #e86a5838;
+        }
+        .landing-faq-list {
+          display: grid;
+          gap: 14px;
+        }
+        .landing-faq-question {
+          width: 100%;
+          text-align: left;
+          background: transparent;
+          border: none;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 22px;
+          font-weight: 700;
+        }
+        .landing-faq-answer {
+          margin: 0;
+          padding: 0 22px 22px;
+          color: #6b6573;
+          line-height: 1.85;
+        }
+        .landing-cta-section {
+          padding: 0 0 82px;
+        }
+        .landing-cta-panel {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 24px;
+          background: linear-gradient(135deg, #2d2a32f5, #3c3842f2);
+          color: #fff;
+          border-radius: 32px;
+          padding: 38px;
+          position: relative;
+          overflow: hidden;
+        }
+        .landing-cta-panel:before {
+          content: "";
+          position: absolute;
+          inset: -40%;
+          background: radial-gradient(circle, #e86a5838 0, #0000 60%);
+          animation: landing-aurora 16s linear infinite;
+        }
+        .landing-cta-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .landing-footer {
+          padding: 0 0 30px;
+        }
+        .landing-footer-inner {
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 16px;
+          padding-top: 16px;
+          border-top: 1px solid #2d2a3214;
+          color: #6b6573;
+        }
+        .landing-footer-links {
+          display: flex;
+          gap: 14px;
+          flex-wrap: wrap;
+        }
+        @keyframes landing-float {
+          0%,
+          to {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+        @keyframes landing-breathe {
+          0%,
+          to {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.015);
+          }
+        }
+        @keyframes landing-aurora {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        @media (max-width: 920px) {
+          .landing-hero-grid,
+          .landing-pain-grid,
+          .landing-workflow-grid,
+          .landing-fit-grid,
+          .landing-pricing-grid,
+          .landing-compare-row,
+          .landing-cta-panel {
+            grid-template-columns: 1fr;
+            display: grid;
+          }
+          .landing-stage {
+            min-height: 0;
+            padding-top: 14px;
+          }
+          .landing-stage-card {
+            position: static;
+            max-width: none;
+            margin-bottom: 14px;
+            animation: none;
+          }
+          .landing-screen {
+            margin-top: 24px;
+          }
+          .landing-container {
+            width: min(100% - 24px, 1160px);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
         }
       `}</style>
     </div>

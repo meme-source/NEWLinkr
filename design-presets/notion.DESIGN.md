@@ -71,7 +71,6 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 
 ### Hierarchy
 
-
 | Role              | Font        | Size           | Weight | Line Height  | Letter Spacing | Notes                                    |
 | ----------------- | ----------- | -------------- | ------ | ------------ | -------------- | ---------------------------------------- |
 | Display Hero      | NotionInter | 64px (4.00rem) | 700    | 1.00 (tight) | -2.125px       | Maximum compression, billboard headlines |
@@ -90,7 +89,6 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 | Caption Light     | NotionInter | 14px (0.88rem) | 400    | 1.43         | normal         | Body captions, descriptions              |
 | Badge             | NotionInter | 12px (0.75rem) | 600    | 1.33         | 0.125px        | Pill badges, tags, status labels         |
 | Micro Label       | NotionInter | 12px (0.75rem) | 400    | 1.33         | 0.125px        | Small metadata, timestamps               |
-
 
 ### Principles
 
@@ -233,7 +231,6 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 
 ## 6. Depth & Elevation
 
-
 | Level                 | Treatment                                          | Use                                        |
 | --------------------- | -------------------------------------------------- | ------------------------------------------ |
 | Flat (Level 0)        | No shadow, no border                               | Page background, text blocks               |
@@ -241,7 +238,6 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 | Soft Card (Level 2)   | 4-layer shadow stack (max opacity 0.04)            | Content cards, feature blocks              |
 | Deep Card (Level 3)   | 5-layer shadow stack (max opacity 0.05, 52px blur) | Modals, featured panels, hero elements     |
 | Focus (Accessibility) | `2px solid var(--focus-color)` outline             | Keyboard focus on all interactive elements |
-
 
 **Shadow Philosophy**: Notion's shadow system uses multiple layers with extremely low individual opacity (0.01 to 0.05) that accumulate into soft, natural-looking elevation. The 4-layer card shadow spans from 1.04px to 18px blur, creating a gradient of depth rather than a single hard shadow. The 5-layer deep shadow extends to 52px blur at 0.05 opacity, producing ambient occlusion that feels like natural light rather than computer-generated depth. This layered approach makes elements feel embedded in the page rather than floating above it.
 
@@ -255,7 +251,6 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 
 ### Breakpoints
 
-
 | Name          | Width       | Key Changes                          |
 | ------------- | ----------- | ------------------------------------ |
 | Mobile Small  | <400px      | Tight single column, minimal padding |
@@ -265,7 +260,6 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 | Desktop Small | 1080-1200px | Standard desktop layout              |
 | Desktop       | 1200-1440px | Full layout, maximum content width   |
 | Large Desktop | >1440px     | Centered, generous margins           |
-
 
 ### Touch Targets
 

@@ -23,20 +23,20 @@ type FilterMode = "找相似" | "找平替" | "找种子达人";
 
 // 找相似 6 维子分（spec §4.2）
 interface SimilarSubscores {
-  topic: number;     // 内容主题 30%
-  format: number;    // 内容形式 25%
-  visual: number;    // 视觉调性 20%
-  data: number;      // 数据量级 15%
-  activity: number;  // 近期活跃 5%
-  contact: number;   // 可联系性 5%
+  topic: number; // 内容主题 30%
+  format: number; // 内容形式 25%
+  visual: number; // 视觉调性 20%
+  data: number; // 数据量级 15%
+  activity: number; // 近期活跃 5%
+  contact: number; // 可联系性 5%
 }
 
 // 找平替 4 维子分（spec §5.3）
 interface AlternativeSubscores {
-  similarity: number;        // 相似度 40%
-  costAdvantage: number;     // 成本优势 35%
-  dataPerformance: number;   // 数据表现 20%
-  contactabilityRisk: number;// 可联系性/风险 5%
+  similarity: number; // 相似度 40%
+  costAdvantage: number; // 成本优势 35%
+  dataPerformance: number; // 数据表现 20%
+  contactabilityRisk: number; // 可联系性/风险 5%
 }
 
 // 找平替详情：与当前博主对比
@@ -74,8 +74,8 @@ interface CardItem {
   altSubscores?: AlternativeSubscores;
   seedComparison?: SeedComparison;
   priceConfidenceLabel?: string; // e.g. "系统估算" / "用户填报"
-  visualPending?: boolean;       // §4.5 视觉异步未完成
-  emailStatusLabel?: string;     // e.g. "已验证" / "已找到" / "未找到"
+  visualPending?: boolean; // §4.5 视觉异步未完成
+  emailStatusLabel?: string; // e.g. "已验证" / "已找到" / "未找到"
   [key: string]: unknown;
 }
 
@@ -173,61 +173,63 @@ function countryToFlagEmoji(country?: string): string {
   const upper = raw.toUpperCase();
 
   const directCode = upper.match(/\b([A-Z]{2})\b/)?.[1];
-  const code = directCode ?? (() => {
-    const map: Record<string, string> = {
-      中国: "CN",
-      CHINA: "CN",
-      美国: "US",
-      USA: "US",
-      "UNITED STATES": "US",
-      英国: "GB",
-      UK: "GB",
-      "GREAT BRITAIN": "GB",
-      日本: "JP",
-      JAPAN: "JP",
-      韩国: "KR",
-      "SOUTH KOREA": "KR",
-      德国: "DE",
-      GERMANY: "DE",
-      法国: "FR",
-      FRANCE: "FR",
-      意大利: "IT",
-      ITALY: "IT",
-      西班牙: "ES",
-      SPAIN: "ES",
-      加拿大: "CA",
-      CANADA: "CA",
-      澳大利亚: "AU",
-      AUSTRALIA: "AU",
-      新加坡: "SG",
-      SINGAPORE: "SG",
-      马来西亚: "MY",
-      MALAYSIA: "MY",
-      泰国: "TH",
-      THAILAND: "TH",
-      越南: "VN",
-      VIETNAM: "VN",
-      印度尼西亚: "ID",
-      INDONESIA: "ID",
-      菲律宾: "PH",
-      PHILIPPINES: "PH",
-      印度: "IN",
-      INDIA: "IN",
-      巴西: "BR",
-      BRAZIL: "BR",
-      墨西哥: "MX",
-      MEXICO: "MX",
-      俄罗斯: "RU",
-      RUSSIA: "RU",
-      土耳其: "TR",
-      TURKEY: "TR",
-      阿联酋: "AE",
-      UAE: "AE",
-      沙特: "SA",
-      "SAUDI ARABIA": "SA",
-    };
-    return map[upper];
-  })();
+  const code =
+    directCode ??
+    (() => {
+      const map: Record<string, string> = {
+        中国: "CN",
+        CHINA: "CN",
+        美国: "US",
+        USA: "US",
+        "UNITED STATES": "US",
+        英国: "GB",
+        UK: "GB",
+        "GREAT BRITAIN": "GB",
+        日本: "JP",
+        JAPAN: "JP",
+        韩国: "KR",
+        "SOUTH KOREA": "KR",
+        德国: "DE",
+        GERMANY: "DE",
+        法国: "FR",
+        FRANCE: "FR",
+        意大利: "IT",
+        ITALY: "IT",
+        西班牙: "ES",
+        SPAIN: "ES",
+        加拿大: "CA",
+        CANADA: "CA",
+        澳大利亚: "AU",
+        AUSTRALIA: "AU",
+        新加坡: "SG",
+        SINGAPORE: "SG",
+        马来西亚: "MY",
+        MALAYSIA: "MY",
+        泰国: "TH",
+        THAILAND: "TH",
+        越南: "VN",
+        VIETNAM: "VN",
+        印度尼西亚: "ID",
+        INDONESIA: "ID",
+        菲律宾: "PH",
+        PHILIPPINES: "PH",
+        印度: "IN",
+        INDIA: "IN",
+        巴西: "BR",
+        BRAZIL: "BR",
+        墨西哥: "MX",
+        MEXICO: "MX",
+        俄罗斯: "RU",
+        RUSSIA: "RU",
+        土耳其: "TR",
+        TURKEY: "TR",
+        阿联酋: "AE",
+        UAE: "AE",
+        沙特: "SA",
+        "SAUDI ARABIA": "SA",
+      };
+      return map[upper];
+    })();
 
   if (!code || code.length !== 2) return "🏳";
   const A = 0x1f1e6;
@@ -239,9 +241,9 @@ function countryToFlagEmoji(country?: string): string {
 
 // Warm tag palette aligned with Claude design system
 const tagColors = [
-  { bg: "#fef3e8", border: "#f5d0a9", color: "#c96442" },   // terracotta
-  { bg: "#f0f4ff", border: "#c7d7f7", color: "#3670c9" },   // muted blue
-  { bg: "#eef6ef", border: "#b8d9bb", color: "#2d6a35" },   // warm green
+  { bg: "#fef3e8", border: "#f5d0a9", color: "#c96442" }, // terracotta
+  { bg: "#f0f4ff", border: "#c7d7f7", color: "#3670c9" }, // muted blue
+  { bg: "#eef6ef", border: "#b8d9bb", color: "#2d6a35" }, // warm green
 ];
 
 // ── Avatar helper (initials, no external images) ───────────────────────────
@@ -362,7 +364,7 @@ function CarouselTagRow({
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="self-center shrink-0"
+        className="shrink-0 self-center"
       >
         <path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.71-7.71a1 1 0 0 0 0-1.41z" />
         <circle cx="7" cy="7" r="1" fill="#b0aea6" stroke="none" />
@@ -515,7 +517,7 @@ export function SimilarCardCarousel({
   const [settingsReady, setSettingsReady] = useState(false);
   const settingsScopeId = projectScopeId ?? "global";
   const scrapeCount: ScrapeCountOption = SCRAPE_COUNT_OPTIONS.includes(
-    controlledScrapeCount as ScrapeCountOption
+    controlledScrapeCount as ScrapeCountOption,
   )
     ? (controlledScrapeCount as ScrapeCountOption)
     : localScrapeCount;
@@ -558,11 +560,9 @@ export function SimilarCardCarousel({
       }
       setFilterMode(modeOptions.includes(scoped.filterMode) ? scoped.filterMode : "找相似");
       setLocalScrapeCount(
-        SCRAPE_COUNT_OPTIONS.includes(scoped.scrapeCount) ? scoped.scrapeCount : 10
+        SCRAPE_COUNT_OPTIONS.includes(scoped.scrapeCount) ? scoped.scrapeCount : 10,
       );
-      setCoverCount(
-        COVER_COUNT_OPTIONS.includes(scoped.coverCount) ? scoped.coverCount : 3
-      );
+      setCoverCount(COVER_COUNT_OPTIONS.includes(scoped.coverCount) ? scoped.coverCount : 3);
       setLocalDataCheckOn(Boolean(scoped.dataCheckOn));
     } catch {
       setFilterMode("找相似");
@@ -637,7 +637,9 @@ export function SimilarCardCarousel({
   const currentCard = cards[currentIndex] ?? null;
   const hasMore = currentIndex < cards.length - 1;
   const currentSaved = currentCard ? favorited.has(currentCard.id) : false;
-  const currentCreatorLabel = currentCard ? `@${currentCard.name.replace(/^@/, "")}` : "当前候选博主";
+  const currentCreatorLabel = currentCard
+    ? `@${currentCard.name.replace(/^@/, "")}`
+    : "当前候选博主";
   const toggleDataCheck = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -734,9 +736,9 @@ export function SimilarCardCarousel({
   };
 
   return (
-    <div className="w-full mx-auto" style={{ maxWidth: "100%" }}>
+    <div className="mx-auto w-full" style={{ maxWidth: "100%" }}>
       {/* ── Top row ── */}
-      <div className="flex items-center justify-between mb-2.5 px-1">
+      <div className="mb-2.5 flex items-center justify-between px-1">
         <span
           className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold tabular-nums"
           style={{
@@ -786,7 +788,7 @@ export function SimilarCardCarousel({
             type="button"
             onClick={() => setShowEndConfirm(true)}
             title="结束找相似"
-            className="p-2 rounded-full transition-all"
+            className="rounded-full p-2 transition-all"
             style={{
               background: TOKEN.ivory,
               border: `1px solid ${TOKEN.borderWarm}`,
@@ -801,7 +803,7 @@ export function SimilarCardCarousel({
               (e.currentTarget as HTMLElement).style.color = TOKEN.stone;
             }}
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="h-3.5 w-3.5" />
           </button>
 
           {/* Mode dropdown */}
@@ -812,7 +814,7 @@ export function SimilarCardCarousel({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.96 }}
                 transition={{ duration: 0.14 }}
-                className="absolute top-full right-0 mt-2 rounded-2xl py-1.5 z-50"
+                className="absolute top-full right-0 z-50 mt-2 rounded-2xl py-1.5"
                 style={{
                   minWidth: "152px",
                   background: TOKEN.ivory,
@@ -847,7 +849,10 @@ export function SimilarCardCarousel({
                         <span className="truncate">{mode}</span>
                       </span>
                       {filterMode === mode ? (
-                        <Check className="h-3.5 w-3.5 shrink-0" style={{ color: TOKEN.terracotta }} />
+                        <Check
+                          className="h-3.5 w-3.5 shrink-0"
+                          style={{ color: TOKEN.terracotta }}
+                        />
                       ) : null}
                     </button>
                     {mode === "找种子达人" ? (
@@ -862,7 +867,7 @@ export function SimilarCardCarousel({
                     ) : null}
                     <span
                       role="tooltip"
-                      className="pointer-events-none absolute left-1/2 top-full z-40 mt-1 w-max max-w-[220px] -translate-x-1/2 rounded-[10px] border border-[#e8e6dc] bg-white px-2 py-1.5 text-[10.5px] leading-[1.5] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover:opacity-100"
+                      className="pointer-events-none absolute top-full left-1/2 z-40 mt-1 w-max max-w-[220px] -translate-x-1/2 rounded-[10px] border border-[#e8e6dc] bg-white px-2 py-1.5 text-[10.5px] leading-[1.5] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover:opacity-100"
                     >
                       {modeDetails[mode].desc}
                     </span>
@@ -875,10 +880,7 @@ export function SimilarCardCarousel({
       </div>
 
       {/* ── 3D Card carousel ── */}
-      <div
-        className="relative w-full mb-4"
-        style={{ height: "520px", perspective: "1400px" }}
-      >
+      <div className="relative mb-4 w-full" style={{ height: "520px", perspective: "1400px" }}>
         {cards.map((card, index) => {
           const diff = index - currentIndex;
           const style = getCardStyle(diff);
@@ -887,7 +889,7 @@ export function SimilarCardCarousel({
           return (
             <motion.div
               key={card.id}
-              className="absolute left-1/2 top-0"
+              className="absolute top-0 left-1/2"
               style={{
                 width: "min(320px, 100%)",
                 marginLeft: "min(-160px, -50%)",
@@ -904,7 +906,7 @@ export function SimilarCardCarousel({
               transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.8 }}
             >
               <div
-                className="rounded-3xl overflow-hidden flex flex-col"
+                className="flex flex-col overflow-hidden rounded-3xl"
                 style={{
                   height: "500px",
                   background: "linear-gradient(160deg, #ffffff 0%, #faf9f5 100%)",
@@ -947,7 +949,7 @@ export function SimilarCardCarousel({
                 {/* ── Identity row: avatar + handle + meta + score ── */}
                 <div className="flex items-center gap-2.5 px-4 pt-1">
                   <CreatorInitials name={card.name} size={44} fontSize={18} />
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p
                       className="truncate"
                       style={{
@@ -996,13 +998,13 @@ export function SimilarCardCarousel({
                                 handleSendEmail();
                               }}
                             >
-                              <Send className="w-3 h-3" />
+                              <Send className="h-3 w-3" />
                             </button>
                             <span>邮箱已找到</span>
                           </>
                         ) : (
                           <>
-                            <Mail className="w-2.5 h-2.5" />
+                            <Mail className="h-2.5 w-2.5" />
                             <span>邮箱未找到</span>
                           </>
                         )}
@@ -1014,12 +1016,12 @@ export function SimilarCardCarousel({
                       type="button"
                       aria-label="打开博主分析"
                       onClick={handleViewDetail}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-[10px] border border-[#edd9ce] bg-[linear-gradient(180deg,#fffdfa_0%,#f8efe8_100%)] text-[#c96442] shadow-[0_10px_24px_-20px_rgba(201,100,66,0.55)] transition-all duration-150 hover:-translate-y-[1px] hover:border-[#d9b6a6] hover:bg-[#fff7f1] hover:text-[#b85a39] active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#c96442]/20"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[10px] border border-[#edd9ce] bg-[linear-gradient(180deg,#fffdfa_0%,#f8efe8_100%)] text-[#c96442] shadow-[0_10px_24px_-20px_rgba(201,100,66,0.55)] transition-all duration-150 hover:-translate-y-[1px] hover:border-[#d9b6a6] hover:bg-[#fff7f1] hover:text-[#b85a39] focus:ring-2 focus:ring-[#c96442]/20 focus:outline-none active:scale-[0.97]"
                       title="打开博主分析"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                     </button>
-                    <span className="pointer-events-none absolute right-0 top-full z-20 mt-1.5 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                    <span className="pointer-events-none absolute top-full right-0 z-20 mt-1.5 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
                       博主分析
                     </span>
                   </div>
@@ -1047,11 +1049,7 @@ export function SimilarCardCarousel({
                   />
                   <CompactMetric label="中位点赞" value={card.medianLikes ?? "—"} divider />
                   <CompactMetric label="中位评论" value={card.medianComments ?? "—"} divider />
-                  <CompactMetric
-                    label="互动率"
-                    value={card.er ?? "—"}
-                    divider
-                  />
+                  <CompactMetric label="互动率" value={card.er ?? "—"} divider />
                 </div>
 
                 <CarouselTagRow
@@ -1101,8 +1099,8 @@ export function SimilarCardCarousel({
                     card.reasons && card.reasons.length > 0
                       ? card.reasons
                       : card.reason
-                      ? [card.reason]
-                      : [];
+                        ? [card.reason]
+                        : [];
 
                   // 构造维度行：label + score + reason 文本（按 reasons 顺序映射）
                   type DimRow = {
@@ -1116,20 +1114,84 @@ export function SimilarCardCarousel({
                   if (filterMode === "找平替" && card.altSubscores) {
                     const s = card.altSubscores;
                     rows = [
-                      { key: "similarity", label: "综合相似度", weightLabel: "40%", score: s.similarity, note: reasonsList[0] },
-                      { key: "cost",       label: "成本优势",    weightLabel: "35%", score: s.costAdvantage, note: reasonsList[1] ?? (card.savingPct ? `预估省 ${card.savingPct}` : undefined) },
-                      { key: "data",       label: "数据表现",    weightLabel: "20%", score: s.dataPerformance, note: reasonsList[2] },
-                      { key: "risk",       label: "可联系/风险",  weightLabel: "5%",  score: s.contactabilityRisk, note: card.emailStatusLabel ? `邮箱${card.emailStatusLabel}` : undefined },
+                      {
+                        key: "similarity",
+                        label: "综合相似度",
+                        weightLabel: "40%",
+                        score: s.similarity,
+                        note: reasonsList[0],
+                      },
+                      {
+                        key: "cost",
+                        label: "成本优势",
+                        weightLabel: "35%",
+                        score: s.costAdvantage,
+                        note:
+                          reasonsList[1] ??
+                          (card.savingPct ? `预估省 ${card.savingPct}` : undefined),
+                      },
+                      {
+                        key: "data",
+                        label: "数据表现",
+                        weightLabel: "20%",
+                        score: s.dataPerformance,
+                        note: reasonsList[2],
+                      },
+                      {
+                        key: "risk",
+                        label: "可联系/风险",
+                        weightLabel: "5%",
+                        score: s.contactabilityRisk,
+                        note: card.emailStatusLabel ? `邮箱${card.emailStatusLabel}` : undefined,
+                      },
                     ];
                   } else if (filterMode !== "找平替" && card.subscores) {
                     const s = card.subscores;
                     rows = [
-                      { key: "topic",    label: "内容主题", weightLabel: "30%", score: s.topic,    note: reasonsList[0] },
-                      { key: "format",   label: "内容形式", weightLabel: "25%", score: s.format,   note: reasonsList[1] },
-                      { key: "visual",   label: "视觉调性", weightLabel: "20%", score: s.visual,   note: card.visualPending ? "封面分析中" : undefined },
-                      { key: "data",     label: "数据量级", weightLabel: "15%", score: s.data,     note: reasonsList[2] ?? (card.views ? `中位播放 ${card.views}` : undefined) },
-                      { key: "activity", label: "近期活跃", weightLabel: "5%",  score: s.activity, note: s.activity >= 90 ? "近 7 天有更新" : undefined },
-                      { key: "contact",  label: "可联系性", weightLabel: "5%",  score: s.contact,  note: card.emailStatusLabel ?? (typeof card.email === "string" && card.email ? "邮箱已找到" : undefined) },
+                      {
+                        key: "topic",
+                        label: "内容主题",
+                        weightLabel: "30%",
+                        score: s.topic,
+                        note: reasonsList[0],
+                      },
+                      {
+                        key: "format",
+                        label: "内容形式",
+                        weightLabel: "25%",
+                        score: s.format,
+                        note: reasonsList[1],
+                      },
+                      {
+                        key: "visual",
+                        label: "视觉调性",
+                        weightLabel: "20%",
+                        score: s.visual,
+                        note: card.visualPending ? "封面分析中" : undefined,
+                      },
+                      {
+                        key: "data",
+                        label: "数据量级",
+                        weightLabel: "15%",
+                        score: s.data,
+                        note: reasonsList[2] ?? (card.views ? `中位播放 ${card.views}` : undefined),
+                      },
+                      {
+                        key: "activity",
+                        label: "近期活跃",
+                        weightLabel: "5%",
+                        score: s.activity,
+                        note: s.activity >= 90 ? "近 7 天有更新" : undefined,
+                      },
+                      {
+                        key: "contact",
+                        label: "可联系性",
+                        weightLabel: "5%",
+                        score: s.contact,
+                        note:
+                          card.emailStatusLabel ??
+                          (typeof card.email === "string" && card.email ? "邮箱已找到" : undefined),
+                      },
                     ];
                   }
 
@@ -1137,7 +1199,7 @@ export function SimilarCardCarousel({
                   if (rows.length === 0) {
                     if (reasonsList.length === 0) return null;
                     return (
-                      <div className="px-4 mt-3">
+                      <div className="mt-3 px-4">
                         <div
                           className="inline-flex items-center gap-1"
                           style={{
@@ -1148,7 +1210,7 @@ export function SimilarCardCarousel({
                             textTransform: "uppercase",
                           }}
                         >
-                          <Sparkles className="w-2.5 h-2.5" style={{ color: accent }} />
+                          <Sparkles className="h-2.5 w-2.5" style={{ color: accent }} />
                           <span>{heading}</span>
                         </div>
                         <ul className="mt-1.5 space-y-1">
@@ -1156,12 +1218,22 @@ export function SimilarCardCarousel({
                             <li
                               key={i}
                               className="flex gap-2"
-                              style={{ color: TOKEN.charcoal, fontSize: "11.5px", lineHeight: 1.45 }}
+                              style={{
+                                color: TOKEN.charcoal,
+                                fontSize: "11.5px",
+                                lineHeight: 1.45,
+                              }}
                             >
                               <span
                                 aria-hidden
                                 className="shrink-0 rounded-full"
-                                style={{ marginTop: 6, width: 4, height: 4, background: accent, opacity: 0.55 }}
+                                style={{
+                                  marginTop: 6,
+                                  width: 4,
+                                  height: 4,
+                                  background: accent,
+                                  opacity: 0.55,
+                                }}
                               />
                               <span
                                 className="flex-1"
@@ -1183,7 +1255,7 @@ export function SimilarCardCarousel({
 
                   if (filterMode !== "找平替") {
                     return (
-                      <div className="px-4 mt-3">
+                      <div className="mt-3 px-4">
                         <div className="flex items-center justify-between">
                           <div
                             className="inline-flex items-center gap-1"
@@ -1195,7 +1267,7 @@ export function SimilarCardCarousel({
                               textTransform: "uppercase",
                             }}
                           >
-                            <Sparkles className="w-2.5 h-2.5" style={{ color: accent }} />
+                            <Sparkles className="h-2.5 w-2.5" style={{ color: accent }} />
                             <span>{heading}</span>
                           </div>
                           <span
@@ -1218,7 +1290,7 @@ export function SimilarCardCarousel({
                   }
 
                   return (
-                    <div className="px-4 mt-3">
+                    <div className="mt-3 px-4">
                       <div className="flex items-center justify-between">
                         <div
                           className="inline-flex items-center gap-1"
@@ -1230,7 +1302,7 @@ export function SimilarCardCarousel({
                             textTransform: "uppercase",
                           }}
                         >
-                          <Sparkles className="w-2.5 h-2.5" style={{ color: accent }} />
+                          <Sparkles className="h-2.5 w-2.5" style={{ color: accent }} />
                           <span>{heading}</span>
                         </div>
                         <span
@@ -1251,13 +1323,12 @@ export function SimilarCardCarousel({
                       <div className="mt-1.5 space-y-[3px]">
                         {rows.map((r) => {
                           const safe = Math.max(0, Math.min(100, Math.round(r.score)));
-                          const tone =
-                            safe >= 85 ? accent : safe >= 65 ? accent : "#b59169";
+                          const tone = safe >= 85 ? accent : safe >= 65 ? accent : "#b59169";
                           return (
                             <div key={r.key} className="flex items-center gap-2">
                               {/* label + weight */}
                               <div
-                                className="shrink-0 inline-flex items-baseline gap-1"
+                                className="inline-flex shrink-0 items-baseline gap-1"
                                 style={{ width: 64 }}
                               >
                                 <span
@@ -1282,7 +1353,11 @@ export function SimilarCardCarousel({
                                   height: 6,
                                   background: TOKEN.borderCream,
                                 }}
-                                title={r.note ? `${r.label} · ${safe} · ${r.note}` : `${r.label} · ${safe}`}
+                                title={
+                                  r.note
+                                    ? `${r.label} · ${safe} · ${r.note}`
+                                    : `${r.label} · ${safe}`
+                                }
                               >
                                 <div
                                   className="h-full rounded-full transition-[width] duration-500"
@@ -1292,7 +1367,7 @@ export function SimilarCardCarousel({
 
                               {/* score */}
                               <span
-                                className="tabular-nums shrink-0 text-right"
+                                className="shrink-0 text-right tabular-nums"
                                 style={{
                                   color: TOKEN.nearBlack,
                                   fontSize: "10.5px",
@@ -1330,7 +1405,7 @@ export function SimilarCardCarousel({
                 {/* ── Tradeoffs footnote ── */}
                 {card.tradeoffs && card.tradeoffs.length > 0 ? (
                   <p
-                    className="px-4 mt-2 truncate"
+                    className="mt-2 truncate px-4"
                     style={{ color: TOKEN.stone, fontSize: "10.5px", lineHeight: 1.4 }}
                   >
                     <span style={{ color: TOKEN.olive, fontWeight: 600 }}>主要参考</span>
@@ -1393,7 +1468,7 @@ export function SimilarCardCarousel({
                           }}
                         >
                           <div
-                            className="px-2.5 pt-1.5 pb-1 text-[10px] uppercase tracking-wide"
+                            className="px-2.5 pt-1.5 pb-1 text-[10px] tracking-wide uppercase"
                             style={{ color: TOKEN.stone }}
                           >
                             采样发文条数
@@ -1421,7 +1496,10 @@ export function SimilarCardCarousel({
                               <span>
                                 {opt}条
                                 {opt === 10 ? (
-                                  <span className="ml-1 text-[9.5px]" style={{ color: TOKEN.stone }}>
+                                  <span
+                                    className="ml-1 text-[9.5px]"
+                                    style={{ color: TOKEN.stone }}
+                                  >
                                     推荐
                                   </span>
                                 ) : null}
@@ -1467,7 +1545,7 @@ export function SimilarCardCarousel({
                           }}
                         >
                           <div
-                            className="px-2.5 pt-1.5 pb-1 text-[10px] uppercase tracking-wide"
+                            className="px-2.5 pt-1.5 pb-1 text-[10px] tracking-wide uppercase"
                             style={{ color: TOKEN.stone }}
                           >
                             视觉辅助封面
@@ -1498,7 +1576,10 @@ export function SimilarCardCarousel({
                               <span>
                                 {opt === 0 ? "关闭" : `${opt} 张`}
                                 {opt === 3 ? (
-                                  <span className="ml-1 text-[9.5px]" style={{ color: TOKEN.stone }}>
+                                  <span
+                                    className="ml-1 text-[9.5px]"
+                                    style={{ color: TOKEN.stone }}
+                                  >
                                     推荐
                                   </span>
                                 ) : null}
@@ -1519,7 +1600,7 @@ export function SimilarCardCarousel({
                       title="在原页面叠加播放量、互动率，并按平均播放排序前 N 条视频"
                       onPointerDown={(event) => event.stopPropagation()}
                       onClick={toggleDataCheck}
-                      className="inline-flex h-[22px] cursor-pointer items-center gap-1 rounded-full pl-2 pr-1 text-[10px] font-semibold"
+                      className="inline-flex h-[22px] cursor-pointer items-center gap-1 rounded-full pr-1 pl-2 text-[10px] font-semibold"
                       style={{
                         background: dataCheckOn ? "#fef3e8" : "#ffffff",
                         border: `1px solid ${dataCheckOn ? "#f5d0a9" : TOKEN.borderWarm}`,
@@ -1552,8 +1633,6 @@ export function SimilarCardCarousel({
                     </button>
                   </div>
                 </div>
-
-
               </div>
             </motion.div>
           );
@@ -1599,23 +1678,17 @@ export function SimilarCardCarousel({
                   width: "calc(100% - 32px)",
                 }}
               >
-                <p
-                  className="text-sm font-semibold text-center"
-                  style={{ color: TOKEN.nearBlack }}
-                >
+                <p className="text-center text-sm font-semibold" style={{ color: TOKEN.nearBlack }}>
                   确定要结束找相似进程吗？
                 </p>
-                <p
-                  className="mt-1.5 text-xs text-center leading-5"
-                  style={{ color: TOKEN.stone }}
-                >
+                <p className="mt-1.5 text-center text-xs leading-5" style={{ color: TOKEN.stone }}>
                   结束后，搜索结果将会清空，仅保留搜索设置。
                 </p>
                 <div className="mt-4 flex gap-2">
                   <button
                     type="button"
                     onClick={() => setShowEndConfirm(false)}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                    className="flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors"
                     style={{
                       background: TOKEN.parchment,
                       border: `1px solid ${TOKEN.borderWarm}`,
@@ -1627,7 +1700,7 @@ export function SimilarCardCarousel({
                   <button
                     type="button"
                     onClick={handleEndConfirm}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                    className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-colors"
                     style={{
                       background: TOKEN.terracotta,
                       color: "#ffffff",
@@ -1685,10 +1758,7 @@ export function SimilarCardCarousel({
                     >
                       与当前博主对比
                     </span>
-                    <span
-                      className="truncate"
-                      style={{ color: TOKEN.stone, fontSize: "11px" }}
-                    >
+                    <span className="truncate" style={{ color: TOKEN.stone, fontSize: "11px" }}>
                       @{currentCard.name.replace(/^@/, "")}
                     </span>
                   </div>
@@ -1703,7 +1773,7 @@ export function SimilarCardCarousel({
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
                   {filterMode === "找平替"
                     ? renderAlternativeDetail(currentCard)
                     : renderSimilarDetail(currentCard)}
@@ -1726,7 +1796,6 @@ export function SimilarCardCarousel({
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
 
       {/* Signal toast */}
@@ -1737,7 +1806,7 @@ export function SimilarCardCarousel({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.16 }}
-            className="text-center text-xs font-medium mb-2"
+            className="mb-2 text-center text-xs font-medium"
             style={{ color: TOKEN.terracotta }}
           >
             {signalToast}
@@ -1753,7 +1822,7 @@ export function SimilarCardCarousel({
             type="button"
             onClick={handleNo}
             disabled={!currentCard}
-            className="flex-1 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-40"
+            className="flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-medium transition-all disabled:opacity-40"
             style={{
               background: "#f3efe3",
               border: "1px solid #d9d3c3",
@@ -1769,7 +1838,7 @@ export function SimilarCardCarousel({
             type="button"
             onClick={handleSaveSignal}
             disabled={!currentCard}
-            className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-40"
+            className="flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-all disabled:opacity-40"
             style={{
               background: currentSaved ? "#fef3e8" : "#f3efe3",
               border: `1px solid ${currentSaved ? "#f5d0a9" : "#d9d3c3"}`,
@@ -1793,7 +1862,7 @@ export function SimilarCardCarousel({
             type="button"
             onClick={handleFindSimilarFromCurrent}
             disabled={!currentCard}
-            className="w-full min-w-0 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-40"
+            className="flex w-full min-w-0 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-all disabled:opacity-40"
             style={{
               background: TOKEN.terracotta,
               color: "#ffffff",
@@ -1811,7 +1880,7 @@ export function SimilarCardCarousel({
         <button
           type="button"
           onClick={onQuickScreen}
-          className="w-full py-1.5 text-xs font-medium flex items-center justify-center gap-1 transition-colors"
+          className="flex w-full items-center justify-center gap-1 py-1.5 text-xs font-medium transition-colors"
           style={{ color: TOKEN.stone }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.color = TOKEN.charcoal;
@@ -1820,11 +1889,10 @@ export function SimilarCardCarousel({
             (e.currentTarget as HTMLElement).style.color = TOKEN.stone;
           }}
         >
-          <Zap className="w-3.5 h-3.5" />
+          <Zap className="h-3.5 w-3.5" />
           <span>切换到快速筛选</span>
         </button>
       </div>
-
     </div>
   );
 }
@@ -2024,16 +2092,11 @@ function SimilarRadarChart({ data }: { data: SimilarRadarDatum[] }) {
   );
 }
 
-function SimilarDeepAnalysisWidget({
-  card,
-  reasons,
-}: {
-  card: CardItem;
-  reasons: string[];
-}) {
+function SimilarDeepAnalysisWidget({ card, reasons }: { card: CardItem; reasons: string[] }) {
   const radarData = buildSimilarRadarData(card);
   const activeLabel = (card.subscores?.activity ?? 0) >= 90 ? "高频更新" : "稳定更新";
-  const contactLabel = typeof card.email === "string" && card.email.trim() ? "已关联商务邮箱" : "商务邮箱待确认";
+  const contactLabel =
+    typeof card.email === "string" && card.email.trim() ? "已关联商务邮箱" : "商务邮箱待确认";
   const operationalSummary =
     reasons[2] ??
     `同量级播放表现，互动率 ${card.er ?? "优于大盘"}；近期${activeLabel}，且${contactLabel}。`;
@@ -2042,7 +2105,7 @@ function SimilarDeepAnalysisWidget({
       tag,
       tagClass: datum.tagClass,
       key: `${datum.subject}-${tag}`,
-    }))
+    })),
   );
 
   return (
@@ -2105,9 +2168,7 @@ function SubscoreBar({
   return (
     <div title={hint}>
       <div className="mb-1 flex items-baseline justify-between">
-        <span style={{ color: TOKEN.charcoal, fontSize: "11.5px", fontWeight: 500 }}>
-          {label}
-        </span>
+        <span style={{ color: TOKEN.charcoal, fontSize: "11.5px", fontWeight: 500 }}>{label}</span>
         <span className="tabular-nums" style={{ color: TOKEN.olive, fontSize: "11px" }}>
           {scoreLabel(safe)} · {safe}
         </span>
@@ -2281,7 +2342,11 @@ function renderAlternativeDetail(card: CardItem) {
             关键数据对比（当前 → 平替）
           </div>
           {cmp.medianViews ? (
-            <CompareRow label="中位播放" seed={cmp.medianViews.seed} candidate={cmp.medianViews.candidate} />
+            <CompareRow
+              label="中位播放"
+              seed={cmp.medianViews.seed}
+              candidate={cmp.medianViews.candidate}
+            />
           ) : null}
           {cmp.er ? (
             <CompareRow label="互动率" seed={cmp.er.seed} candidate={cmp.er.candidate} />
@@ -2387,7 +2452,7 @@ function CompactMetric({
         ) : null}
       </div>
       <div
-        className="mt-1 truncate max-w-full"
+        className="mt-1 max-w-full truncate"
         style={{
           color: highlight ? TOKEN.terracotta : TOKEN.nearBlack,
           fontSize: "17px",

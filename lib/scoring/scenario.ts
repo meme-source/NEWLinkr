@@ -3,10 +3,10 @@
 
 // 场景本身的推荐分（决定先展示哪个场景）
 export type SceneScoreInput = {
-  productFit: number;           // 产品卖点匹配 0-100
-  expressiveness: number;       // 内容可表达性 0-100
-  historicalPerformance: number;// 同品类历史表现 0-100
-  creatorSupply: number;        // 达人供给数量 0-100
+  productFit: number; // 产品卖点匹配 0-100
+  expressiveness: number; // 内容可表达性 0-100
+  historicalPerformance: number; // 同品类历史表现 0-100
+  creatorSupply: number; // 达人供给数量 0-100
 };
 
 export function sceneScore(input: SceneScoreInput): number {
@@ -20,11 +20,11 @@ export function sceneScore(input: SceneScoreInput): number {
 
 // 场景下达人的推荐分
 export type ScenarioCreatorScoreInput = {
-  sceneMatch: number;           // 场景匹配度 0-100
-  scenePerformance: number;     // 该场景内容表现 0-100
-  formatFit: number;            // 内容形式适配 0-100
-  commercialAvailability: number;// 商业可用性 0-100
-  dataStability: number;        // 数据稳定性 0-100
+  sceneMatch: number; // 场景匹配度 0-100
+  scenePerformance: number; // 该场景内容表现 0-100
+  formatFit: number; // 内容形式适配 0-100
+  commercialAvailability: number; // 商业可用性 0-100
+  dataStability: number; // 数据稳定性 0-100
 };
 
 export function scenarioCreatorScore(input: ScenarioCreatorScoreInput): number {

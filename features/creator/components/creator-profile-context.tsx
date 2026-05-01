@@ -23,7 +23,7 @@ export function CreatorProfileProvider({ children }: { children: React.ReactNode
 
   const value = useMemo(
     () => ({ openCreatorProfile, closeCreatorProfile }),
-    [openCreatorProfile, closeCreatorProfile]
+    [openCreatorProfile, closeCreatorProfile],
   );
 
   return (

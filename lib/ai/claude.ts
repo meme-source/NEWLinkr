@@ -7,7 +7,9 @@ export async function callClaude(_prompt: string): Promise<string> {
   // Fail loudly: a silent empty string would let calling code "succeed" with bad data.
   // Replace this body in Phase 2 with a real Anthropic client invocation.
   if (!ANTHROPIC_API_KEY) {
-    throw new Error("[stub] callClaude not implemented and ANTHROPIC_API_KEY missing — wire up @anthropic-ai/sdk in Phase 2");
+    throw new Error(
+      "[stub] callClaude not implemented and ANTHROPIC_API_KEY missing — wire up @anthropic-ai/sdk in Phase 2",
+    );
   }
   throw new Error("[stub] callClaude not implemented — wire up @anthropic-ai/sdk in Phase 2");
 }

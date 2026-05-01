@@ -2,11 +2,7 @@
 // POST /api/discovery/competitor
 // 文档：博主发现页实现逻辑.md §3
 import { ok, fail } from "@/lib/api/envelope";
-import type {
-  CompetitorDiscoveryRequest,
-  CompetitorCreatorResult,
-  SearchBasis,
-} from "@/types/api";
+import type { CompetitorDiscoveryRequest, CompetitorCreatorResult, SearchBasis } from "@/types/api";
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as CompetitorDiscoveryRequest | null;

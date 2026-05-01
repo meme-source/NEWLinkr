@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { ProjectSheet } from "@/features/project/components/project-sheet";
 
@@ -104,12 +98,14 @@ function isWorkspaceProject(value: unknown): value is WorkspaceProject {
   }
 
   const candidate = value as Partial<WorkspaceProject>;
-  return typeof candidate.id === "string"
-    && typeof candidate.name === "string"
-    && typeof candidate.productName === "string"
-    && typeof candidate.category === "string"
-    && typeof candidate.createdAt === "string"
-    && typeof candidate.updatedAt === "string";
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.productName === "string" &&
+    typeof candidate.category === "string" &&
+    typeof candidate.createdAt === "string" &&
+    typeof candidate.updatedAt === "string"
+  );
 }
 
 function normalizeDraft(draft: WorkspaceProjectDraft): WorkspaceProjectDraft {
@@ -154,7 +150,9 @@ export function formatProjectBudget(project: WorkspaceProject) {
 
 export function WorkspaceProjectProvider({ children }: { children: React.ReactNode }) {
   const [projects, setProjects] = useState<WorkspaceProject[]>(DEFAULT_WORKSPACE_PROJECTS);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(DEFAULT_WORKSPACE_PROJECTS[0].id);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(
+    DEFAULT_WORKSPACE_PROJECTS[0].id,
+  );
   const [drawerState, setDrawerState] = useState<DrawerState>({
     open: false,
     mode: "create",
@@ -185,7 +183,8 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
   }, []);
 
   const stableProjects = projects.length > 0 ? projects : DEFAULT_WORKSPACE_PROJECTS;
-  const currentProject = stableProjects.find((project) => project.id === selectedProjectId) ?? stableProjects[0];
+  const currentProject =
+    stableProjects.find((project) => project.id === selectedProjectId) ?? stableProjects[0];
 
   useEffect(() => {
     if (!projects.some((project) => project.id === selectedProjectId) && projects[0]) {
@@ -242,8 +241,8 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
                 ...normalizedDraft,
                 updatedAt: now,
               }
-            : project
-        )
+            : project,
+        ),
       );
       closeProjectDrawer();
       return;
@@ -279,7 +278,7 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
       resolveProjectName,
       getProject,
     }),
-    [currentProject, stableProjects]
+    [currentProject, stableProjects],
   );
 
   const editingProject = drawerState.projectId

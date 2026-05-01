@@ -143,11 +143,20 @@ function getSuggestedCpmUsd(country: string, tier: RegionTierKey): string {
   return cpm.toFixed(2);
 }
 
-function SocialPlatformLogo({ platform, className }: { platform: SocialPlatformKey; className?: string }) {
+function SocialPlatformLogo({
+  platform,
+  className,
+}: {
+  platform: SocialPlatformKey;
+  className?: string;
+}) {
   if (platform === "youtube") {
     return (
       <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <path fill="#FF0000" d="M23.5 7.1a3.08 3.08 0 0 0-2.16-2.18C19.43 4.4 12 4.4 12 4.4s-7.43 0-9.34.52A3.08 3.08 0 0 0 .5 7.1 32.7 32.7 0 0 0 0 12a32.7 32.7 0 0 0 .5 4.9 3.08 3.08 0 0 0 2.16 2.18C4.57 19.6 12 19.6 12 19.6s7.43 0 9.34-.52a3.08 3.08 0 0 0 2.16-2.18A32.7 32.7 0 0 0 24 12a32.7 32.7 0 0 0-.5-4.9Z" />
+        <path
+          fill="#FF0000"
+          d="M23.5 7.1a3.08 3.08 0 0 0-2.16-2.18C19.43 4.4 12 4.4 12 4.4s-7.43 0-9.34.52A3.08 3.08 0 0 0 .5 7.1 32.7 32.7 0 0 0 0 12a32.7 32.7 0 0 0 .5 4.9 3.08 3.08 0 0 0 2.16 2.18C4.57 19.6 12 19.6 12 19.6s7.43 0 9.34-.52a3.08 3.08 0 0 0 2.16-2.18A32.7 32.7 0 0 0 24 12a32.7 32.7 0 0 0-.5-4.9Z"
+        />
         <path fill="#fff" d="m9.6 15.2 6.2-3.2-6.2-3.2v6.4Z" />
       </svg>
     );
@@ -174,16 +183,29 @@ function SocialPlatformLogo({ platform, className }: { platform: SocialPlatformK
     return (
       <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <rect x="2" y="2" width="20" height="20" rx="6" fill="#111" />
-        <path fill="#fff" d="M14.8 5h3.1l-4.8 5.5L18.8 19h-4.4l-3.4-4.8L6.7 19H3.6l5.1-5.8L3.2 5h4.5l3 4.3L14.8 5Zm-.8 12h1.2L8.1 6.9H6.8L14 17Z" />
+        <path
+          fill="#fff"
+          d="M14.8 5h3.1l-4.8 5.5L18.8 19h-4.4l-3.4-4.8L6.7 19H3.6l5.1-5.8L3.2 5h4.5l3 4.3L14.8 5Zm-.8 12h1.2L8.1 6.9H6.8L14 17Z"
+        />
       </svg>
     );
   }
 
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path fill="#25F4EE" d="M16.4 2.5v10.2a4.4 4.4 0 1 1-4.4-4.4c.3 0 .6 0 .9.1v2.4a2.1 2.1 0 1 0 1.2 1.9V2.5h2.3Z" />
-      <path fill="#FE2C55" d="M14.1 2.5h2.3c.7 2 2.1 3.5 4.1 4.2v2.3a8.1 8.1 0 0 1-4.1-1.6v5.3a4.4 4.4 0 1 1-4.4-4.4c.3 0 .6 0 .9.1v2.4a2.1 2.1 0 1 0 1.2 1.9V2.5Z" fillOpacity=".85" />
-      <path fill="#fff" d="M14.1 2.5v10.2a2.1 2.1 0 1 1-1.2-1.9V8.4a4.7 4.7 0 0 0-.9-.1 4.4 4.4 0 1 0 4.4 4.4V7.4a8.1 8.1 0 0 0 4.1 1.6V6.7a6.5 6.5 0 0 1-4.1-4.2h-2.3Z" />
+      <path
+        fill="#25F4EE"
+        d="M16.4 2.5v10.2a4.4 4.4 0 1 1-4.4-4.4c.3 0 .6 0 .9.1v2.4a2.1 2.1 0 1 0 1.2 1.9V2.5h2.3Z"
+      />
+      <path
+        fill="#FE2C55"
+        d="M14.1 2.5h2.3c.7 2 2.1 3.5 4.1 4.2v2.3a8.1 8.1 0 0 1-4.1-1.6v5.3a4.4 4.4 0 1 1-4.4-4.4c.3 0 .6 0 .9.1v2.4a2.1 2.1 0 1 0 1.2 1.9V2.5Z"
+        fillOpacity=".85"
+      />
+      <path
+        fill="#fff"
+        d="M14.1 2.5v10.2a2.1 2.1 0 1 1-1.2-1.9V8.4a4.7 4.7 0 0 0-.9-.1 4.4 4.4 0 1 0 4.4 4.4V7.4a8.1 8.1 0 0 0 4.1 1.6V6.7a6.5 6.5 0 0 1-4.1-4.2h-2.3Z"
+      />
     </svg>
   );
 }
@@ -200,7 +222,7 @@ function focusWithoutScroll(element: { focus: (options?: FocusOptions) => void }
 function getSidebarWidthBounds(viewportWidth: number, compactViewport: boolean) {
   const maxWidth = Math.max(
     280,
-    Math.min(SIDEBAR_MAX_WIDTH, viewportWidth - (compactViewport ? 24 : 180))
+    Math.min(SIDEBAR_MAX_WIDTH, viewportWidth - (compactViewport ? 24 : 180)),
   );
   const minWidth = Math.min(SIDEBAR_MIN_WIDTH, maxWidth);
   return { min: minWidth, max: maxWidth };
@@ -208,7 +230,7 @@ function getSidebarWidthBounds(viewportWidth: number, compactViewport: boolean) 
 
 function sortProjectsNewestFirst(projects: ProjectSummary[]) {
   return [...projects].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
   );
 }
 
@@ -233,7 +255,6 @@ function createEmptyProjectScopedState(): ProjectScopedState {
   };
 }
 
-
 function getCreatorEmail(creator: CreatorProfile) {
   return creator.email ?? `${creator.handle.replace("@", "")}@mail.demo`;
 }
@@ -246,8 +267,7 @@ function getCreatorAveragePlays(creator: CreatorProfile, scrapeCount?: number) {
   if (typeof scrapeCount === "number") {
     const videos = generateSyntheticVideos(creator, Math.max(18, scrapeCount));
     if (videos.length > 0) {
-      const averagePlays =
-        videos.reduce((sum, video) => sum + video.plays, 0) / videos.length;
+      const averagePlays = videos.reduce((sum, video) => sum + video.plays, 0) / videos.length;
       return formatPlays(averagePlays);
     }
   }
@@ -269,7 +289,16 @@ function getCreatorMedianComments(creator: CreatorProfile) {
   if (!m) return "—";
   const base = parseFloat(m[1]);
   const unit = m[2];
-  const mul = unit === "万" ? 1e4 : unit === "千" ? 1e3 : unit === "k" || unit === "K" ? 1e3 : unit === "m" || unit === "M" ? 1e6 : 1;
+  const mul =
+    unit === "万"
+      ? 1e4
+      : unit === "千"
+        ? 1e3
+        : unit === "k" || unit === "K"
+          ? 1e3
+          : unit === "m" || unit === "M"
+            ? 1e6
+            : 1;
   const likesNum = base * mul;
   const comments = likesNum * 0.08;
   if (comments >= 1e4) return `${(comments / 1e4).toFixed(1)}万`;
@@ -293,7 +322,7 @@ function getCreatorMetricSnapshot(creator: CreatorProfile, scrapeCount?: number)
 
 function getCreatorTopicSummary(
   topics: Array<{ label: string; weight: number }>,
-  scrapeCount: number
+  scrapeCount: number,
 ) {
   const sortedTopics = [...topics].sort((left, right) => {
     if (right.weight !== left.weight) {
@@ -308,7 +337,7 @@ function getCreatorTopicSummary(
     const decayMentions = Math.max(1, scrapeCount - index - 1);
     const mentions = Math.max(
       1,
-      Math.min(scrapeCount, Math.round((weightedMentions + decayMentions) / 2))
+      Math.min(scrapeCount, Math.round((weightedMentions + decayMentions) / 2)),
     );
     return { ...topic, mentions };
   });
@@ -340,9 +369,7 @@ function getCreatorDiagnostics(creator: CreatorProfile) {
   const hitRate = Math.max(5, Math.min(25, Math.round(safeEr * 2.5)));
   const base = getCreatorAveragePlays(creator);
   const stabilityText =
-    safeEr >= 4
-      ? "表现极度稳定，适合做常规曝光投放。"
-      : "流量整体平稳，偶有波动，需关注近期节奏。";
+    safeEr >= 4 ? "表现极度稳定，适合做常规曝光投放。" : "流量整体平稳，偶有波动，需关注近期节奏。";
   const positiveSentiment = Math.max(60, Math.min(92, Math.round(60 + safeEr * 6)));
   return {
     flopRate,
@@ -411,18 +438,20 @@ function getCreatorAudienceBreakdown(creator: CreatorProfile) {
 }
 
 function getAudienceSummary(creator: CreatorProfile): AudienceSummary {
-  return creator.audienceSummary ?? {
-    gender: { female: 72, male: 28 },
-    age: [
-      { range: "0-17", pct: 3 },
-      { range: "18-25", pct: 22 },
-      { range: "25-34", pct: 65 },
-      { range: "35-44", pct: 8 },
-      { range: "45+", pct: 2 },
-    ],
-    regionT1: { pct: 62, flags: ["🇺🇸", "🇨🇦", "🇬🇧"] },
-    regionT2: { pct: 24, flags: ["🇵🇭", "🇮🇩", "🇧🇷"] },
-  };
+  return (
+    creator.audienceSummary ?? {
+      gender: { female: 72, male: 28 },
+      age: [
+        { range: "0-17", pct: 3 },
+        { range: "18-25", pct: 22 },
+        { range: "25-34", pct: 65 },
+        { range: "35-44", pct: 8 },
+        { range: "45+", pct: 2 },
+      ],
+      regionT1: { pct: 62, flags: ["🇺🇸", "🇨🇦", "🇬🇧"] },
+      regionT2: { pct: 24, flags: ["🇵🇭", "🇮🇩", "🇧🇷"] },
+    }
+  );
 }
 
 function computeAudienceHighlights(summary: AudienceSummary): AudienceHighlight[] {
@@ -459,7 +488,9 @@ function computeAudienceHighlights(summary: AudienceSummary): AudienceHighlight[
 }
 
 function getCountryFlag(country: string) {
-  return COUNTRY_TO_FLAG[country] ?? COUNTRY_OPTIONS.find((item) => item.name === country)?.flag ?? "🌐";
+  return (
+    COUNTRY_TO_FLAG[country] ?? COUNTRY_OPTIONS.find((item) => item.name === country)?.flag ?? "🌐"
+  );
 }
 
 function getRegionTierForCountry(country: string): RegionTierKey {
@@ -548,7 +579,7 @@ function buildDiscoveryResultsUrl({
 function buildSeedFinderDiscoveryUrl(
   creatorId: string,
   creator: CreatorProfile,
-  project?: ProjectSummary
+  project?: ProjectSummary,
 ) {
   return buildDiscoveryResultsUrl({
     creatorId,
@@ -562,7 +593,7 @@ function buildSeedFinderDiscoveryUrl(
 function buildQuickScreenDiscoveryUrl(
   creatorId: string,
   creator: CreatorProfile,
-  project?: ProjectSummary
+  project?: ProjectSummary,
 ) {
   return buildDiscoveryResultsUrl({
     creatorId,
@@ -586,9 +617,7 @@ function getCreatorPersonalizationSummary(creator: CreatorProfile, project?: Pro
     creator.statBadges[0] ??
     getCreatorType(creator).replace("类", "");
   const secondaryTopic =
-    creator.topics?.[1]?.label.replace(/^#/, "") ??
-    creator.statBadges[1] ??
-    "真实体验";
+    creator.topics?.[1]?.label.replace(/^#/, "") ?? creator.statBadges[1] ?? "真实体验";
   const projectAngle = project?.productDescription.trim() || "这轮内容合作";
   const review = getCreatorReview(creator).replace(/[。.!！]$/, "");
 
@@ -608,7 +637,7 @@ function getCreatorPersonalizationSummary(creator: CreatorProfile, project?: Pro
 function getEmailTemplateSegments(
   template: EmailTemplateKey,
   creator: CreatorProfile,
-  project?: ProjectSummary
+  project?: ProjectSummary,
 ): EmailTemplateSegment[] {
   if (!template) {
     return [];
@@ -628,7 +657,9 @@ function getEmailTemplateSegments(
       { text: info.projectAngle, personalized: true },
       { text: "\n- 内容切入：" },
       { text: `${info.primaryTopic} / ${info.secondaryTopic}`, personalized: true },
-      { text: "\n- 希望确认：近期档期、报价区间、可接受的合作形式\n\n如果方便的话，也可以直接回复到 " },
+      {
+        text: "\n- 希望确认：近期档期、报价区间、可接受的合作形式\n\n如果方便的话，也可以直接回复到 ",
+      },
       { text: info.email, personalized: true },
       { text: "，我们会尽快跟进。\n\n谢谢！\n2Linkr 团队" },
     ];
@@ -643,7 +674,9 @@ function getEmailTemplateSegments(
       { text: " 寻找适合先体验、再决定合作形式的创作者。\n\n" },
       { text: "AI 觉得你很适合这轮寄样，是因为 " },
       { text: info.aiReason, personalized: true },
-      { text: "。\n\n如果你愿意，我们可以先寄一份样品给你，等你体验后再一起确认是否做短视频、图文或长期合作。\n\n期待听听你的想法。\n2Linkr 团队" },
+      {
+        text: "。\n\n如果你愿意，我们可以先寄一份样品给你，等你体验后再一起确认是否做短视频、图文或长期合作。\n\n期待听听你的想法。\n2Linkr 团队",
+      },
     ];
   }
 
@@ -655,14 +688,16 @@ function getEmailTemplateSegments(
     { text: " 的创作者，看到你的账号后觉得内容调性、受众画像和互动氛围都很匹配。\n\n" },
     { text: "尤其是 " },
     { text: info.creatorProof, personalized: true },
-    { text: "，这部分非常适合做第一轮合作沟通。\n\n想先和你确认三件事：\n- 你最近是否方便接合作\n- 当前的大致报价区间\n- 更适合的合作形式（短视频 / 组合发布 / 长期合作）\n\n如果方便的话，可以直接回复这封邮件，我们会把更具体的 brief 发给你。\n\n谢谢！\n2Linkr 团队" },
+    {
+      text: "，这部分非常适合做第一轮合作沟通。\n\n想先和你确认三件事：\n- 你最近是否方便接合作\n- 当前的大致报价区间\n- 更适合的合作形式（短视频 / 组合发布 / 长期合作）\n\n如果方便的话，可以直接回复这封邮件，我们会把更具体的 brief 发给你。\n\n谢谢！\n2Linkr 团队",
+    },
   ];
 }
 
 function getEmailTemplateDraft(
   template: EmailTemplateKey,
   creator: CreatorProfile,
-  project?: ProjectSummary
+  project?: ProjectSummary,
 ) {
   return getEmailTemplateSegments(template, creator, project)
     .map((segment) => segment.text)
@@ -672,14 +707,10 @@ function getEmailTemplateDraft(
 function getEmailSubjectSegments(
   template: EmailTemplateKey,
   creator: CreatorProfile,
-  project?: ProjectSummary
+  project?: ProjectSummary,
 ): EmailTemplateSegment[] {
   if (template === "followup") {
-    return [
-      { text: "跟进 " },
-      { text: creator.name, personalized: true },
-      { text: " 的合作档期" },
-    ];
+    return [{ text: "跟进 " }, { text: creator.name, personalized: true }, { text: " 的合作档期" }];
   }
 
   if (template === "gifted") {
@@ -691,10 +722,7 @@ function getEmailSubjectSegments(
   }
 
   if (template === "intro") {
-    return [
-      { text: creator.name, personalized: true },
-      { text: " x 2Linkr 内容合作邀约" },
-    ];
+    return [{ text: creator.name, personalized: true }, { text: " x 2Linkr 内容合作邀约" }];
   }
 
   return [];
@@ -703,7 +731,7 @@ function getEmailSubjectSegments(
 function getEmailTemplateSubject(
   template: EmailTemplateKey,
   creator: CreatorProfile,
-  project?: ProjectSummary
+  project?: ProjectSummary,
 ) {
   return getEmailSubjectSegments(template, creator, project)
     .map((segment) => segment.text)
@@ -797,10 +825,11 @@ export default function PluginPathDemo() {
   const [inlineDataKeys, setInlineDataKeys] = useState<InlineDataKey[]>(DEFAULT_INLINE_DATA_KEYS);
   const [playMedianMultiple, setPlayMedianMultiple] = useState(1.5);
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatformKey>("tiktok");
-  const [selectedHoverMetricKeys, setSelectedHoverMetricKeys] = useState<HoverMetricKey[]>(DEFAULT_HOVER_METRICS);
-  const [hoverMetricModes, setHoverMetricModes] = useState<Record<HoverMetricKey, MetricAggregation>>(
-    DEFAULT_HOVER_METRIC_MODES
-  );
+  const [selectedHoverMetricKeys, setSelectedHoverMetricKeys] =
+    useState<HoverMetricKey[]>(DEFAULT_HOVER_METRICS);
+  const [hoverMetricModes, setHoverMetricModes] = useState<
+    Record<HoverMetricKey, MetricAggregation>
+  >(DEFAULT_HOVER_METRIC_MODES);
   const [floatingTop, setFloatingTop] = useState(216);
   const [floatingOffsetX, setFloatingOffsetX] = useState(0);
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_MIN_WIDTH);
@@ -809,13 +838,14 @@ export default function PluginPathDemo() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectProductDescription, setNewProjectProductDescription] = useState("");
   const [newProjectFiles, setNewProjectFiles] = useState<File[]>([]);
-  const [projects, setProjects] = useState<ProjectSummary[]>(sortProjectsNewestFirst(defaultProjects));
+  const [projects, setProjects] = useState<ProjectSummary[]>(
+    sortProjectsNewestFirst(defaultProjects),
+  );
   const [selectedProjectId, setSelectedProjectId] = useState<string>(
-    sortProjectsNewestFirst(defaultProjects)[0]?.id ?? ""
+    sortProjectsNewestFirst(defaultProjects)[0]?.id ?? "",
   );
-  const [projectScopedState, setProjectScopedState] = useState<Record<string, ProjectScopedState>>(
-    defaultProjectScopedState
-  );
+  const [projectScopedState, setProjectScopedState] =
+    useState<Record<string, ProjectScopedState>>(defaultProjectScopedState);
   const [activeCreatorId, setActiveCreatorId] = useState("camping-aurora");
   const [sequentialCreatorIds, setSequentialCreatorIds] = useState<string[]>([]);
   const [feedback, setFeedback] = useState("");
@@ -843,7 +873,7 @@ export default function PluginPathDemo() {
   const expandedSidebarWidth = clampValue(
     sidebarWidth,
     sidebarWidthBounds.min,
-    sidebarWidthBounds.max
+    sidebarWidthBounds.max,
   );
 
   const handleSetWorkMode = (next: "on" | "off") => {
@@ -985,7 +1015,7 @@ export default function PluginPathDemo() {
       const nextWidth = clampValue(
         sidebarResizeStateRef.current.startWidth + deltaX,
         sidebarWidthBounds.min,
-        sidebarWidthBounds.max
+        sidebarWidthBounds.max,
       );
       setSidebarWidth(nextWidth);
     };
@@ -1023,7 +1053,7 @@ export default function PluginPathDemo() {
       const nextOffsetX = clampValue(
         dragStateRef.current.startOffsetX + deltaX,
         -window.innerWidth + 120,
-        120
+        120,
       );
       setFloatingTop(nextTop);
       setFloatingOffsetX(nextOffsetX);
@@ -1056,14 +1086,14 @@ export default function PluginPathDemo() {
       savedCreatorIds
         .map((creatorId) => creatorProfiles[creatorId])
         .filter((creator): creator is CreatorProfile => Boolean(creator)),
-    [savedCreatorIds]
+    [savedCreatorIds],
   );
   const dismissedCreatorIds = activeProjectState.dismissedCreatorIds;
   const creatorTags = activeProjectState.creatorTags;
   const activeResults = searchResults[selectedMode];
   const activeCreator = creatorProfiles[activeCreatorId];
   const visibleCards = activeResults.cards.filter(
-    (card) => !dismissedCreatorIds.includes(card.id) && !savedCreatorIds.includes(card.id)
+    (card) => !dismissedCreatorIds.includes(card.id) && !savedCreatorIds.includes(card.id),
   );
   const sequentialPosition = sequentialCreatorIds.findIndex((id) => id === activeCreatorId);
 
@@ -1073,8 +1103,8 @@ export default function PluginPathDemo() {
         getEmailTemplateDraft(
           selectedEmailTemplate,
           creatorProfiles[activeCreatorId],
-          selectedProject
-        )
+          selectedProject,
+        ),
       );
     }
   }, [activeCreatorId, selectedEmailTemplate, selectedProject]);
@@ -1096,7 +1126,7 @@ export default function PluginPathDemo() {
               typeof value.name === "string" &&
               typeof value.productDescription === "string" &&
               typeof value.createdAt === "string" &&
-              typeof value.createdLabel === "string"
+              typeof value.createdLabel === "string",
           );
 
           if (normalizedProjects.length > 0) {
@@ -1149,7 +1179,7 @@ export default function PluginPathDemo() {
   }, [projects, selectedProject]);
 
   const updateSelectedProjectState = (
-    updater: (current: ProjectScopedState) => ProjectScopedState
+    updater: (current: ProjectScopedState) => ProjectScopedState,
   ) => {
     setProjectScopedState((current) => ({
       ...current,
@@ -1252,7 +1282,7 @@ export default function PluginPathDemo() {
     setFeedback(
       newProjectFiles.length > 0
         ? `已新建项目「${nextProject.name}」，并附带 ${newProjectFiles.length} 份达人名单`
-        : `已新建项目「${nextProject.name}」`
+        : `已新建项目「${nextProject.name}」`,
     );
   };
 
@@ -1266,9 +1296,12 @@ export default function PluginPathDemo() {
     setReviewFlow("idle");
 
     [26, 48, 73, 91].forEach((value, index) => {
-      const timer = window.setTimeout(() => {
-        setSearchProgress(value);
-      }, 220 + index * 260);
+      const timer = window.setTimeout(
+        () => {
+          setSearchProgress(value);
+        },
+        220 + index * 260,
+      );
       searchTimerRefs.current.push(timer);
     });
 
@@ -1338,7 +1371,7 @@ export default function PluginPathDemo() {
     setFeedback(
       wasDismissed
         ? `已在项目「${selectedProject.name}」取消 No，并收藏 ${creatorHandle}`
-        : `已在项目「${selectedProject.name}」收藏 ${creatorHandle}`
+        : `已在项目「${selectedProject.name}」收藏 ${creatorHandle}`,
     );
   };
 
@@ -1358,9 +1391,7 @@ export default function PluginPathDemo() {
         }
 
         const restoredIds = new Set([...current, creatorId]);
-        return activeResults.cards
-          .map((card) => card.id)
-          .filter((id) => restoredIds.has(id));
+        return activeResults.cards.map((card) => card.id).filter((id) => restoredIds.has(id));
       });
       setFeedback(`已在项目「${selectedProject.name}」取消 No，恢复 ${creatorHandle}`);
       return;
@@ -1369,7 +1400,7 @@ export default function PluginPathDemo() {
     const currentIndex = sequentialCreatorIds.findIndex((id) => id === creatorId);
     const nextCreatorId =
       currentIndex >= 0
-        ? sequentialCreatorIds[currentIndex + 1] ?? sequentialCreatorIds[currentIndex - 1]
+        ? (sequentialCreatorIds[currentIndex + 1] ?? sequentialCreatorIds[currentIndex - 1])
         : undefined;
 
     updateSelectedProjectState((current) => ({
@@ -1392,7 +1423,7 @@ export default function PluginPathDemo() {
     setFeedback(
       wasSaved
         ? `已在项目「${selectedProject.name}」对 ${creatorHandle} 标记 No，并取消收藏`
-        : `已在项目「${selectedProject.name}」对 ${creatorHandle} 标记 No`
+        : `已在项目「${selectedProject.name}」对 ${creatorHandle} 标记 No`,
     );
   };
 
@@ -1407,7 +1438,9 @@ export default function PluginPathDemo() {
     setActiveSidebarTab("similar");
     setSidebarCollapsed(false);
     setSidebarOpen(true);
-    setFeedback(`已在项目「${selectedProject.name}」里切换 ${creatorProfiles[creatorId]?.handle} 为种子博主`);
+    setFeedback(
+      `已在项目「${selectedProject.name}」里切换 ${creatorProfiles[creatorId]?.handle} 为种子博主`,
+    );
   };
 
   const handleQuickScreen = () => {
@@ -1435,7 +1468,7 @@ export default function PluginPathDemo() {
     setSidebarOpen(true);
     setDemoStage("floating");
     setFeedback(
-      `已切换到项目「${selectedProject.name}」的逐个筛选，当前查看 ${creatorProfiles[firstCreatorId]?.handle}`
+      `已切换到项目「${selectedProject.name}」的逐个筛选，当前查看 ${creatorProfiles[firstCreatorId]?.handle}`,
     );
   };
 
@@ -1530,7 +1563,7 @@ export default function PluginPathDemo() {
         : `${recipientCreators[0].handle} 等 ${recipientCreators.length} 位博主`;
 
     setFeedback(
-      `${suffix}：项目「${selectedProject.name}」向 ${recipientLabel} 发送「${templateLabel}」邮件${attachmentText}（演示）`
+      `${suffix}：项目「${selectedProject.name}」向 ${recipientLabel} 发送「${templateLabel}」邮件${attachmentText}（演示）`,
     );
   };
 
@@ -1572,7 +1605,7 @@ export default function PluginPathDemo() {
 
   return (
     <main className="min-h-screen bg-[#f5f4ed] text-[#141413]">
-      <div className="absolute left-4 top-4 z-40 sm:left-6 sm:top-6">
+      <div className="absolute top-4 left-4 z-40 sm:top-6 sm:left-6">
         <Button
           asChild
           variant="outline"
@@ -1586,7 +1619,7 @@ export default function PluginPathDemo() {
       </div>
 
       {feedback ? (
-        <div className="absolute left-1/2 top-20 z-40 -translate-x-1/2 rounded-full border border-[#e8e6dc] bg-white px-4 py-2 text-sm text-[#4d4c48] shadow-[0_12px_32px_-18px_rgba(77,76,72,0.28)]">
+        <div className="absolute top-20 left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#e8e6dc] bg-white px-4 py-2 text-sm text-[#4d4c48] shadow-[0_12px_32px_-18px_rgba(77,76,72,0.28)]">
           {feedback}
         </div>
       ) : null}
@@ -1609,7 +1642,7 @@ export default function PluginPathDemo() {
           <div
             className={cn(
               "transition-[padding-right] duration-300",
-              isSidebarResizing && "transition-none"
+              isSidebarResizing && "transition-none",
             )}
             style={{
               paddingRight: sidebarOpen
@@ -1619,67 +1652,67 @@ export default function PluginPathDemo() {
                 : "0px",
             }}
           >
-          <div
-            className="absolute z-30"
-            style={{
-              top: `${floatingTop}px`,
-              right: floatingRight,
-              transform: `translateX(${floatingOffsetX}px)`,
-            }}
-          >
-            <FloatingPluginGroup
-              demoStage={demoStage}
-              cardCloseRef={cardCloseRef}
-              onOpenCard={() => setDemoStage("card")}
-              onOpenCurrentSidebar={openCurrentSidebar}
-              onOpenEmailSidebar={openEmailSidebar}
-              onOpenSimilarSidebar={openSimilarSidebar}
-              onClose={() => setDemoStage("floating")}
-              onDragStart={startFloatingDrag}
-              compactViewport={compactViewport}
-              creator={activeCreator}
-              reviewFlow={reviewFlow}
-              sequentialIndex={sequentialPosition}
-              sequentialTotal={sequentialCreatorIds.length}
-              onSeedCreator={() => handleSeedCreator(activeCreator.id)}
-              isSaved={savedCreatorIds.includes(activeCreator.id)}
-              onToggleSave={() => handleSaveCreator(activeCreator.id)}
-              workMode={workMode}
-              onToggleWorkMode={handleToggleWorkMode}
-              onSetWorkMode={handleSetWorkMode}
-              onOpenTaskList={openTaskList}
-              floatingTop={floatingTop}
-              dataCheckOn={dataCheckOn}
-              onToggleDataCheck={() => setDataCheckOn((v) => !v)}
-              scrapeCount={scrapeCount}
-              onChangeScrapeCount={setScrapeCount}
-              selectedHoverMetricKeys={selectedHoverMetricKeys}
-              hoverMetricModes={hoverMetricModes}
-            />
-          </div>
+            <div
+              className="absolute z-30"
+              style={{
+                top: `${floatingTop}px`,
+                right: floatingRight,
+                transform: `translateX(${floatingOffsetX}px)`,
+              }}
+            >
+              <FloatingPluginGroup
+                demoStage={demoStage}
+                cardCloseRef={cardCloseRef}
+                onOpenCard={() => setDemoStage("card")}
+                onOpenCurrentSidebar={openCurrentSidebar}
+                onOpenEmailSidebar={openEmailSidebar}
+                onOpenSimilarSidebar={openSimilarSidebar}
+                onClose={() => setDemoStage("floating")}
+                onDragStart={startFloatingDrag}
+                compactViewport={compactViewport}
+                creator={activeCreator}
+                reviewFlow={reviewFlow}
+                sequentialIndex={sequentialPosition}
+                sequentialTotal={sequentialCreatorIds.length}
+                onSeedCreator={() => handleSeedCreator(activeCreator.id)}
+                isSaved={savedCreatorIds.includes(activeCreator.id)}
+                onToggleSave={() => handleSaveCreator(activeCreator.id)}
+                workMode={workMode}
+                onToggleWorkMode={handleToggleWorkMode}
+                onSetWorkMode={handleSetWorkMode}
+                onOpenTaskList={openTaskList}
+                floatingTop={floatingTop}
+                dataCheckOn={dataCheckOn}
+                onToggleDataCheck={() => setDataCheckOn((v) => !v)}
+                scrapeCount={scrapeCount}
+                onChangeScrapeCount={setScrapeCount}
+                selectedHoverMetricKeys={selectedHoverMetricKeys}
+                hoverMetricModes={hoverMetricModes}
+              />
+            </div>
 
-          <div className="border-b border-[#e8e6dc] bg-[#faf9f5] px-4 py-3 sm:px-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="inline-flex items-center gap-2 text-lg font-semibold">
-                <SocialPlatformLogo platform={selectedPlatform} className="h-5 w-5" />
-                {selectedPlatformLabel}
-              </div>
-              <div className="flex-1">
-                <div className="mx-auto hidden h-9 max-w-[520px] rounded-full border border-[#e8e6dc] bg-white sm:block" />
-              </div>
-              <div className="rounded-full border border-[#e8e6dc] bg-white px-4 py-1.5 text-sm text-[#5e5d59]">
-                登录
+            <div className="border-b border-[#e8e6dc] bg-[#faf9f5] px-4 py-3 sm:px-6">
+              <div className="flex items-center justify-between gap-4">
+                <div className="inline-flex items-center gap-2 text-lg font-semibold">
+                  <SocialPlatformLogo platform={selectedPlatform} className="h-5 w-5" />
+                  {selectedPlatformLabel}
+                </div>
+                <div className="flex-1">
+                  <div className="mx-auto hidden h-9 max-w-[520px] rounded-full border border-[#e8e6dc] bg-white sm:block" />
+                </div>
+                <div className="rounded-full border border-[#e8e6dc] bg-white px-4 py-1.5 text-sm text-[#5e5d59]">
+                  登录
+                </div>
               </div>
             </div>
-          </div>
 
-          <FakeTiktokProfile
-            creator={activeCreator}
-            dataCheckOn={dataCheckOn}
-            scrapeCount={scrapeCount}
-            inlineDataKeys={inlineDataKeys}
-            playMedianMultiple={playMedianMultiple}
-          />
+            <FakeTiktokProfile
+              creator={activeCreator}
+              dataCheckOn={dataCheckOn}
+              scrapeCount={scrapeCount}
+              inlineDataKeys={inlineDataKeys}
+              playMedianMultiple={playMedianMultiple}
+            />
           </div>
 
           {sidebarOpen ? (
@@ -1936,19 +1969,23 @@ function FakeTiktokProfile({
   const creatorErNumber = parseFloat(creator.er.replace("%", "")) || 0;
 
   return (
-    <section className="mx-auto max-w-[980px] px-4 pb-10 pt-6 sm:px-8">
+    <section className="mx-auto max-w-[980px] px-4 pt-6 pb-10 sm:px-8">
       <div className="flex items-start gap-4">
-        <CreatorAvatar creator={creator} className="h-18 w-18 border border-[#e8e6dc]" labelClassName="text-3xl" />
+        <CreatorAvatar
+          creator={creator}
+          className="h-18 w-18 border border-[#e8e6dc]"
+          labelClassName="text-3xl"
+        />
         <div className="min-w-0 flex-1">
-          <div className="break-words text-2xl font-semibold">{creator.handle}</div>
-          <div className="mt-1 break-words text-sm text-[#5e5d59]">{creator.name}</div>
+          <div className="text-2xl font-semibold break-words">{creator.handle}</div>
+          <div className="mt-1 text-sm break-words text-[#5e5d59]">{creator.name}</div>
           <div className="mt-2 flex flex-wrap gap-4 text-sm text-[#5e5d59]">
             <HoverStat>{creator.followers} 粉丝</HoverStat>
             <HoverStat>{creator.likes} 获赞</HoverStat>
             <HoverStat>{creator.videos} 视频</HoverStat>
             <HoverStat>ER {creator.er}</HoverStat>
           </div>
-          <div className="mt-3 max-w-2xl break-words text-sm leading-6 text-[#5e5d59]">
+          <div className="mt-3 max-w-2xl text-sm leading-6 break-words text-[#5e5d59]">
             {creator.bio}
           </div>
           <div className="mt-4 flex gap-3">
@@ -1999,13 +2036,13 @@ function FakeTiktokProfile({
                   className="relative aspect-[3/4] overflow-hidden rounded-[14px] bg-[linear-gradient(180deg,#7f9bff_0%,#6680f5_55%,#5269e0_100%)] text-white shadow-[0_12px_28px_-18px_rgba(60,82,196,0.55)] transition-transform duration-150 hover:-translate-y-0.5"
                 >
                   {/* top row: speed + duration */}
-                  <div className="absolute left-0 right-0 top-0 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
+                  <div className="absolute top-0 right-0 left-0 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
                     <span>{playMedianRatio.toFixed(1)}X</span>
                     <span>{formatDuration(video.durationSec)}</span>
                   </div>
                   {/* days */}
                   {hasInlineData("publishedAt") ? (
-                    <div className="absolute left-0 right-0 top-7 text-center text-[11px] opacity-85">
+                    <div className="absolute top-7 right-0 left-0 text-center text-[11px] opacity-85">
                       {video.days} days
                     </div>
                   ) : null}
@@ -2015,7 +2052,7 @@ function FakeTiktokProfile({
                       #{rank}
                     </div>
                     {hasInlineData("plays") ? (
-                      <div className="mt-1 text-[30px] font-bold leading-none tracking-tight">
+                      <div className="mt-1 text-[30px] leading-none font-bold tracking-tight">
                         {formatPlays(video.plays)}
                       </div>
                     ) : null}
@@ -2054,85 +2091,83 @@ function FakeTiktokProfile({
           </div>
         </div>
       ) : (
-      <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {allVideos.slice(0, 9).map((video) => {
-          const ratio = getPlayMedianRatio(video);
-          const autoCategory: VideoCategory =
-            video.category === "paid"
-              ? "paid"
-              : ratio >= playMedianMultiple
-                ? "viral"
-                : ratio <= flopThreshold
-                  ? "flop"
-                  : "normal";
-          const cardGradient =
-            autoCategory === "viral"
-              ? "bg-[linear-gradient(180deg,#ff8a8a_0%,#ef4444_55%,#c92c2c_100%)]"
-              : autoCategory === "flop"
-                ? "bg-[linear-gradient(180deg,#7f9bff_0%,#4f6bff_55%,#2d4dd1_100%)]"
-                : autoCategory === "paid"
-                  ? "bg-[linear-gradient(180deg,#6dd58c_0%,#22c55e_55%,#148a3f_100%)]"
-                  : "bg-[linear-gradient(180deg,#a1a6b5_0%,#7a8194_55%,#5b6275_100%)]";
-          return (
-            <div
-              key={video.id}
-              className={cn(
-                "group relative aspect-[3/4] overflow-hidden rounded-[14px] text-white shadow-[0_12px_28px_-18px_rgba(60,82,196,0.45)] transition-transform duration-150 hover:-translate-y-0.5",
-                cardGradient
-              )}
-            >
-              {/* top row: speed + duration */}
-              <div className="absolute left-0 right-0 top-0 z-10 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
-                {/* speed with hover tooltip legend */}
-                <span className="group/speed relative cursor-help">
-                  <span className="underline decoration-dotted underline-offset-2">
-                    {ratio.toFixed(1)}X
+        <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {allVideos.slice(0, 9).map((video) => {
+            const ratio = getPlayMedianRatio(video);
+            const autoCategory: VideoCategory =
+              video.category === "paid"
+                ? "paid"
+                : ratio >= playMedianMultiple
+                  ? "viral"
+                  : ratio <= flopThreshold
+                    ? "flop"
+                    : "normal";
+            const cardGradient =
+              autoCategory === "viral"
+                ? "bg-[linear-gradient(180deg,#ff8a8a_0%,#ef4444_55%,#c92c2c_100%)]"
+                : autoCategory === "flop"
+                  ? "bg-[linear-gradient(180deg,#7f9bff_0%,#4f6bff_55%,#2d4dd1_100%)]"
+                  : autoCategory === "paid"
+                    ? "bg-[linear-gradient(180deg,#6dd58c_0%,#22c55e_55%,#148a3f_100%)]"
+                    : "bg-[linear-gradient(180deg,#a1a6b5_0%,#7a8194_55%,#5b6275_100%)]";
+            return (
+              <div
+                key={video.id}
+                className={cn(
+                  "group relative aspect-[3/4] overflow-hidden rounded-[14px] text-white shadow-[0_12px_28px_-18px_rgba(60,82,196,0.45)] transition-transform duration-150 hover:-translate-y-0.5",
+                  cardGradient,
+                )}
+              >
+                {/* top row: speed + duration */}
+                <div className="absolute top-0 right-0 left-0 z-10 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
+                  {/* speed with hover tooltip legend */}
+                  <span className="group/speed relative cursor-help">
+                    <span className="underline decoration-dotted underline-offset-2">
+                      {ratio.toFixed(1)}X
+                    </span>
+                    <span className="pointer-events-none invisible absolute top-full left-0 z-20 mt-1.5 w-[180px] rounded-lg bg-black/85 px-2.5 py-2 text-left text-[10.5px] leading-[1.45] font-normal text-white opacity-0 shadow-lg transition-[opacity,visibility] duration-150 group-hover/speed:visible group-hover/speed:opacity-100">
+                      <span className="block font-semibold">This post views ÷ Average views</span>
+                      <span className="mt-1 block">
+                        <span className="text-[#ff8a8a]">Red:</span> viral
+                      </span>
+                      <span className="block">
+                        <span className="text-[#9fb5ff]">Blue:</span> flop
+                      </span>
+                      <span className="block">
+                        <span className="text-[#8ae3a2]">Green:</span> paid partnership
+                      </span>
+                    </span>
                   </span>
-                  <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-1.5 w-[180px] rounded-lg bg-black/85 px-2.5 py-2 text-left text-[10.5px] font-normal leading-[1.45] text-white opacity-0 shadow-lg transition-[opacity,visibility] duration-150 group-hover/speed:visible group-hover/speed:opacity-100">
-                    <span className="block font-semibold">
-                      This post views ÷ Average views
-                    </span>
-                    <span className="mt-1 block">
-                      <span className="text-[#ff8a8a]">Red:</span> viral
-                    </span>
-                    <span className="block">
-                      <span className="text-[#9fb5ff]">Blue:</span> flop
-                    </span>
-                    <span className="block">
-                      <span className="text-[#8ae3a2]">Green:</span> paid partnership
-                    </span>
-                  </span>
-                </span>
-                <span>{formatDuration(video.durationSec)}</span>
-              </div>
-              {/* hours ago */}
-              <div className="absolute left-0 right-0 top-7 text-center text-[11px] opacity-85">
-                {video.hoursAgo} hours
-              </div>
-              {/* bottom: ER + stats */}
-              <div className="absolute inset-x-0 bottom-0 px-3 pb-2.5">
-                <div className="text-[11px] font-semibold opacity-95">
-                  ER <span className="text-white">{video.erPct.toFixed(1)}%</span>
+                  <span>{formatDuration(video.durationSec)}</span>
                 </div>
-                <div className="mt-1 flex items-center gap-2 text-[10.5px] opacity-95">
-                  <span className="inline-flex items-center gap-0.5">
-                    <Play className="h-2.5 w-2.5" fill="currentColor" />
-                    {formatPlays(video.plays)}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5">
-                    <Heart className="h-2.5 w-2.5" />
-                    {formatLikes(video.likes)}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5">
-                    <MessageCircle className="h-2.5 w-2.5" />
-                    {formatComments(video.comments)}
-                  </span>
+                {/* hours ago */}
+                <div className="absolute top-7 right-0 left-0 text-center text-[11px] opacity-85">
+                  {video.hoursAgo} hours
+                </div>
+                {/* bottom: ER + stats */}
+                <div className="absolute inset-x-0 bottom-0 px-3 pb-2.5">
+                  <div className="text-[11px] font-semibold opacity-95">
+                    ER <span className="text-white">{video.erPct.toFixed(1)}%</span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-2 text-[10.5px] opacity-95">
+                    <span className="inline-flex items-center gap-0.5">
+                      <Play className="h-2.5 w-2.5" fill="currentColor" />
+                      {formatPlays(video.plays)}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5">
+                      <Heart className="h-2.5 w-2.5" />
+                      {formatLikes(video.likes)}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5">
+                      <MessageCircle className="h-2.5 w-2.5" />
+                      {formatComments(video.comments)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
       )}
     </section>
   );
@@ -2266,7 +2301,6 @@ function FloatingPluginGroup({
   // Recompute when floating ball moves vertically.
   useEffect(() => {
     if (menuOpen) computeDirection();
-
   }, [floatingTop, menuOpen]);
 
   const items: FloatingMenuItem[] = [
@@ -2329,17 +2363,12 @@ function FloatingPluginGroup({
     },
   ];
 
-  const actions = items.filter(
-    (item): item is FloatingMenuAction => !("kind" in item)
-  );
+  const actions = items.filter((item): item is FloatingMenuAction => !("kind" in item));
   const hovered = actions.find((a) => a.id === hoveredId) ?? null;
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={openHoverCard}
-    >
-      {((demoStage === "card") || hoverCardOpen) && !isOff ? (
+    <div className="relative" onMouseEnter={openHoverCard}>
+      {(demoStage === "card" || hoverCardOpen) && !isOff ? (
         <FloatingCard
           closeButtonRef={cardCloseRef}
           onOpenCurrentSidebar={() => {
@@ -2379,7 +2408,7 @@ function FloatingPluginGroup({
         />
       ) : null}
 
-      <div className="absolute right-0 top-1/2 z-30 flex -translate-y-1/2 items-center">
+      <div className="absolute top-1/2 right-0 z-30 flex -translate-y-1/2 items-center">
         <div className="relative">
           <button
             ref={buttonRef}
@@ -2438,7 +2467,7 @@ function FloatingPluginGroup({
             }}
             className={cn(
               "relative flex h-10 w-10 cursor-grab touch-none items-center justify-center transition-all duration-150 hover:scale-[1.04] active:cursor-grabbing",
-              isOff && "opacity-55 grayscale"
+              isOff && "opacity-55 grayscale",
             )}
           >
             <Image
@@ -2451,7 +2480,7 @@ function FloatingPluginGroup({
             {isOff ? (
               <span
                 aria-hidden="true"
-                className="absolute -bottom-0.5 -right-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full border border-white bg-slate-700 text-white"
+                className="absolute -right-0.5 -bottom-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full border border-white bg-slate-700 text-white"
               >
                 <Moon className="h-2.5 w-2.5" />
               </span>
@@ -2476,10 +2505,15 @@ function CreatorAvatar({
     <div
       className={cn(
         "flex items-center justify-center rounded-full border-4 border-white bg-[radial-gradient(circle_at_30%_30%,#f6ddd1_0%,#d3b4a2_45%,#9c7c70_100%)] shadow-[0_10px_28px_-18px_rgba(77,76,72,0.35)]",
-        className
+        className,
       )}
     >
-      <span className={cn("text-lg font-semibold leading-none tracking-tight text-white", labelClassName)}>
+      <span
+        className={cn(
+          "text-lg leading-none font-semibold tracking-tight text-white",
+          labelClassName,
+        )}
+      >
         {creator.name[0]}
       </span>
     </div>
@@ -2488,12 +2522,7 @@ function CreatorAvatar({
 
 function SidebarAnalysisSparkleIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 1024 1024"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
+    <svg viewBox="0 0 1024 1024" fill="none" aria-hidden="true" className={className}>
       <path
         d="M381.8496 206.8992a89.1392 89.1392 0 0 1 79.8208-63.4368 88.0128 88.0128 0 0 1 84.5824 56.0128l2.6624 7.4752 35.84 110.8992a183.3984 183.3984 0 0 0 100.5056 113.1008l9.5744 3.7376 104.3456 37.8368a93.3888 93.3888 0 0 1 59.648 84.7872 94.5152 94.5152 0 0 1-52.5824 89.9072l-7.0144 2.8672-104.3456 37.8368a181.5552 181.5552 0 0 0-106.4448 106.752l-3.5328 10.24-35.8912 110.5408a89.1392 89.1392 0 0 1-79.616 63.1808 88.0128 88.0128 0 0 1-84.5824-56.0128l-2.7648-7.168-35.84-110.7456a183.3984 183.3984 0 0 0-100.5056-113.2032l-9.5232-3.7888-104.2432-37.9904a93.3888 93.3888 0 0 1-59.648-84.736A94.464 94.464 0 0 1 124.7744 475.136l7.1168-2.9696 104.3968-37.9904a181.5552 181.5552 0 0 0 106.4448-106.752l3.6352-10.24 35.5328-110.8992z m83.6096 30.3104l-35.5328 110.8992a274.7904 274.7904 0 0 1-153.6 171.2128l-10.9568 4.2496-104.3456 37.7856 104.2944 37.7856a272.64 272.64 0 0 1 161.1264 163.4304l3.9936 11.6224 35.5328 110.8992 35.84-110.8992a274.7904 274.7904 0 0 1 153.6-171.2128l10.9568-4.1472 104.3456-37.8368-104.3456-37.8368a272.64 272.64 0 0 1-161.1776-163.5328l-3.9424-11.6224zM818.6368 45.056a43.5712 43.5712 0 0 1 39.68 26.2656l2.0992 5.4784 15.36 48.128 45.312 16.384a46.08 46.08 0 0 1 30.464 41.3184 47.2064 47.2064 0 0 1-24.8832 45.2608l-5.4784 2.2528-45.2608 16.4352-15.36 48.128a44.4416 44.4416 0 0 1-38.9632 32.0512 43.5712 43.5712 0 0 1-42.4448-26.5728l-2.0992-5.4784-15.36-48.128-45.312-16.384a46.08 46.08 0 0 1-30.464-41.3184 47.2064 47.2064 0 0 1 24.8832-45.2608l5.4784-2.2528 45.312-16.4352 15.36-48.128a44.1856 44.1856 0 0 1 41.6768-31.744z"
         fill="currentColor"
@@ -2570,10 +2599,13 @@ function FloatingCard({
 
   const copyEmail = () => {
     if (!displayEmail || isEditingEmail) return;
-    navigator.clipboard.writeText(displayEmail).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {});
+    navigator.clipboard
+      .writeText(displayEmail)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   };
 
   const handleFinishEmailEdit = () => {
@@ -2602,11 +2634,11 @@ function FloatingCard({
         "absolute top-1/2 z-20 -translate-y-1/2 rounded-[28px] border border-[#e8e6dc] bg-[#faf9f5]/98 text-[#141413] shadow-[0_28px_80px_-34px_rgba(77,76,72,0.22)] backdrop-blur",
         compactViewport
           ? "right-[42px] w-[min(286px,calc(100vw-164px))] max-w-[286px]"
-          : "right-[52px] w-[min(352px,calc(100vw-120px))] max-w-[352px]"
+          : "right-[52px] w-[min(352px,calc(100vw-120px))] max-w-[352px]",
       )}
     >
       <div
-        className="flex cursor-grab touch-none justify-center pb-1 pt-1.5 active:cursor-grabbing select-none"
+        className="flex cursor-grab touch-none justify-center pt-1.5 pb-1 select-none active:cursor-grabbing"
         onPointerDown={(event) => {
           if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
@@ -2614,13 +2646,10 @@ function FloatingCard({
           onDragStart(event.clientX, event.clientY);
         }}
       >
-        <span
-          aria-hidden="true"
-          className="block h-1.5 w-11 rounded-full bg-[#ddd8ce]"
-        />
+        <span aria-hidden="true" className="block h-1.5 w-11 rounded-full bg-[#ddd8ce]" />
       </div>
 
-      <div className="px-3 pb-3 pt-1">
+      <div className="px-3 pt-1 pb-3">
         {reviewFlow === "sequential" && sequentialTotal > 0 ? (
           <div className="mb-2 rounded-full bg-[#f5f4ed] px-3 py-1.5 text-center text-[11px] text-[#87867f]">
             逐个筛选中：第 {Math.max(sequentialIndex + 1, 1)} / {sequentialTotal} 位
@@ -2638,7 +2667,7 @@ function FloatingCard({
               >
                 <ExternalLink className="h-3.5 w-3.5" />
               </button>
-              <span className="pointer-events-none absolute left-0 top-full z-30 mt-1.5 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+              <span className="pointer-events-none absolute top-full left-0 z-30 mt-1.5 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
                 跳转到 web 端任务页
               </span>
             </div>
@@ -2653,7 +2682,7 @@ function FloatingCard({
                 >
                   <Moon className="h-3.5 w-3.5" />
                 </button>
-                <span className="pointer-events-none absolute right-0 top-full z-30 mt-1.5 w-44 rounded-[10px] bg-[#141413] px-2.5 py-2 text-[10px] leading-4 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                <span className="pointer-events-none absolute top-full right-0 z-30 mt-1.5 w-44 rounded-[10px] bg-[#141413] px-2.5 py-2 text-[10px] leading-4 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
                   打开下班模式后，插件将关闭。点击悬浮球可恢复上班模式。
                 </span>
               </div>
@@ -2677,8 +2706,10 @@ function FloatingCard({
             <div className="shrink-0">
               <CreatorAvatar creator={creator} className="h-12 w-12" labelClassName="text-base" />
             </div>
-            <div className="min-w-0 flex min-h-[48px] flex-1 flex-col justify-center gap-0.5">
-              <div className={cn("flex min-w-0 items-center", compactViewport ? "gap-1" : "gap-1.5")}>
+            <div className="flex min-h-[48px] min-w-0 flex-1 flex-col justify-center gap-0.5">
+              <div
+                className={cn("flex min-w-0 items-center", compactViewport ? "gap-1" : "gap-1.5")}
+              >
                 <SidebarLocationInline
                   flag={creatorLocation.flag}
                   country={creatorLocation.country}
@@ -2697,15 +2728,22 @@ function FloatingCard({
                     compactViewport ? "h-[22px] w-[22px]" : "h-6 w-6",
                     isSaved
                       ? "border-[#f0d7cd] bg-[#fff7f4] text-[#c96442] shadow-[0_4px_10px_rgba(201,100,66,0.16)]"
-                      : "text-[#b0aea6] hover:border-[#ece7dc] hover:bg-white hover:text-[#c96442]"
+                      : "text-[#b0aea6] hover:border-[#ece7dc] hover:bg-white hover:text-[#c96442]",
                   )}
                 >
-                  <Heart className={cn(compactViewport ? "h-3.5 w-3.5" : "h-4 w-4", isSaved && "fill-current")} />
+                  <Heart
+                    className={cn(
+                      compactViewport ? "h-3.5 w-3.5" : "h-4 w-4",
+                      isSaved && "fill-current",
+                    )}
+                  />
                 </button>
               </div>
 
-              <div className={cn("flex min-w-0 items-center", compactViewport ? "gap-1" : "gap-1.5")}>
-                <div className="min-w-0 flex flex-1 items-center">
+              <div
+                className={cn("flex min-w-0 items-center", compactViewport ? "gap-1" : "gap-1.5")}
+              >
+                <div className="flex min-w-0 flex-1 items-center">
                   {isEditingEmail ? (
                     <input
                       autoFocus
@@ -2723,7 +2761,7 @@ function FloatingCard({
                         }
                       }}
                       placeholder="输入邮箱地址"
-                      className="h-[26px] min-w-0 flex-1 rounded-[13px] border border-[#e8e6dc] bg-white px-[9px] text-[11px] font-medium text-[#141413] outline-none transition-colors focus:border-[#c96442]/35"
+                      className="h-[26px] min-w-0 flex-1 rounded-[13px] border border-[#e8e6dc] bg-white px-[9px] text-[11px] font-medium text-[#141413] transition-colors outline-none focus:border-[#c96442]/35"
                     />
                   ) : (
                     <button
@@ -2748,18 +2786,19 @@ function FloatingCard({
                       }}
                       className={cn(
                         "flex h-[26px] min-w-0 flex-1 items-center gap-1.5 rounded-[13px] px-[9px] text-[11px] transition-all select-none",
-                        copied
-                          ? "bg-emerald-50"
-                          : hasEmail
-                            ? "bg-[#f0ece4]"
-                            : "bg-[#f5f4ed]",
-                        hasEmail ? "cursor-pointer hover:bg-[#e8e3d8]" : "cursor-text"
+                        copied ? "bg-emerald-50" : hasEmail ? "bg-[#f0ece4]" : "bg-[#f5f4ed]",
+                        hasEmail ? "cursor-pointer hover:bg-[#e8e3d8]" : "cursor-text",
                       )}
                     >
                       {copied ? (
                         <Check className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
                       ) : (
-                        <Copy className={cn("h-3.5 w-3.5 shrink-0", hasEmail ? "text-[#87867f]" : "text-[#bcb7ad]")} />
+                        <Copy
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0",
+                            hasEmail ? "text-[#87867f]" : "text-[#bcb7ad]",
+                          )}
+                        />
                       )}
                       <span
                         className={cn(
@@ -2768,7 +2807,7 @@ function FloatingCard({
                             ? "text-emerald-700"
                             : hasEmail
                               ? "text-[#4d4c48]"
-                              : "text-[#a39f95]"
+                              : "text-[#a39f95]",
                         )}
                       >
                         {copied ? "已复制" : hasEmail ? displayEmail : "双击添加邮箱"}
@@ -2794,7 +2833,7 @@ function FloatingCard({
             <div
               className={cn(
                 "flex flex-wrap items-center justify-between",
-                compactViewport ? "gap-2 px-2.5 py-2" : "gap-2.5 px-3 py-2.5"
+                compactViewport ? "gap-2 px-2.5 py-2" : "gap-2.5 px-3 py-2.5",
               )}
             >
               <div className={cn("flex items-center", compactViewport ? "gap-1" : "gap-1.5")}>
@@ -2806,16 +2845,21 @@ function FloatingCard({
                     aria-expanded={scrapeMenuOpen}
                     className={cn(
                       "inline-flex items-center gap-0.5 rounded-full border border-[#e8e6dc] bg-[#faf9f5] font-semibold text-[#4d4c48] transition-all hover:border-[#d1cfc5] hover:bg-[#f0ece4]",
-                      compactViewport ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]"
+                      compactViewport ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]",
                     )}
                   >
                     <span>最近 {scrapeCount} 条</span>
-                    <ChevronDown className={cn("h-3 w-3 text-[#87867f] transition-transform", scrapeMenuOpen && "rotate-180")} />
+                    <ChevronDown
+                      className={cn(
+                        "h-3 w-3 text-[#87867f] transition-transform",
+                        scrapeMenuOpen && "rotate-180",
+                      )}
+                    />
                   </button>
                   {scrapeMenuOpen ? (
                     <div
                       role="listbox"
-                      className="absolute left-0 top-full z-30 mt-1 w-[108px] overflow-hidden rounded-[14px] border border-[#e8e6dc] bg-white shadow-[0_16px_40px_-20px_rgba(77,76,72,0.25)]"
+                      className="absolute top-full left-0 z-30 mt-1 w-[108px] overflow-hidden rounded-[14px] border border-[#e8e6dc] bg-white shadow-[0_16px_40px_-20px_rgba(77,76,72,0.25)]"
                     >
                       {SCRAPE_COUNT_OPTIONS.map((opt) => (
                         <button
@@ -2829,7 +2873,7 @@ function FloatingCard({
                           }}
                           className={cn(
                             "flex w-full items-center justify-between px-2.5 py-1.5 text-[11px] transition-colors hover:bg-[#f5f4ed]",
-                            opt === scrapeCount ? "font-semibold text-[#c96442]" : "text-[#4d4c48]"
+                            opt === scrapeCount ? "font-semibold text-[#c96442]" : "text-[#4d4c48]",
                           )}
                         >
                           <span>最近 {opt} 条</span>
@@ -2845,25 +2889,28 @@ function FloatingCard({
                     aria-label={`CPM ${creatorCpm}，悬浮查看说明`}
                     className={cn(
                       "inline-flex items-center rounded-full border border-[#e8e6dc] bg-[#f5f4ed] font-semibold text-[#c96442]",
-                      compactViewport ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]"
+                      compactViewport ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-[11px]",
                     )}
                   >
                     CPM {creatorCpm}
                   </span>
                   <span
                     role="tooltip"
-                    className="pointer-events-none absolute left-1/2 top-full z-40 mt-1.5 w-60 -translate-x-1/2 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/cpm:opacity-100"
+                    className="pointer-events-none absolute top-full left-1/2 z-40 mt-1.5 w-60 -translate-x-1/2 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/cpm:opacity-100"
                   >
-                    系统检测该博主位于{creatorLocation.country}，当前该地区默认 CPM 为 {creatorCpm}。如需修改，请前往设置页面自行调整。
+                    系统检测该博主位于{creatorLocation.country}，当前该地区默认 CPM 为 {creatorCpm}
+                    。如需修改，请前往设置页面自行调整。
                   </span>
                 </span>
               </div>
 
-              <div className={cn("flex shrink-0 items-center", compactViewport ? "gap-0.5" : "gap-1")}>
+              <div
+                className={cn("flex shrink-0 items-center", compactViewport ? "gap-0.5" : "gap-1")}
+              >
                 <div
                   className={cn(
                     "flex items-center font-medium text-[#87867f]",
-                    compactViewport ? "gap-0.5 text-[10px]" : "gap-1 text-[11px]"
+                    compactViewport ? "gap-0.5 text-[10px]" : "gap-1 text-[11px]",
                   )}
                 >
                   <span>数据透视</span>
@@ -2871,9 +2918,10 @@ function FloatingCard({
                     <CircleHelp className="h-3.5 w-3.5 cursor-help text-[#b8b6ad] transition-colors hover:text-[#87867f]" />
                     <span
                       role="tooltip"
-                      className="pointer-events-none absolute right-0 top-full z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
+                      className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
                     >
-                      在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前 N 条视频。若取数异常，刷新网页即可。
+                      在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前
+                      N 条视频。若取数异常，刷新网页即可。
                     </span>
                   </span>
                 </div>
@@ -2885,13 +2933,13 @@ function FloatingCard({
                   onClick={onToggleDataCheck}
                   className={cn(
                     "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                    dataCheckOn ? "bg-[#c96442]" : "bg-[#d8d4c8]"
+                    dataCheckOn ? "bg-[#c96442]" : "bg-[#d8d4c8]",
                   )}
                 >
                   <span
                     className={cn(
                       "absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                      dataCheckOn && "translate-x-4"
+                      dataCheckOn && "translate-x-4",
                     )}
                   />
                 </button>
@@ -2901,7 +2949,10 @@ function FloatingCard({
             <div className="border-t border-[#e8e6dc]" />
 
             <div className="grid grid-cols-2">
-              {(selectedHoverMetricKeys.length ? selectedHoverMetricKeys : DEFAULT_HOVER_METRICS).map((key, index) => {
+              {(selectedHoverMetricKeys.length
+                ? selectedHoverMetricKeys
+                : DEFAULT_HOVER_METRICS
+              ).map((key, index) => {
                 const showBorderRight = index % 2 === 0;
                 const showBorderTop = index >= 2;
                 if (key === "rate") {
@@ -2924,7 +2975,11 @@ function FloatingCard({
                       icon={ThumbsUp}
                       iconClassName="text-rose-500"
                       label={hoverMetricModes.likes === "median" ? "中位点赞" : "平均点赞"}
-                      value={hoverMetricModes.likes === "median" ? creatorMetrics.medianLikes : formatLikes(parseMetricToNumber(creator.likes) * 1.08)}
+                      value={
+                        hoverMetricModes.likes === "median"
+                          ? creatorMetrics.medianLikes
+                          : formatLikes(parseMetricToNumber(creator.likes) * 1.08)
+                      }
                       borderRight={showBorderRight}
                       borderTop={showBorderTop}
                     />
@@ -2936,8 +2991,16 @@ function FloatingCard({
                       key={key}
                       icon={Play}
                       iconClassName="text-[#3b82f6]"
-                      label={(hoverMetricModes.plays ?? "median") === "median" ? "中位观看量" : "平均观看量"}
-                      value={(hoverMetricModes.plays ?? "median") === "median" ? creatorMetrics.medianPlays : creatorMetrics.averagePlays}
+                      label={
+                        (hoverMetricModes.plays ?? "median") === "median"
+                          ? "中位观看量"
+                          : "平均观看量"
+                      }
+                      value={
+                        (hoverMetricModes.plays ?? "median") === "median"
+                          ? creatorMetrics.medianPlays
+                          : creatorMetrics.averagePlays
+                      }
                       borderRight={showBorderRight}
                       borderTop={showBorderTop}
                     />
@@ -2950,7 +3013,13 @@ function FloatingCard({
                       icon={MessageCircle}
                       iconClassName="text-[#f59e0b]"
                       label={hoverMetricModes.comments === "median" ? "中位评论" : "平均评论"}
-                      value={hoverMetricModes.comments === "median" ? creatorMetrics.medianComments : formatComments(parseMetricToNumber(creatorMetrics.medianComments) * 1.16)}
+                      value={
+                        hoverMetricModes.comments === "median"
+                          ? creatorMetrics.medianComments
+                          : formatComments(
+                              parseMetricToNumber(creatorMetrics.medianComments) * 1.16,
+                            )
+                      }
                       borderRight={showBorderRight}
                       borderTop={showBorderTop}
                     />
@@ -3014,9 +3083,9 @@ function FloatingStatCell({
   return (
     <div
       className={cn(
-        "px-3 py-3 flex flex-col items-center text-center",
+        "flex flex-col items-center px-3 py-3 text-center",
         borderTop && "border-t border-[#e8e6dc]",
-        borderRight && "border-r border-[#e8e6dc]"
+        borderRight && "border-r border-[#e8e6dc]",
       )}
     >
       <div className="flex items-center gap-1 text-xs font-medium text-[#87867f]">
@@ -3027,7 +3096,6 @@ function FloatingStatCell({
     </div>
   );
 }
-
 
 function SimilarSidebar({
   closeButtonRef,
@@ -3156,7 +3224,9 @@ function SimilarSidebar({
   const creatorMetrics = getCreatorMetricSnapshot(creator, scrapeCount);
   const creatorCpm = creatorMetrics.cpm;
   const audienceHighlights = computeAudienceHighlights(getAudienceSummary(creator));
-  const configuredMetricKeys = selectedHoverMetricKeys.length ? selectedHoverMetricKeys : DEFAULT_HOVER_METRICS;
+  const configuredMetricKeys = selectedHoverMetricKeys.length
+    ? selectedHoverMetricKeys
+    : DEFAULT_HOVER_METRICS;
   const sidebarMetricItems = configuredMetricKeys.map((key) => {
     if (key === "rate") {
       return { key, icon: DollarSign, label: "预估报价", value: creatorMetrics.rate };
@@ -3166,7 +3236,10 @@ function SimilarSidebar({
         key,
         icon: ThumbsUp,
         label: hoverMetricModes.likes === "median" ? "中位点赞" : "平均点赞",
-        value: hoverMetricModes.likes === "median" ? creatorMetrics.medianLikes : formatLikes(parseMetricToNumber(creator.likes) * 1.08),
+        value:
+          hoverMetricModes.likes === "median"
+            ? creatorMetrics.medianLikes
+            : formatLikes(parseMetricToNumber(creator.likes) * 1.08),
       };
     }
     if (key === "plays") {
@@ -3174,7 +3247,10 @@ function SimilarSidebar({
         key,
         icon: Play,
         label: (hoverMetricModes.plays ?? "median") === "median" ? "中位观看量" : "平均观看量",
-        value: (hoverMetricModes.plays ?? "median") === "median" ? creatorMetrics.medianPlays : creatorMetrics.averagePlays,
+        value:
+          (hoverMetricModes.plays ?? "median") === "median"
+            ? creatorMetrics.medianPlays
+            : creatorMetrics.averagePlays,
       };
     }
     if (key === "comments") {
@@ -3197,7 +3273,7 @@ function SimilarSidebar({
     { id: "demo", label: "工作邮箱", address: "team@2linkr.io" },
   ]);
   const [selectedSenderId, setSelectedSenderId] = useState<string>(
-    senderEmails.length > 0 ? senderEmails[0].id : ""
+    senderEmails.length > 0 ? senderEmails[0].id : "",
   );
   const selectedSender = senderEmails.find((acct) => acct.id === selectedSenderId) ?? null;
   const [emailSubject, setEmailSubject] = useState("");
@@ -3225,7 +3301,7 @@ function SimilarSidebar({
   }, [creator, savedProjectCreators]);
   const selectedRecipientSet = new Set(selectedRecipientIds);
   const selectedRecipientCreators = emailCandidateCreators.filter((item) =>
-    selectedRecipientSet.has(item.id)
+    selectedRecipientSet.has(item.id),
   );
   const emailRecipientCreators = selectedRecipientCreators;
   const emailRecipientIds = emailRecipientCreators.map((item) => item.id);
@@ -3235,7 +3311,9 @@ function SimilarSidebar({
     const currentCreator = filteredRecipientCreators.find((item) => item.id === creator.id);
     const restCreators = filteredRecipientCreators.filter((item) => item.id !== creator.id);
     const selectedCreators = restCreators.filter((item) => selectedRecipientIds.includes(item.id));
-    const unselectedCreators = restCreators.filter((item) => !selectedRecipientIds.includes(item.id));
+    const unselectedCreators = restCreators.filter(
+      (item) => !selectedRecipientIds.includes(item.id),
+    );
     return currentCreator
       ? [currentCreator, ...selectedCreators, ...unselectedCreators]
       : [...selectedCreators, ...unselectedCreators];
@@ -3250,8 +3328,8 @@ function SimilarSidebar({
   const emailTemplateSegments = selectedEmailTemplate
     ? getEmailTemplateSegments(selectedEmailTemplate, previewCreator, selectedProject)
     : [];
-  const personalizedSegmentCount = emailTemplateSegments.filter((segment) =>
-    segment.personalized
+  const personalizedSegmentCount = emailTemplateSegments.filter(
+    (segment) => segment.personalized,
   ).length;
   const canOpenEmailReview =
     Boolean(selectedEmailTemplate) &&
@@ -3312,9 +3390,19 @@ function SimilarSidebar({
       return;
     }
 
-    setEmailSubject(getEmailTemplateSubject(selectedEmailTemplate, previewCreator, selectedProject));
-    onEmailDraftChange(getEmailTemplateDraft(selectedEmailTemplate, previewCreator, selectedProject));
-  }, [onEmailDraftChange, onSelectEmailTemplate, previewCreator, selectedEmailTemplate, selectedProject]);
+    setEmailSubject(
+      getEmailTemplateSubject(selectedEmailTemplate, previewCreator, selectedProject),
+    );
+    onEmailDraftChange(
+      getEmailTemplateDraft(selectedEmailTemplate, previewCreator, selectedProject),
+    );
+  }, [
+    onEmailDraftChange,
+    onSelectEmailTemplate,
+    previewCreator,
+    selectedEmailTemplate,
+    selectedProject,
+  ]);
 
   useEffect(() => {
     const availableIds = new Set(emailCandidateCreators.map((item) => item.id));
@@ -3339,7 +3427,7 @@ function SimilarSidebar({
 
     setEmailAttachments((current) => {
       const existingKeys = new Set(
-        current.map((file) => `${file.name}-${file.size}-${file.lastModified}`)
+        current.map((file) => `${file.name}-${file.size}-${file.lastModified}`),
       );
       const next = [...current];
 
@@ -3421,7 +3509,7 @@ function SimilarSidebar({
       className={cn(
         "absolute inset-y-0 right-0 z-20 flex flex-row border-l border-[#e8e6dc] bg-[#faf9f5]/96 shadow-[-20px_0_60px_-30px_rgba(77,76,72,0.18)] backdrop-blur transition-[width] duration-300",
         collapsed && "w-11",
-        isResizing && "select-none transition-none"
+        isResizing && "transition-none select-none",
       )}
       style={collapsed ? undefined : { width: expandedWidth }}
     >
@@ -3439,7 +3527,7 @@ function SimilarSidebar({
               "absolute inset-y-6 left-1/2 -translate-x-1/2 rounded-full bg-[#ddd8ce] transition-all duration-150",
               isResizing
                 ? "w-1.5 bg-[#c96442] shadow-[0_0_0_3px_rgba(201,100,66,0.15)]"
-                : "w-px group-hover:w-1 group-hover:bg-[#c96442]/70"
+                : "w-px group-hover:w-1 group-hover:bg-[#c96442]/70",
             )}
           />
         </div>
@@ -3481,7 +3569,9 @@ function SimilarSidebar({
               onChangeHoverMetricModes={onChangeHoverMetricModes}
               onRecordQuickSettingsChange={onRecordQuickSettingsChange}
               pluginStatus={pluginStatus}
-              onTogglePluginStatus={() => setPluginStatus((s) => (s === "working" ? "idle" : "working"))}
+              onTogglePluginStatus={() =>
+                setPluginStatus((s) => (s === "working" ? "idle" : "working"))
+              }
               onOpenWeb={onOpenWeb}
             />
           ) : null}
@@ -3524,7 +3614,9 @@ function SimilarSidebar({
                         第一层 · 大标题（可点击折叠）
                         第二层 · 元信息（最近N条 + 数据透视）
                         第三层 · 指标数据 */}
-                  <div className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#e8e6dc] bg-white`}>
+                  <div
+                    className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#e8e6dc] bg-white`}
+                  >
                     <button
                       type="button"
                       onClick={() => setCoreMetricsOpen((v) => !v)}
@@ -3538,7 +3630,7 @@ function SimilarSidebar({
                       <ChevronDown
                         className={cn(
                           "h-4 w-4 text-[#87867f] transition-transform duration-200",
-                          coreMetricsOpen && "rotate-180"
+                          coreMetricsOpen && "rotate-180",
                         )}
                       />
                     </button>
@@ -3553,12 +3645,17 @@ function SimilarSidebar({
                           className="inline-flex items-center gap-0.5 rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-2 py-1 text-[11px] font-semibold text-[#4d4c48] transition-all hover:border-[#d1cfc5] hover:bg-[#f0ece4]"
                         >
                           <span>最近 {scrapeCount} 条</span>
-                          <ChevronDown className={cn("h-3 w-3 text-[#87867f] transition-transform", metricsRangeMenuOpen && "rotate-180")} />
+                          <ChevronDown
+                            className={cn(
+                              "h-3 w-3 text-[#87867f] transition-transform",
+                              metricsRangeMenuOpen && "rotate-180",
+                            )}
+                          />
                         </button>
                         {metricsRangeMenuOpen ? (
                           <div
                             role="listbox"
-                            className="absolute left-0 top-full z-30 mt-1 w-[108px] overflow-hidden rounded-[14px] border border-[#e8e6dc] bg-white shadow-[0_16px_40px_-20px_rgba(77,76,72,0.25)]"
+                            className="absolute top-full left-0 z-30 mt-1 w-[108px] overflow-hidden rounded-[14px] border border-[#e8e6dc] bg-white shadow-[0_16px_40px_-20px_rgba(77,76,72,0.25)]"
                           >
                             {SCRAPE_COUNT_OPTIONS.map((opt) => (
                               <button
@@ -3572,7 +3669,9 @@ function SimilarSidebar({
                                 }}
                                 className={cn(
                                   "flex w-full items-center justify-between px-2.5 py-1.5 text-[11px] transition-colors hover:bg-[#f5f4ed]",
-                                  opt === scrapeCount ? "font-semibold text-[#c96442]" : "text-[#4d4c48]"
+                                  opt === scrapeCount
+                                    ? "font-semibold text-[#c96442]"
+                                    : "text-[#4d4c48]",
                                 )}
                               >
                                 <span>最近 {opt} 条</span>
@@ -3593,9 +3692,10 @@ function SimilarSidebar({
                           <CircleHelp className="h-3.5 w-3.5 cursor-help text-[#b8b6ad] transition-colors hover:text-[#87867f]" />
                           <span
                             role="tooltip"
-                            className="pointer-events-none absolute right-0 top-full z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
+                            className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
                           >
-                            在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前 N 条视频。若取数异常，刷新网页即可。
+                            在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前
+                            N 条视频。若取数异常，刷新网页即可。
                           </span>
                         </span>
                         <button
@@ -3606,13 +3706,13 @@ function SimilarSidebar({
                           onClick={onToggleDataCheck}
                           className={cn(
                             "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                            dataCheckOn ? "bg-[#c96442]" : "bg-[#d8d4c8]"
+                            dataCheckOn ? "bg-[#c96442]" : "bg-[#d8d4c8]",
                           )}
                         >
                           <span
                             className={cn(
                               "absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                              dataCheckOn && "translate-x-4"
+                              dataCheckOn && "translate-x-4",
                             )}
                           />
                         </button>
@@ -3623,7 +3723,12 @@ function SimilarSidebar({
                       <div className="border-t border-[#ececec]">
                         <div className="grid grid-cols-2 divide-x divide-y divide-[#ececec]">
                           {sidebarMetricItems.map((item) => (
-                            <SidebarMetricInline key={item.key} icon={item.icon} label={item.label} value={item.value} />
+                            <SidebarMetricInline
+                              key={item.key}
+                              icon={item.icon}
+                              label={item.label}
+                              value={item.value}
+                            />
                           ))}
                         </div>
                       </div>
@@ -3651,15 +3756,21 @@ function SimilarSidebar({
                     <div className="grid grid-cols-3 gap-1.5 text-center">
                       <div className="rounded-[12px] bg-[#faf9f5] px-2 py-2">
                         <div className="text-[10.5px] text-[#87867f]">扑街率</div>
-                        <div className="mt-0.5 text-sm font-semibold text-[#141413]">{diagnostics.flopRate}%</div>
+                        <div className="mt-0.5 text-sm font-semibold text-[#141413]">
+                          {diagnostics.flopRate}%
+                        </div>
                       </div>
                       <div className="rounded-[12px] bg-[#faf9f5] px-2 py-2">
                         <div className="text-[10.5px] text-[#87867f]">常态区间</div>
-                        <div className="mt-0.5 text-sm font-semibold text-emerald-600">{diagnostics.normalRange}</div>
+                        <div className="mt-0.5 text-sm font-semibold text-emerald-600">
+                          {diagnostics.normalRange}
+                        </div>
                       </div>
                       <div className="rounded-[12px] bg-[#faf9f5] px-2 py-2">
                         <div className="text-[10.5px] text-[#87867f]">爆款率</div>
-                        <div className="mt-0.5 text-sm font-semibold text-[#141413]">{diagnostics.hitRate}%</div>
+                        <div className="mt-0.5 text-sm font-semibold text-[#141413]">
+                          {diagnostics.hitRate}%
+                        </div>
                       </div>
                     </div>
                     <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-[3px] text-[11px] text-emerald-700">
@@ -3703,7 +3814,10 @@ function SimilarSidebar({
                     <button
                       type="button"
                       onClick={() => {
-                        window.open(`/workspace?creator=${encodeURIComponent(creator.id)}&tab=audience`, "_blank");
+                        window.open(
+                          `/workspace?creator=${encodeURIComponent(creator.id)}&tab=audience`,
+                          "_blank",
+                        );
                       }}
                       className="mt-2.5 flex w-full items-center justify-center gap-1 rounded-[12px] border border-[#e8e6dc] bg-white py-2 text-xs text-[#87867f] transition-all hover:border-[#d1cfc5] hover:bg-[#faf9f5] hover:text-[#5e5d59]"
                     >
@@ -3720,7 +3834,9 @@ function SimilarSidebar({
                       <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e8e6dc] bg-white text-[#c96442] shadow-sm">
                         <Lock className="h-4 w-4" />
                       </div>
-                      <div className="mt-2.5 text-sm font-semibold text-[#141413]">解锁深度受众分析</div>
+                      <div className="mt-2.5 text-sm font-semibold text-[#141413]">
+                        解锁深度受众分析
+                      </div>
                       <p className="mt-1 max-w-[240px] text-[11.5px] leading-[1.55] text-[#5e5d59]">
                         系统将深扫互动粉丝、剔除水军与低净值流量，输出更精准的受众画像与谈判依据。
                       </p>
@@ -3739,7 +3855,6 @@ function SimilarSidebar({
                   </div>
                 </div>
               )}
-
             </div>
           ) : null}
 
@@ -3769,7 +3884,7 @@ function SimilarSidebar({
                           ? "border-[#c96442] bg-[#fff7f1] text-[#c96442]"
                           : "border-[#e8e6dc] text-[#b8b3a8] hover:border-[#c96442]/35 hover:bg-[#fff7f1] hover:text-[#c96442]",
                         filteredRecipientCreators.length === 0 &&
-                          "text-[#c8c5bc] hover:border-[#e8e6dc] hover:bg-white"
+                          "text-[#c8c5bc] hover:border-[#e8e6dc] hover:bg-white",
                       )}
                     >
                       <Check className="h-2.5 w-2.5" />
@@ -3790,7 +3905,7 @@ function SimilarSidebar({
                           className={cn(
                             "group flex h-10 items-center gap-1.5 rounded-[14px] border bg-white px-2 py-1 transition-all",
                             isSelected ? "border-[#c96442]/40 bg-[#fff7f1]" : "border-[#ece9df]",
-                            isPreviewing && "ring-1 ring-inset ring-[#f4cf6a]/75"
+                            isPreviewing && "ring-1 ring-[#f4cf6a]/75 ring-inset",
                           )}
                         >
                           <button
@@ -3802,7 +3917,7 @@ function SimilarSidebar({
                               "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all",
                               isSelected
                                 ? "border-[#c96442] bg-[#c96442] text-white"
-                                : "border-[#d8d4c8] bg-[#faf9f5] text-transparent hover:border-[#c96442]/45"
+                                : "border-[#d8d4c8] bg-[#faf9f5] text-transparent hover:border-[#c96442]/45",
                             )}
                           >
                             <Check className="h-2 w-2" />
@@ -3880,12 +3995,16 @@ function SimilarSidebar({
                           className={emailCompactControlClasses}
                         >
                           {senderEmails.map((acct) => (
-                            <option key={acct.id} value={acct.id} className="bg-white text-[#141413]">
+                            <option
+                              key={acct.id}
+                              value={acct.id}
+                              className="bg-white text-[#141413]"
+                            >
                               {acct.address}
                             </option>
                           ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4d4c48]" />
+                        <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#4d4c48]" />
                       </div>
                     )}
                   </div>
@@ -3896,19 +4015,25 @@ function SimilarSidebar({
                       <div className="relative">
                         <select
                           value={selectedEmailTemplate}
-                          onChange={(e) => onSelectEmailTemplate(e.target.value as EmailTemplateKey)}
+                          onChange={(e) =>
+                            onSelectEmailTemplate(e.target.value as EmailTemplateKey)
+                          }
                           className={emailCompactControlClasses}
                         >
                           <option value="" className="bg-white text-[#87867f]">
                             请选择模板
                           </option>
                           {emailTemplates.map((template) => (
-                            <option key={template.key} value={template.key} className="bg-white text-[#141413]">
+                            <option
+                              key={template.key}
+                              value={template.key}
+                              className="bg-white text-[#141413]"
+                            >
                               {template.label}
                             </option>
                           ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#4d4c48]" />
+                        <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#4d4c48]" />
                       </div>
                       {activeEmailTemplate ? (
                         <div className="px-1 text-[11px] leading-[1.45] text-[#87867f]">
@@ -3967,7 +4092,7 @@ function SimilarSidebar({
                                       aria-label={`移除附件 ${file.name}`}
                                       onClick={() =>
                                         setEmailAttachments((current) =>
-                                          current.filter((item) => item !== file)
+                                          current.filter((item) => item !== file),
                                         )
                                       }
                                       className="ml-0.5 text-[#b0aea6] transition-colors hover:text-[#4d4c48]"
@@ -4001,9 +4126,10 @@ function SimilarSidebar({
                             </span>
                             <span
                               role="tooltip"
-                              className="pointer-events-none absolute right-0 top-full z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/highlight:opacity-100"
+                              className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/highlight:opacity-100"
                             >
-                              高亮内容仅用于标识 AI 为该博主生成的个性化替换内容，不会显示在最终邮件正文中。
+                              高亮内容仅用于标识 AI
+                              为该博主生成的个性化替换内容，不会显示在最终邮件正文中。
                             </span>
                           </span>
                         </div>
@@ -4017,9 +4143,7 @@ function SimilarSidebar({
                 </div>
 
                 <div className="relative mt-3">
-                  <div
-                    className="flex overflow-hidden rounded-full bg-[#c96442] text-[#faf9f5] shadow-[0_16px_30px_-24px_rgba(201,100,66,0.65)]"
-                  >
+                  <div className="flex overflow-hidden rounded-full bg-[#c96442] text-[#faf9f5] shadow-[0_16px_30px_-24px_rgba(201,100,66,0.65)]">
                     <button
                       type="button"
                       disabled={!canOpenEmailReview}
@@ -4032,8 +4156,12 @@ function SimilarSidebar({
                         <Send className="h-4 w-4" />
                       )}
                       {sendMode === "scheduled"
-                        ? emailRecipientCount > 1 ? `定时 ${emailRecipientCount} 人` : "确认定时"
-                        : emailRecipientCount > 1 ? `一键建联 ${emailRecipientCount} 人` : "一键建联"}
+                        ? emailRecipientCount > 1
+                          ? `定时 ${emailRecipientCount} 人`
+                          : "确认定时"
+                        : emailRecipientCount > 1
+                          ? `一键建联 ${emailRecipientCount} 人`
+                          : "一键建联"}
                     </button>
                     <button
                       type="button"
@@ -4050,7 +4178,7 @@ function SimilarSidebar({
                   </div>
 
                   {sendMenuOpen ? (
-                    <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-[18px] border border-[#e8e6dc] bg-white shadow-[0_20px_42px_-24px_rgba(77,76,72,0.35)]">
+                    <div className="absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-[18px] border border-[#e8e6dc] bg-white shadow-[0_20px_42px_-24px_rgba(77,76,72,0.35)]">
                       <button
                         type="button"
                         role="menuitem"
@@ -4060,7 +4188,7 @@ function SimilarSidebar({
                         }}
                         className={cn(
                           "flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition-colors hover:bg-[#faf9f5]",
-                          sendMode === "now" ? "font-semibold text-[#c96442]" : "text-[#4d4c48]"
+                          sendMode === "now" ? "font-semibold text-[#c96442]" : "text-[#4d4c48]",
                         )}
                       >
                         <span className="inline-flex items-center gap-2">
@@ -4078,7 +4206,9 @@ function SimilarSidebar({
                         }}
                         className={cn(
                           "flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition-colors hover:bg-[#faf9f5]",
-                          sendMode === "scheduled" ? "font-semibold text-[#c96442]" : "text-[#4d4c48]"
+                          sendMode === "scheduled"
+                            ? "font-semibold text-[#c96442]"
+                            : "text-[#4d4c48]",
                         )}
                       >
                         <span className="inline-flex items-center gap-2">
@@ -4101,7 +4231,7 @@ function SimilarSidebar({
                       type="datetime-local"
                       value={scheduledAt}
                       onChange={(event) => setScheduledAt(event.target.value)}
-                      className="h-9 w-full rounded-full border border-[#e8e6dc] bg-white px-3 text-sm text-[#141413] outline-none transition-colors focus:border-[#c96442]/35"
+                      className="h-9 w-full rounded-full border border-[#e8e6dc] bg-white px-3 text-sm text-[#141413] transition-colors outline-none focus:border-[#c96442]/35"
                     />
                     <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#87867f]">
                       <Clock3 className="h-3 w-3" />
@@ -4170,7 +4300,7 @@ function SimilarSidebar({
                           />
                           <div className="flex min-w-0 flex-1 flex-col gap-1">
                             <div
-                              className="truncate text-[15px] font-semibold leading-tight text-[#141413]"
+                              className="truncate text-[15px] leading-tight font-semibold text-[#141413]"
                               style={{ fontFamily: "Georgia, serif" }}
                             >
                               {creator.handle}
@@ -4191,11 +4321,11 @@ function SimilarSidebar({
                             type="button"
                             aria-label="打开博主分析"
                             onClick={() => onSelectSidebarTab("current")}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-[12px] border border-[#edd9ce] bg-[linear-gradient(180deg,#fffdfa_0%,#f8efe8_100%)] text-[#c96442] shadow-[0_10px_24px_-20px_rgba(201,100,66,0.55)] transition-all duration-150 hover:-translate-y-[1px] hover:border-[#d9b6a6] hover:bg-[#fff7f1] hover:text-[#b85a39] active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#c96442]/20"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-[12px] border border-[#edd9ce] bg-[linear-gradient(180deg,#fffdfa_0%,#f8efe8_100%)] text-[#c96442] shadow-[0_10px_24px_-20px_rgba(201,100,66,0.55)] transition-all duration-150 hover:-translate-y-[1px] hover:border-[#d9b6a6] hover:bg-[#fff7f1] hover:text-[#b85a39] focus:ring-2 focus:ring-[#c96442]/20 focus:outline-none active:scale-[0.97]"
                           >
                             <SidebarAnalysisSparkleIcon className="h-4 w-4" />
                           </button>
-                          <span className="pointer-events-none absolute right-0 top-full z-20 mt-1.5 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                          <span className="pointer-events-none absolute top-full right-0 z-20 mt-1.5 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
                             博主分析
                           </span>
                         </div>
@@ -4216,14 +4346,14 @@ function SimilarSidebar({
                               <ChevronDown
                                 className={cn(
                                   "h-2.5 w-2.5 text-[#918a7b] transition-transform",
-                                  similarMetricsRangeMenuOpen && "rotate-180"
+                                  similarMetricsRangeMenuOpen && "rotate-180",
                                 )}
                               />
                             </button>
                             {similarMetricsRangeMenuOpen ? (
                               <div
                                 role="listbox"
-                                className="absolute left-0 top-full z-30 mt-1 w-[104px] overflow-hidden rounded-[12px] border border-[#ece4d8] bg-[#fffffd] shadow-[0_14px_32px_-18px_rgba(77,76,72,0.24)]"
+                                className="absolute top-full left-0 z-30 mt-1 w-[104px] overflow-hidden rounded-[12px] border border-[#ece4d8] bg-[#fffffd] shadow-[0_14px_32px_-18px_rgba(77,76,72,0.24)]"
                               >
                                 {SCRAPE_COUNT_OPTIONS.map((opt) => (
                                   <button
@@ -4237,7 +4367,9 @@ function SimilarSidebar({
                                     }}
                                     className={cn(
                                       "flex w-full items-center justify-between px-2.5 py-1.5 text-[10.5px] transition-colors hover:bg-[#faf5ee]",
-                                      opt === scrapeCount ? "font-semibold text-[#c96442]" : "text-[#4d4c48]"
+                                      opt === scrapeCount
+                                        ? "font-semibold text-[#c96442]"
+                                        : "text-[#4d4c48]",
                                     )}
                                   >
                                     <span>{opt}条</span>
@@ -4256,9 +4388,10 @@ function SimilarSidebar({
                               <CircleHelp className="h-3 w-3 cursor-help text-[#aaa395] transition-colors hover:text-[#87867f]" />
                               <span
                                 role="tooltip"
-                                className="pointer-events-none absolute right-0 top-full z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
+                                className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[11px] leading-[1.55] text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
                               >
-                                在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前 N 条视频。若取数异常，刷新网页即可。
+                                在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前
+                                N 条视频。若取数异常，刷新网页即可。
                               </span>
                             </span>
                             <button
@@ -4271,13 +4404,13 @@ function SimilarSidebar({
                                 "relative h-[18px] w-[30px] shrink-0 rounded-full border transition-colors",
                                 dataCheckOn
                                   ? "border-[#d26b49] bg-[#d26b49]"
-                                  : "border-[#d6ccb7] bg-[#d8cfbe]"
+                                  : "border-[#d6ccb7] bg-[#d8cfbe]",
                               )}
                             >
                               <span
                                 className={cn(
-                                  "absolute left-[1px] top-[1px] h-[14px] w-[14px] rounded-full bg-[#fffaf1] shadow-[0_1px_2px_rgba(77,76,72,0.18)] transition-transform",
-                                  dataCheckOn && "translate-x-3"
+                                  "absolute top-[1px] left-[1px] h-[14px] w-[14px] rounded-full bg-[#fffaf1] shadow-[0_1px_2px_rgba(77,76,72,0.18)] transition-transform",
+                                  dataCheckOn && "translate-x-3",
                                 )}
                               />
                             </button>
@@ -4295,7 +4428,10 @@ function SimilarSidebar({
                           {sidebarMetricItems.map((item) => {
                             const Icon = item.icon;
                             return (
-                              <div key={item.key} className="flex min-h-[56px] flex-col items-center justify-center px-2.5 py-1.5 text-center">
+                              <div
+                                key={item.key}
+                                className="flex min-h-[56px] flex-col items-center justify-center px-2.5 py-1.5 text-center"
+                              >
                                 <div className="inline-flex items-center gap-1 text-[10px] font-medium text-[#8b897f]">
                                   <Icon className="h-3.5 w-3.5" />
                                   <span>{item.label}</span>
@@ -4308,7 +4444,6 @@ function SimilarSidebar({
                           })}
                         </div>
                       </div>
-
                     </div>
                   }
                 />
@@ -4324,7 +4459,10 @@ function SimilarSidebar({
                       className="h-5 w-5 shrink-0 border border-white/80 shadow-[0_2px_8px_-4px_rgba(20,20,19,0.35)]"
                       labelClassName="text-[9px]"
                     />
-                    <span className="truncate font-semibold text-[#141413]" style={{ fontFamily: "Georgia, serif" }}>
+                    <span
+                      className="truncate font-semibold text-[#141413]"
+                      style={{ fontFamily: "Georgia, serif" }}
+                    >
                       {creator.handle}
                     </span>
                     <span>· {activeResults.total} 位匹配</span>
@@ -4332,10 +4470,9 @@ function SimilarSidebar({
                   <button
                     type="button"
                     onClick={() => {
-                      const blob = new Blob(
-                        [activeResults.cards.map((c) => c.name).join("\n")],
-                        { type: "text/plain" }
-                      );
+                      const blob = new Blob([activeResults.cards.map((c) => c.name).join("\n")], {
+                        type: "text/plain",
+                      });
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
@@ -4393,9 +4530,7 @@ function SimilarSidebar({
                   onChangeScrapeCount={onChangeScrapeCount}
                   onSendEmail={(creatorId) => {
                     onSaveCreator(creatorId);
-                    setSelectedRecipientIds((prev) =>
-                      Array.from(new Set([...prev, creatorId]))
-                    );
+                    setSelectedRecipientIds((prev) => Array.from(new Set([...prev, creatorId])));
                     onSelectSidebarTab("email");
                   }}
                 />
@@ -4417,12 +4552,12 @@ function SimilarSidebar({
               aria-label={collapsed ? "打开侧边栏" : "收起侧边栏"}
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
-                "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
+                "text-[#87867f] hover:bg-white hover:text-[#4d4c48]",
               )}
             >
               <PanelRight className="h-3.5 w-3.5" />
             </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               {collapsed ? "打开侧边栏" : "收起侧边栏"}
             </span>
           </div>
@@ -4431,18 +4566,21 @@ function SimilarSidebar({
           <div className="group relative">
             <button
               type="button"
-              onClick={() => { onSelectSidebarTab("similar"); if (collapsed) onToggleCollapse(); }}
+              onClick={() => {
+                onSelectSidebarTab("similar");
+                if (collapsed) onToggleCollapse();
+              }}
               aria-label="找相似"
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
                 !collapsed && activeSidebarTab === "similar"
                   ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
+                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]",
               )}
             >
               <Search className="h-3.5 w-3.5" />
             </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               找相似
             </span>
           </div>
@@ -4451,19 +4589,22 @@ function SimilarSidebar({
           <div className="group relative">
             <button
               type="button"
-              onClick={() => { onSelectSidebarTab("current"); if (collapsed) onToggleCollapse(); }}
+              onClick={() => {
+                onSelectSidebarTab("current");
+                if (collapsed) onToggleCollapse();
+              }}
               aria-label="博主分析"
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
                 !collapsed && activeSidebarTab === "current"
                   ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
+                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]",
               )}
             >
               <User className="h-3.5 w-3.5" />
             </button>
             {/* Tooltip — points LEFT into content */}
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               博主分析
             </span>
           </div>
@@ -4472,18 +4613,21 @@ function SimilarSidebar({
           <div className="group relative">
             <button
               type="button"
-              onClick={() => { onSelectSidebarTab("email"); if (collapsed) onToggleCollapse(); }}
+              onClick={() => {
+                onSelectSidebarTab("email");
+                if (collapsed) onToggleCollapse();
+              }}
               aria-label="邮件建联"
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
                 !collapsed && activeSidebarTab === "email"
                   ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
+                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]",
               )}
             >
               <Mail className="h-3.5 w-3.5" />
             </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               邮件建联
             </span>
           </div>
@@ -4492,18 +4636,21 @@ function SimilarSidebar({
           <div className="group relative">
             <button
               type="button"
-              onClick={() => { onSelectSidebarTab("quick"); if (collapsed) onToggleCollapse(); }}
+              onClick={() => {
+                onSelectSidebarTab("quick");
+                if (collapsed) onToggleCollapse();
+              }}
               aria-label="预览设置"
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
                 !collapsed && activeSidebarTab === "quick"
                   ? "bg-[#c96442]/10 text-[#c96442]"
-                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]"
+                  : "text-[#87867f] hover:bg-white hover:text-[#4d4c48]",
               )}
             >
               <Settings className="h-3.5 w-3.5" />
             </button>
-            <span className="pointer-events-none absolute right-[calc(100%+8px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[11px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               预览设置
             </span>
           </div>
@@ -4511,7 +4658,6 @@ function SimilarSidebar({
 
         {/* Spacer */}
         <div className="flex-1" />
-
       </div>
     </aside>
   );
@@ -4563,15 +4709,20 @@ function QuickSettingsPanel({
   onOpenWeb: () => void;
 }) {
   const [selectedCountry, setSelectedCountry] = useState(location.country);
-  const [regionTier, setRegionTier] = useState<RegionTierKey>(getRegionTierForCountry(location.country));
+  const [regionTier, setRegionTier] = useState<RegionTierKey>(
+    getRegionTierForCountry(location.country),
+  );
   const [cpmAmount, setCpmAmount] = useState(parseCpmAmount(creatorMetrics.cpm));
   const [currencyUnit, setCurrencyUnit] = useState<(typeof CURRENCY_OPTIONS)[number]>("USD");
   const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [draftPlatform, setDraftPlatform] = useState<SocialPlatformKey>(selectedPlatform);
   const [draftCountry, setDraftCountry] = useState(location.country);
-  const [draftRegionTier, setDraftRegionTier] = useState<RegionTierKey>(getRegionTierForCountry(location.country));
+  const [draftRegionTier, setDraftRegionTier] = useState<RegionTierKey>(
+    getRegionTierForCountry(location.country),
+  );
   const [draftCpmAmount, setDraftCpmAmount] = useState(parseCpmAmount(creatorMetrics.cpm));
-  const [draftCurrencyUnit, setDraftCurrencyUnit] = useState<(typeof CURRENCY_OPTIONS)[number]>("USD");
+  const [draftCurrencyUnit, setDraftCurrencyUnit] =
+    useState<(typeof CURRENCY_OPTIONS)[number]>("USD");
 
   useEffect(() => {
     const browserCountry =
@@ -4652,24 +4803,26 @@ function QuickSettingsPanel({
   };
 
   const toggleHoverMetric = (key: HoverMetricKey) => {
-    onChangeHoverMetricKeys((() => {
-      const current = selectedHoverMetricKeys;
-      if (current.includes(key)) {
-        return current.filter((item) => item !== key);
-      }
-      if (current.length >= HOVER_CARD_MAX_METRICS) {
-        showHoverLimitToast();
-        return current;
-      }
-      return [...current, key];
-    })());
+    onChangeHoverMetricKeys(
+      (() => {
+        const current = selectedHoverMetricKeys;
+        if (current.includes(key)) {
+          return current.filter((item) => item !== key);
+        }
+        if (current.length >= HOVER_CARD_MAX_METRICS) {
+          showHoverLimitToast();
+          return current;
+        }
+        return [...current, key];
+      })(),
+    );
   };
 
   const toggleInlineDataKey = (key: InlineDataKey) => {
     onChangeInlineDataKeys(
       inlineDataKeys.includes(key)
         ? inlineDataKeys.filter((item) => item !== key)
-        : [...inlineDataKeys, key]
+        : [...inlineDataKeys, key],
     );
   };
 
@@ -4701,21 +4854,28 @@ function QuickSettingsPanel({
       key: "plays",
       icon: Play,
       label: `${resolvedHoverMetricModes.plays === "median" ? "中位" : "平均"}观看量`,
-      value: resolvedHoverMetricModes.plays === "median" ? creatorMetrics.medianPlays : creatorMetrics.averagePlays,
+      value:
+        resolvedHoverMetricModes.plays === "median"
+          ? creatorMetrics.medianPlays
+          : creatorMetrics.averagePlays,
       modeLabels: ["中位", "平均"],
     },
     {
       key: "likes",
       icon: ThumbsUp,
       label: `${resolvedHoverMetricModes.likes === "median" ? "中位" : "平均"}点赞量`,
-      value: resolvedHoverMetricModes.likes === "median" ? creatorMetrics.medianLikes : averageLikes,
+      value:
+        resolvedHoverMetricModes.likes === "median" ? creatorMetrics.medianLikes : averageLikes,
       modeLabels: ["中位", "平均"],
     },
     {
       key: "comments",
       icon: MessageCircle,
       label: `${resolvedHoverMetricModes.comments === "median" ? "中位" : "平均"}评论量`,
-      value: resolvedHoverMetricModes.comments === "median" ? creatorMetrics.medianComments : averageComments,
+      value:
+        resolvedHoverMetricModes.comments === "median"
+          ? creatorMetrics.medianComments
+          : averageComments,
       modeLabels: ["中位", "平均"],
     },
     {
@@ -4726,7 +4886,11 @@ function QuickSettingsPanel({
     },
   ];
 
-  const inlineDataOptions: Array<{ key: InlineDataKey; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  const inlineDataOptions: Array<{
+    key: InlineDataKey;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
     { key: "plays", label: "播放", icon: Play },
     { key: "likes", label: "点赞", icon: ThumbsUp },
     { key: "comments", label: "评论", icon: MessageCircle },
@@ -4739,7 +4903,9 @@ function QuickSettingsPanel({
       <div className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#e8e6dc] bg-white`}>
         <div className="flex items-center justify-between border-b border-[#efede6] px-3 py-2.5">
           <div className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#141413]">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#141413] text-[13px] font-semibold text-white">♪</span>
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#141413] text-[13px] font-semibold text-white">
+              ♪
+            </span>
             社媒与 CPM
           </div>
           <button
@@ -4748,7 +4914,11 @@ function QuickSettingsPanel({
             aria-label={isEditingSettings ? "确认保存设置" : "编辑设置"}
             className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#e8e6dc] bg-white text-[#6b6a64] transition-colors hover:border-[#d1cfc5] hover:text-[#141413]"
           >
-            {isEditingSettings ? <Check className="h-3.5 w-3.5 text-[#c96442]" /> : <Pencil className="h-3.5 w-3.5" />}
+            {isEditingSettings ? (
+              <Check className="h-3.5 w-3.5 text-[#c96442]" />
+            ) : (
+              <Pencil className="h-3.5 w-3.5" />
+            )}
           </button>
         </div>
 
@@ -4761,8 +4931,8 @@ function QuickSettingsPanel({
                 onChange={(event) => setDraftPlatform(event.target.value as SocialPlatformKey)}
                 disabled={!isEditingSettings}
                 className={cn(
-                  "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pl-9 pr-8 text-sm font-semibold text-[#141413] outline-none transition-colors focus:border-[#c96442]/35",
-                  !isEditingSettings && "cursor-not-allowed opacity-60"
+                  "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pr-8 pl-9 text-sm font-semibold text-[#141413] transition-colors outline-none focus:border-[#c96442]/35",
+                  !isEditingSettings && "cursor-not-allowed opacity-60",
                 )}
               >
                 {SOCIAL_PLATFORM_OPTIONS.map((item) => (
@@ -4771,8 +4941,11 @@ function QuickSettingsPanel({
                   </option>
                 ))}
               </select>
-              <SocialPlatformLogo platform={draftPlatform} className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
+              <SocialPlatformLogo
+                platform={draftPlatform}
+                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              />
+              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
             </div>
           </div>
 
@@ -4785,8 +4958,8 @@ function QuickSettingsPanel({
                   onChange={(event) => setDraftCountryWithTier(event.target.value)}
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pl-9 pr-8 text-sm text-[#141413] outline-none transition-colors focus:border-[#c96442]/35",
-                    !isEditingSettings && "cursor-not-allowed opacity-60"
+                    "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pr-8 pl-9 text-sm text-[#141413] transition-colors outline-none focus:border-[#c96442]/35",
+                    !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 >
                   {COUNTRY_OPTIONS.map((item) => (
@@ -4795,10 +4968,10 @@ function QuickSettingsPanel({
                     </option>
                   ))}
                 </select>
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
                   {draftCountryFlag}
                 </span>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
               </div>
             </div>
 
@@ -4815,8 +4988,8 @@ function QuickSettingsPanel({
                   }}
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pr-8 text-sm text-[#141413] outline-none transition-colors focus:border-[#c96442]/35",
-                    !isEditingSettings && "cursor-not-allowed opacity-60"
+                    "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pr-8 text-sm text-[#141413] transition-colors outline-none focus:border-[#c96442]/35",
+                    !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 >
                   {REGION_TIER_OPTIONS.map((item) => (
@@ -4825,7 +4998,7 @@ function QuickSettingsPanel({
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
               </div>
             </div>
           </div>
@@ -4834,7 +5007,7 @@ function QuickSettingsPanel({
             <div className="mb-1.5 text-xs font-medium text-zinc-500">CPM 设定</div>
             <div className="grid grid-cols-[1fr_92px] gap-2">
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#87867f]">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm font-semibold text-[#87867f]">
                   {draftCurrencySymbol}
                 </span>
                 <input
@@ -4845,19 +5018,21 @@ function QuickSettingsPanel({
                   onChange={(event) => setDraftCpmAmount(event.target.value)}
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pl-7 text-sm font-semibold text-[#141413] outline-none transition-colors focus:border-[#c96442]/35",
-                    !isEditingSettings && "cursor-not-allowed opacity-60"
+                    "h-9 w-full rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pl-7 text-sm font-semibold text-[#141413] transition-colors outline-none focus:border-[#c96442]/35",
+                    !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 />
               </div>
               <div className="relative">
                 <select
                   value={draftCurrencyUnit}
-                  onChange={(event) => setDraftCurrencyUnit(event.target.value as (typeof CURRENCY_OPTIONS)[number])}
+                  onChange={(event) =>
+                    setDraftCurrencyUnit(event.target.value as (typeof CURRENCY_OPTIONS)[number])
+                  }
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pr-7 text-sm font-semibold text-[#141413] outline-none transition-colors focus:border-[#c96442]/35",
-                    !isEditingSettings && "cursor-not-allowed opacity-60"
+                    "h-9 w-full appearance-none rounded-full border border-[#e8e6dc] bg-[#faf9f5] px-3 pr-7 text-sm font-semibold text-[#141413] transition-colors outline-none focus:border-[#c96442]/35",
+                    !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 >
                   {CURRENCY_OPTIONS.map((item) => (
@@ -4866,26 +5041,30 @@ function QuickSettingsPanel({
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
               </div>
             </div>
             <div className="mt-1.5 inline-flex rounded-full bg-[#f5f4ed] px-2 py-1 text-[11px] font-medium text-[#87867f]">
-              {draftCountryFlag} {draftCountry || "未指定"} · {getRegionTierLabel(draftRegionTier)} · CPM {CURRENCY_SYMBOLS[draftCurrencyUnit]}{draftCpmAmount || "0"}
+              {draftCountryFlag} {draftCountry || "未指定"} · {getRegionTierLabel(draftRegionTier)}{" "}
+              · CPM {CURRENCY_SYMBOLS[draftCurrencyUnit]}
+              {draftCpmAmount || "0"}
             </div>
           </div>
         </div>
       </div>
 
-      <div className={`${SIDEBAR_CARD_RADIUS} relative overflow-hidden border border-[#e8e6dc] bg-white`}>
+      <div
+        className={`${SIDEBAR_CARD_RADIUS} relative overflow-hidden border border-[#e8e6dc] bg-white`}
+      >
         {/* 超限 toast */}
         <div
           aria-live="polite"
           className={cn(
             "pointer-events-none absolute inset-x-3 top-[42px] z-30 flex justify-center transition-all duration-200",
-            hoverLimitToast ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
+            hoverLimitToast ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
           )}
         >
-          <span className="rounded-[14px] bg-[#141413] px-3.5 py-2 text-[12px] font-medium leading-[1.45] text-white shadow-[0_8px_24px_-8px_rgba(20,20,19,0.45)]">
+          <span className="rounded-[14px] bg-[#141413] px-3.5 py-2 text-[12px] leading-[1.45] font-medium text-white shadow-[0_8px_24px_-8px_rgba(20,20,19,0.45)]">
             请关闭一个选项
           </span>
         </div>
@@ -4912,7 +5091,7 @@ function QuickSettingsPanel({
                     key={item.key}
                     className={cn(
                       "rounded-[16px] border px-2.5 py-2 transition-colors",
-                      active ? "border-[#ead8cf] bg-[#fffaf7]" : "border-[#e8e6dc] bg-[#faf9f5]"
+                      active ? "border-[#ead8cf] bg-[#fffaf7]" : "border-[#e8e6dc] bg-[#faf9f5]",
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -4923,19 +5102,26 @@ function QuickSettingsPanel({
                         onClick={() => toggleHoverMetric(item.key)}
                         className={cn(
                           "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                          active ? "bg-[#c96442]" : "bg-[#d8d4c8]"
+                          active ? "bg-[#c96442]" : "bg-[#d8d4c8]",
                         )}
                       >
                         <span
                           className={cn(
-                            "absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                            active && "translate-x-4"
+                            "absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
+                            active && "translate-x-4",
                           )}
                         />
                       </button>
-                      <Icon className={cn("h-3.5 w-3.5 shrink-0", active ? "text-[#c96442]" : "text-[#9b9a93]")} />
+                      <Icon
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0",
+                          active ? "text-[#c96442]" : "text-[#9b9a93]",
+                        )}
+                      />
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-xs font-semibold text-[#141413]">{item.label}</div>
+                        <div className="truncate text-xs font-semibold text-[#141413]">
+                          {item.label}
+                        </div>
                         <div className="mt-0.5 text-[11px] text-[#87867f]">{item.value}</div>
                       </div>
                       {item.modeLabels ? (
@@ -4949,7 +5135,7 @@ function QuickSettingsPanel({
                                 "h-6 rounded-full px-2 text-[10.5px] font-semibold transition-colors",
                                 resolvedHoverMetricModes[item.key] === mode
                                   ? "bg-[#141413] text-white"
-                                  : "text-[#87867f] hover:text-[#4d4c48]"
+                                  : "text-[#87867f] hover:text-[#4d4c48]",
                               )}
                             >
                               {item.modeLabels?.[index]}
@@ -4977,13 +5163,13 @@ function QuickSettingsPanel({
                   onClick={onToggleDataCheck}
                   className={cn(
                     "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                    dataCheckOn ? "bg-[#c96442]" : "bg-[#d8d4c8]"
+                    dataCheckOn ? "bg-[#c96442]" : "bg-[#d8d4c8]",
                   )}
                 >
                   <span
                     className={cn(
-                      "absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                      dataCheckOn && "translate-x-4"
+                      "absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
+                      dataCheckOn && "translate-x-4",
                     )}
                   />
                 </button>
@@ -5004,11 +5190,13 @@ function QuickSettingsPanel({
                       "flex h-9 items-center justify-between rounded-[14px] border px-2.5 text-xs font-semibold transition-all active:scale-[0.98]",
                       active
                         ? "border-[#ead8cf] bg-white text-[#141413]"
-                        : "border-[#e4e1d7] bg-[#f0ece4] text-[#87867f]"
+                        : "border-[#e4e1d7] bg-[#f0ece4] text-[#87867f]",
                     )}
                   >
                     <span className="inline-flex items-center gap-1.5">
-                      <Icon className={cn("h-3.5 w-3.5", active ? "text-[#c96442]" : "text-[#9b9a93]")} />
+                      <Icon
+                        className={cn("h-3.5 w-3.5", active ? "text-[#c96442]" : "text-[#9b9a93]")}
+                      />
                       {item.label}
                     </span>
                     {active ? <Check className="h-3.5 w-3.5 text-[#c96442]" /> : null}
@@ -5049,7 +5237,7 @@ function QuickSettingsPanel({
                     "rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all active:scale-[0.98]",
                     scrapeCount === option
                       ? "border-[#c96442]/35 bg-[#fff7f1] text-[#c96442]"
-                      : "border-[#e8e6dc] bg-white text-[#87867f] hover:text-[#4d4c48]"
+                      : "border-[#e8e6dc] bg-white text-[#87867f] hover:text-[#4d4c48]",
                   )}
                 >
                   最近 {option} 条
@@ -5073,13 +5261,13 @@ function QuickSettingsPanel({
               "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold transition-colors",
               pluginStatus === "working"
                 ? "bg-emerald-50 text-emerald-700"
-                : "bg-[#f0ece4] text-[#87867f]"
+                : "bg-[#f0ece4] text-[#87867f]",
             )}
           >
             <span
               className={cn(
                 "h-1.5 w-1.5 rounded-full",
-                pluginStatus === "working" ? "bg-emerald-500" : "bg-[#b0aea6]"
+                pluginStatus === "working" ? "bg-emerald-500" : "bg-[#b0aea6]",
               )}
             />
             {pluginStatus === "working" ? "工作中" : "闲置"}
@@ -5096,7 +5284,9 @@ function QuickSettingsPanel({
               aria-label={`剩余额度 ${quotaRemainingPct}%`}
             >
               <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-white text-center">
-                <div className="text-lg font-semibold leading-none text-[#141413]">{quotaRemainingPct}%</div>
+                <div className="text-lg leading-none font-semibold text-[#141413]">
+                  {quotaRemainingPct}%
+                </div>
                 <div className="mt-1 text-[10px] text-[#87867f]">剩余</div>
               </div>
             </div>
@@ -5146,8 +5336,8 @@ function HighlightedEmailPreview({
   return (
     <div
       className={cn(
-        "whitespace-pre-wrap break-words rounded-[16px] border border-[#efe6d7] bg-white text-[#141413]",
-        compact ? "px-3 py-2.5 text-[12px] leading-5" : "min-h-[140px] px-3 py-3 text-sm leading-6"
+        "rounded-[16px] border border-[#efe6d7] bg-white break-words whitespace-pre-wrap text-[#141413]",
+        compact ? "px-3 py-2.5 text-[12px] leading-5" : "min-h-[140px] px-3 py-3 text-sm leading-6",
       )}
     >
       {segments.map((segment, index) => (
@@ -5155,7 +5345,7 @@ function HighlightedEmailPreview({
           key={`${index}-${segment.text.slice(0, 10)}`}
           className={cn(
             segment.personalized &&
-              "rounded-[5px] bg-[#fff2a8] px-0.5 font-semibold text-[#624c0b] ring-1 ring-[#edd36b]/70"
+              "rounded-[5px] bg-[#fff2a8] px-0.5 font-semibold text-[#624c0b] ring-1 ring-[#edd36b]/70",
           )}
         >
           {segment.text}
@@ -5191,8 +5381,7 @@ function EmailReviewModal({
   onConfirm: () => void;
 }) {
   const [activeRecipientId, setActiveRecipientId] = useState(recipients[0]?.id ?? "");
-  const activeRecipient =
-    recipients.find((item) => item.id === activeRecipientId) ?? recipients[0];
+  const activeRecipient = recipients.find((item) => item.id === activeRecipientId) ?? recipients[0];
   const subjectSegments = activeRecipient
     ? getEmailSubjectSegments(templateKey, activeRecipient, project)
     : [{ text: subject }];
@@ -5239,11 +5428,15 @@ function EmailReviewModal({
           <div className="grid gap-2.5 sm:grid-cols-4">
             <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
               <div className="text-[10.5px] font-medium text-[#87867f]">模板</div>
-              <div className="mt-1 truncate text-sm font-semibold text-[#141413]">{templateLabel}</div>
+              <div className="mt-1 truncate text-sm font-semibold text-[#141413]">
+                {templateLabel}
+              </div>
             </div>
             <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
               <div className="text-[10.5px] font-medium text-[#87867f]">收件人</div>
-              <div className="mt-1 text-sm font-semibold text-[#141413]">{recipients.length} 位</div>
+              <div className="mt-1 text-sm font-semibold text-[#141413]">
+                {recipients.length} 位
+              </div>
             </div>
             <div className="rounded-[18px] border border-[#e8e6dc] bg-white px-3 py-2.5">
               <div className="text-[10.5px] font-medium text-[#87867f]">发送方式</div>
@@ -5276,10 +5469,14 @@ function EmailReviewModal({
                       "flex min-w-[122px] items-center gap-2 rounded-[16px] border px-2 py-2 text-left transition-all",
                       active
                         ? "border-[#c96442]/40 bg-[#fff7f1]"
-                        : "border-[#e8e6dc] bg-[#faf9f5] hover:bg-white"
+                        : "border-[#e8e6dc] bg-[#faf9f5] hover:bg-white",
                     )}
                   >
-                    <CreatorAvatar creator={recipient} className="h-8 w-8 shrink-0 border border-white" labelClassName="text-[11px]" />
+                    <CreatorAvatar
+                      creator={recipient}
+                      className="h-8 w-8 shrink-0 border border-white"
+                      labelClassName="text-[11px]"
+                    />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[11px] font-semibold text-[#141413]">
                         {recipient.handle}
@@ -5302,7 +5499,9 @@ function EmailReviewModal({
               </span>
             </div>
             <HighlightedEmailPreview
-              segments={displaySubjectSegments.length > 0 ? displaySubjectSegments : [{ text: subject }]}
+              segments={
+                displaySubjectSegments.length > 0 ? displaySubjectSegments : [{ text: subject }]
+              }
               emptyLabel="暂无标题"
               compact
             />
@@ -5343,7 +5542,7 @@ function EmailReviewModal({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -5381,7 +5580,7 @@ function SidebarProjectSelector({
       {/* canopy strip: a wide top bar that visually covers the content below */}
       <div className="flex items-center gap-2 pb-2">
         <FolderOpen className="h-[14px] w-[14px] shrink-0 text-[#c96442]" strokeWidth={2.2} />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#87867f]">
+        <span className="text-[11px] font-semibold tracking-[0.08em] text-[#87867f] uppercase">
           项目
         </span>
 
@@ -5392,21 +5591,21 @@ function SidebarProjectSelector({
             aria-haspopup="listbox"
             aria-expanded={menuOpen}
             className={cn(
-              "group/trigger flex h-7 w-full items-center gap-1 rounded-md px-1.5 text-left text-[13px] font-semibold text-[#141413] outline-none transition-colors hover:bg-[#f5f4ed]"
+              "group/trigger flex h-7 w-full items-center gap-1 rounded-md px-1.5 text-left text-[13px] font-semibold text-[#141413] transition-colors outline-none hover:bg-[#f5f4ed]",
             )}
           >
             <span className="min-w-0 flex-1 truncate leading-none">{selectedProject.name}</span>
             <ChevronDown
               className={cn(
                 "h-[13px] w-[13px] shrink-0 text-[#87867f] transition-transform",
-                menuOpen && "rotate-180"
+                menuOpen && "rotate-180",
               )}
               strokeWidth={2.2}
             />
           </button>
 
           {menuOpen ? (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-40 overflow-hidden rounded-[14px] border border-[#e8e6dc] bg-white p-1.5 shadow-[0_16px_40px_rgba(20,20,19,0.12)]">
+            <div className="absolute top-[calc(100%+6px)] right-0 left-0 z-40 overflow-hidden rounded-[14px] border border-[#e8e6dc] bg-white p-1.5 shadow-[0_16px_40px_rgba(20,20,19,0.12)]">
               <div role="listbox" aria-label="项目列表" className="space-y-1">
                 {projects.map((project) => {
                   const isSelected = project.id === selectedProject.id;
@@ -5415,7 +5614,7 @@ function SidebarProjectSelector({
                       key={project.id}
                       className={cn(
                         "flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-colors",
-                        isSelected ? "bg-[#f5f4ed]" : "hover:bg-[#faf9f5]"
+                        isSelected ? "bg-[#f5f4ed]" : "hover:bg-[#faf9f5]",
                       )}
                     >
                       <button
@@ -5446,12 +5645,14 @@ function SidebarProjectSelector({
                           onDeleteProject(project.id);
                         }}
                         disabled={!canDelete}
-                        aria-label={canDelete ? `删除项目 ${project.name}` : `无法删除项目 ${project.name}`}
+                        aria-label={
+                          canDelete ? `删除项目 ${project.name}` : `无法删除项目 ${project.name}`
+                        }
                         className={cn(
                           "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
                           canDelete
                             ? "text-[#9c403a] hover:bg-[#fbeae6]"
-                            : "cursor-not-allowed text-[#c8c5bc]"
+                            : "cursor-not-allowed text-[#c8c5bc]",
                         )}
                       >
                         <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
@@ -5472,7 +5673,7 @@ function SidebarProjectSelector({
           >
             <CircleHelp className="h-[14px] w-[14px]" strokeWidth={2} />
           </button>
-          <span className="pointer-events-none absolute right-0 top-[calc(100%+6px)] z-50 block w-[220px] rounded-[10px] bg-[#141413] px-3 py-2 text-[11px] leading-5 text-white opacity-0 shadow-md transition-opacity group-hover/help:opacity-100">
+          <span className="pointer-events-none absolute top-[calc(100%+6px)] right-0 z-50 block w-[220px] rounded-[10px] bg-[#141413] px-3 py-2 text-[11px] leading-5 text-white opacity-0 shadow-md transition-opacity group-hover/help:opacity-100">
             收藏、No、标签和后续匹配分析都会归属到当前项目
           </span>
         </div>
@@ -5486,23 +5687,25 @@ function SidebarProjectSelector({
           >
             <Plus className="h-[14px] w-[14px]" strokeWidth={2.4} />
           </button>
-          <span className="pointer-events-none absolute right-0 top-[calc(100%+6px)] z-30 whitespace-nowrap rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] text-white opacity-0 shadow-md transition-opacity group-hover/new:opacity-100">
+          <span className="pointer-events-none absolute top-[calc(100%+6px)] right-0 z-30 rounded-[10px] bg-[#141413] px-2.5 py-1 text-[10px] whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover/new:opacity-100">
             新建项目
           </span>
         </div>
       </div>
 
       {/* canopy edge: a soft gradient band that visually "covers" the content below */}
-      <div className="pointer-events-none h-[6px] rounded-b-[10px] bg-[linear-gradient(180deg,#f1ede2_0%,rgba(241,237,226,0)_100%)] border-t border-[#ece8dc]" />
+      <div className="pointer-events-none h-[6px] rounded-b-[10px] border-t border-[#ece8dc] bg-[linear-gradient(180deg,#f1ede2_0%,rgba(241,237,226,0)_100%)]" />
     </div>
   );
 }
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-[#faf9f5] p-2.5 transition-all duration-150 hover:-translate-y-0.5 hover:border-[#d1cfc5] hover:bg-white`}>
-      <div className="text-[11px] uppercase tracking-wide text-[#87867f]">{label}</div>
-      <div className="mt-1.5 break-words text-base font-semibold text-[#141413]">{value}</div>
+    <div
+      className={`${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-[#faf9f5] p-2.5 transition-all duration-150 hover:-translate-y-0.5 hover:border-[#d1cfc5] hover:bg-white`}
+    >
+      <div className="text-[11px] tracking-wide text-[#87867f] uppercase">{label}</div>
+      <div className="mt-1.5 text-base font-semibold break-words text-[#141413]">{value}</div>
     </div>
   );
 }
@@ -5526,8 +5729,12 @@ function SidebarTagRow({
   const editInputRef = useRef<HTMLInputElement>(null);
   const MAX_TAGS = 3;
 
-  useEffect(() => { if (adding) addInputRef.current?.focus(); }, [adding]);
-  useEffect(() => { if (editingLabel !== null) editInputRef.current?.select(); }, [editingLabel]);
+  useEffect(() => {
+    if (adding) addInputRef.current?.focus();
+  }, [adding]);
+  useEffect(() => {
+    if (editingLabel !== null) editInputRef.current?.select();
+  }, [editingLabel]);
 
   const commitEdit = () => {
     if (editingLabel !== null) {
@@ -5545,13 +5752,25 @@ function SidebarTagRow({
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
       {/* Tag icon — outside the container */}
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b0aea6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="self-center flex-shrink-0">
-        <path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.71-7.71a1 1 0 0 0 0-1.41z"/>
-        <circle cx="7" cy="7" r="1" fill="#b0aea6" stroke="none"/>
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#b0aea6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="flex-shrink-0 self-center"
+      >
+        <path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.71-7.71a1 1 0 0 0 0-1.41z" />
+        <circle cx="7" cy="7" r="1" fill="#b0aea6" stroke="none" />
       </svg>
 
       {/* Unified container */}
-      <div className={`flex min-w-0 flex-1 flex-wrap items-center gap-1.5 overflow-hidden ${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-white px-2.5 py-1.5`}>
+      <div
+        className={`flex min-w-0 flex-1 flex-wrap items-center gap-1.5 overflow-hidden ${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-white px-2.5 py-1.5`}
+      >
         {/* Empty placeholder */}
         {tags.length === 0 && !adding && (
           <button
@@ -5570,10 +5789,15 @@ function SidebarTagRow({
           return (
             <span
               key={tag}
-              onClick={() => { if (!isEditing) { setEditingLabel(tag); setEditValue(tag); } }}
+              onClick={() => {
+                if (!isEditing) {
+                  setEditingLabel(tag);
+                  setEditValue(tag);
+                }
+              }}
               className={cn(
-                "inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium cursor-pointer transition-all",
-                getTagChipClasses(tone)
+                "inline-flex max-w-full cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium transition-all",
+                getTagChipClasses(tone),
               )}
             >
               {isEditing ? (
@@ -5588,15 +5812,18 @@ function SidebarTagRow({
                   }}
                   onClick={(e) => e.stopPropagation()}
                   style={{ width: Math.max(editValue.length, 3) * 7 + 4 }}
-                  className="bg-transparent outline-none text-xs min-w-[24px]"
+                  className="min-w-[24px] bg-transparent text-xs outline-none"
                 />
               ) : (
                 <>
                   <span className="max-w-full truncate">{tag}</span>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); onRemove(tag); }}
-                    className="ml-0.5 flex-shrink-0 leading-none opacity-50 hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(tag);
+                    }}
+                    className="ml-0.5 flex-shrink-0 leading-none opacity-50 transition-opacity hover:opacity-100"
                   >
                     ×
                   </button>
@@ -5615,7 +5842,10 @@ function SidebarTagRow({
             onBlur={commitAdd}
             onKeyDown={(e) => {
               if (e.key === "Enter") commitAdd();
-              if (e.key === "Escape") { setAdding(false); setAddValue(""); }
+              if (e.key === "Escape") {
+                setAdding(false);
+                setAddValue("");
+              }
             }}
             placeholder="标签…"
             style={{ width: Math.max(addValue.length, 4) * 7 + 20 }}
@@ -5628,7 +5858,7 @@ function SidebarTagRow({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="ml-auto flex-shrink-0 self-center text-[#b0aea6] text-sm leading-none transition-colors hover:text-[#c96442]"
+            className="ml-auto flex-shrink-0 self-center text-sm leading-none text-[#b0aea6] transition-colors hover:text-[#c96442]"
           >
             +
           </button>
@@ -5684,7 +5914,7 @@ function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail: boolea
           }
         }}
         placeholder="输入邮箱地址"
-        className="h-[26px] min-w-0 flex-1 rounded-[13px] border border-[#e8e6dc] bg-white px-[9px] text-[11px] font-medium text-[#141413] outline-none transition-colors focus:border-[#c96442]/35"
+        className="h-[26px] min-w-0 flex-1 rounded-[13px] border border-[#e8e6dc] bg-white px-[9px] text-[11px] font-medium text-[#141413] transition-colors outline-none focus:border-[#c96442]/35"
       />
     );
   }
@@ -5707,27 +5937,24 @@ function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail: boolea
       title={effectiveHasEmail ? effectiveEmail : "双击添加邮箱"}
       className={cn(
         "flex h-[26px] min-w-0 flex-1 items-center gap-1.5 rounded-[13px] px-[9px] text-[11px] transition-all select-none",
-        copied
-          ? "bg-emerald-50"
-          : effectiveHasEmail
-            ? "bg-[#f0ece4]"
-            : "bg-[#f5f4ed]",
-        effectiveHasEmail ? "cursor-pointer hover:bg-[#e8e3d8]" : "cursor-text"
+        copied ? "bg-emerald-50" : effectiveHasEmail ? "bg-[#f0ece4]" : "bg-[#f5f4ed]",
+        effectiveHasEmail ? "cursor-pointer hover:bg-[#e8e3d8]" : "cursor-text",
       )}
     >
       {copied ? (
         <Check className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
       ) : (
-        <Copy className={cn("h-3.5 w-3.5 shrink-0", effectiveHasEmail ? "text-[#87867f]" : "text-[#bcb7ad]")} />
+        <Copy
+          className={cn(
+            "h-3.5 w-3.5 shrink-0",
+            effectiveHasEmail ? "text-[#87867f]" : "text-[#bcb7ad]",
+          )}
+        />
       )}
       <span
         className={cn(
           "min-w-0 flex-1 truncate text-left font-medium",
-          copied
-            ? "text-emerald-700"
-            : effectiveHasEmail
-              ? "text-[#4d4c48]"
-              : "text-[#a39f95]"
+          copied ? "text-emerald-700" : effectiveHasEmail ? "text-[#4d4c48]" : "text-[#a39f95]",
         )}
       >
         {copied ? "已复制" : effectiveHasEmail ? effectiveEmail : "双击添加邮箱"}
@@ -5751,34 +5978,35 @@ function SidebarLocationInline({
       title={country}
       className={cn(
         "inline-flex items-center rounded-full border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#fbf8f2_100%)] text-[#4d4c48] shadow-[0_1px_2px_rgba(20,20,19,0.04)]",
-        compact ? "h-5 gap-1 px-2" : "h-[22px] gap-1.5 px-2.5"
+        compact ? "h-5 gap-1 px-2" : "h-[22px] gap-1.5 px-2.5",
       )}
     >
       <span className={cn("leading-none", compact ? "text-[11px]" : "text-[12px]")}>{flag}</span>
-      <span className={cn("font-medium leading-none text-[#4d4c48]", compact ? "text-[10px]" : "text-[11px]")}>
+      <span
+        className={cn(
+          "leading-none font-medium text-[#4d4c48]",
+          compact ? "text-[10px]" : "text-[11px]",
+        )}
+      >
         {country}
       </span>
     </span>
   );
 }
 
-function SidebarCreatorTypeTag({
-  type,
-  compact = false,
-}: {
-  type: string;
-  compact?: boolean;
-}) {
+function SidebarCreatorTypeTag({ type, compact = false }: { type: string; compact?: boolean }) {
   return (
     <span
       aria-label={`博主类型 ${type}`}
       title={type}
       className={cn(
         "inline-flex items-center rounded-full border border-[#eddcca] bg-[linear-gradient(180deg,#fff8ef_0%,#f7ecdf_100%)] text-[#9a6538] shadow-[0_1px_2px_rgba(154,101,56,0.08)]",
-        compact ? "h-5 px-2" : "h-[22px] px-2.5"
+        compact ? "h-5 px-2" : "h-[22px] px-2.5",
       )}
     >
-      <span className={cn("font-medium leading-none", compact ? "text-[10px]" : "text-[11px]")}>{type}</span>
+      <span className={cn("leading-none font-medium", compact ? "text-[10px]" : "text-[11px]")}>
+        {type}
+      </span>
     </span>
   );
 }
@@ -5812,7 +6040,7 @@ function SidebarCreatorProfileCard({
         <div className="shrink-0">
           <CreatorAvatar creator={creator} className="h-12 w-12" labelClassName="text-base" />
         </div>
-        <div className="min-w-0 flex min-h-[48px] flex-1 flex-col justify-center gap-0.5">
+        <div className="flex min-h-[48px] min-w-0 flex-1 flex-col justify-center gap-0.5">
           <div className="flex min-w-0 items-center gap-1.5">
             <SidebarLocationInline flag={location.flag} country={location.country} />
             <SidebarCreatorTypeTag type={creatorType} />
@@ -5825,7 +6053,7 @@ function SidebarCreatorProfileCard({
                 "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-transparent bg-transparent transition-all duration-150 active:scale-[0.88]",
                 isSaved
                   ? "border-[#f0d7cd] bg-[#fff7f4] text-[#c96442] shadow-[0_4px_10px_rgba(201,100,66,0.16)]"
-                  : "text-[#b0aea6] hover:border-[#ece7dc] hover:bg-white hover:text-[#c96442]"
+                  : "text-[#b0aea6] hover:border-[#ece7dc] hover:bg-white hover:text-[#c96442]",
               )}
             >
               <Heart className={cn("h-4 w-4", isSaved && "fill-current")} />
@@ -5861,16 +6089,31 @@ function SidebarCreatorProfileCard({
 
 function SidebarMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-white px-3 py-2.5 transition-all duration-150 hover:border-[#d1cfc5] hover:bg-[#f5f4ed]`}>
+    <div
+      className={`${SIDEBAR_CONTROL_RADIUS} border border-[#e8e6dc] bg-white px-3 py-2.5 transition-all duration-150 hover:border-[#d1cfc5] hover:bg-[#f5f4ed]`}
+    >
       <div className="text-[11px] text-[#87867f]">{label}</div>
-      <div className="mt-1 break-words text-sm font-medium text-[#141413]">{value}</div>
+      <div className="mt-1 text-sm font-medium break-words text-[#141413]">{value}</div>
     </div>
   );
 }
 
-function SidebarMetricCenter({ label, value, className }: { label: string; value: string; className?: string }) {
+function SidebarMetricCenter({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
   return (
-    <div className={cn(`${SIDEBAR_METRIC_RADIUS} border border-[#e8e6dc] bg-white px-2 py-3 text-center transition-all duration-150 hover:border-[#d1cfc5] hover:bg-[#f5f4ed]`, className)}>
+    <div
+      className={cn(
+        `${SIDEBAR_METRIC_RADIUS} border border-[#e8e6dc] bg-white px-2 py-3 text-center transition-all duration-150 hover:border-[#d1cfc5] hover:bg-[#f5f4ed]`,
+        className,
+      )}
+    >
       <div className="text-[10px] text-[#87867f]">{label}</div>
       <div className="mt-1.5 text-sm font-semibold text-[#141413]">{value}</div>
     </div>
@@ -5892,7 +6135,7 @@ function SidebarMetricInline({
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="text-[13px] font-semibold leading-tight text-[#141413]">{value}</div>
+      <div className="text-[13px] leading-tight font-semibold text-[#141413]">{value}</div>
     </div>
   );
 }
@@ -5927,17 +6170,14 @@ function SidebarCollapsibleSection({
         <ChevronDown
           className={cn(
             "h-4 w-4 text-[#87867f] transition-transform duration-200",
-            open && "rotate-180"
+            open && "rotate-180",
           )}
         />
       </button>
-      {open ? (
-        <div className="border-t border-[#ececec] px-3 py-3">{children}</div>
-      ) : null}
+      {open ? <div className="border-t border-[#ececec] px-3 py-3">{children}</div> : null}
     </div>
   );
 }
-
 
 function seededRandom(seed: number) {
   let s = seed;
@@ -5961,7 +6201,12 @@ const WORD_CLOUD_COLORS = [
 ];
 
 function TopicWordCloud({ topics }: { topics: Array<{ label: string; weight: number }> }) {
-  const [hovered, setHovered] = useState<{ label: string; count: number; x: number; y: number } | null>(null);
+  const [hovered, setHovered] = useState<{
+    label: string;
+    count: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const maxWeight = Math.max(...topics.map((t) => t.weight));
@@ -5994,7 +6239,8 @@ function TopicWordCloud({ topics }: { topics: Array<{ label: string; weight: num
 
   const overlaps = (x: number, y: number, w: number, h: number) => {
     for (const p of placed) {
-      if (x < p.x + p.w + PAD && x + w + PAD > p.x && y < p.y + p.h + PAD && y + h + PAD > p.y) return true;
+      if (x < p.x + p.w + PAD && x + w + PAD > p.x && y < p.y + p.h + PAD && y + h + PAD > p.y)
+        return true;
     }
     return false;
   };
@@ -6025,7 +6271,7 @@ function TopicWordCloud({ topics }: { topics: Array<{ label: string; weight: num
 
   const handleMouseEnter = (
     e: React.MouseEvent<SVGTextElement>,
-    item: (typeof positionedItems)[number]
+    item: (typeof positionedItems)[number],
   ) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -6041,7 +6287,11 @@ function TopicWordCloud({ topics }: { topics: Array<{ label: string; weight: num
   };
 
   return (
-    <div ref={containerRef} style={{ width: "100%", overflow: "visible", position: "relative" }} aria-label="话题词云">
+    <div
+      ref={containerRef}
+      style={{ width: "100%", overflow: "visible", position: "relative" }}
+      aria-label="话题词云"
+    >
       <svg
         width="100%"
         height={CONTAINER_H}
@@ -6058,7 +6308,11 @@ function TopicWordCloud({ topics }: { topics: Array<{ label: string; weight: num
               y={item.drawY}
               textAnchor="middle"
               dominantBaseline="middle"
-              transform={isHovered ? `translate(${item.drawX},${item.drawY}) scale(1.18) translate(${-item.drawX},${-item.drawY})` : undefined}
+              transform={
+                isHovered
+                  ? `translate(${item.drawX},${item.drawY}) scale(1.18) translate(${-item.drawX},${-item.drawY})`
+                  : undefined
+              }
               style={{
                 fontSize: item.fontSize,
                 fill: isHovered ? "#c96442" : item.color,
@@ -6150,7 +6404,7 @@ function CreatorTopicSummaryRow({
     setRemainingTopicsTooltipPosition({
       left: Math.min(
         window.innerWidth - viewportPadding,
-        Math.max(viewportPadding + tooltipWidth, rect.right)
+        Math.max(viewportPadding + tooltipWidth, rect.right),
       ),
       maxWidth: tooltipWidth,
       placement: openAbove ? "top" : "bottom",
@@ -6216,13 +6470,13 @@ function CreatorTopicSummaryRow({
             <span key={topic.label} className="group relative min-w-0 flex-1 basis-0">
               <span
                 tabIndex={0}
-                className="inline-flex w-full min-w-0 items-center justify-center truncate rounded-full border border-[#e6ddcf] bg-[#f8f3ea] px-2 py-1 text-[10px] font-medium text-[#5e5d59] outline-none transition-colors hover:border-[#dccfbe] hover:bg-[#fbf7ef] focus-visible:border-[#dccfbe] focus-visible:bg-[#fbf7ef]"
+                className="inline-flex w-full min-w-0 items-center justify-center truncate rounded-full border border-[#e6ddcf] bg-[#f8f3ea] px-2 py-1 text-[10px] font-medium text-[#5e5d59] transition-colors outline-none hover:border-[#dccfbe] hover:bg-[#fbf7ef] focus-visible:border-[#dccfbe] focus-visible:bg-[#fbf7ef]"
               >
                 {topic.label}
               </span>
               <span
                 role="tooltip"
-                className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-1.5 -translate-x-1/2 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-1.5 text-[10px] font-medium text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+                className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-1.5 -translate-x-1/2 rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-1.5 text-[10px] font-medium text-[#4d4c48] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
               >
                 共提及 {topic.mentions} 次
               </span>
@@ -6242,7 +6496,7 @@ function CreatorTopicSummaryRow({
                 aria-label="展开剩余话题"
                 onFocus={openRemainingTopics}
                 onBlur={() => setRemainingTopicsOpen(false)}
-                className="inline-flex items-center rounded-full border border-[#e6ddcf] bg-[#f8f3ea] px-2 py-1 text-[10px] font-semibold tracking-[0.06em] text-[#8a8373] outline-none transition-colors hover:border-[#dccfbe] hover:bg-[#fbf7ef] focus-visible:border-[#dccfbe] focus-visible:bg-[#fbf7ef]"
+                className="inline-flex items-center rounded-full border border-[#e6ddcf] bg-[#f8f3ea] px-2 py-1 text-[10px] font-semibold tracking-[0.06em] text-[#8a8373] transition-colors outline-none hover:border-[#dccfbe] hover:bg-[#fbf7ef] focus-visible:border-[#dccfbe] focus-visible:bg-[#fbf7ef]"
               >
                 ...
               </button>
@@ -6259,7 +6513,7 @@ function CreatorTopicSummaryRow({
               role="tooltip"
               onMouseEnter={openRemainingTopics}
               onMouseLeave={closeRemainingTopics}
-              className="pointer-events-auto fixed z-[80] w-full rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[10px] leading-[1.55] text-[#4d4c48] shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] whitespace-normal"
+              className="pointer-events-auto fixed z-[80] w-full rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-2 text-[10px] leading-[1.55] whitespace-normal text-[#4d4c48] shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)]"
               style={{
                 left: remainingTopicsTooltipPosition.left,
                 maxWidth: remainingTopicsTooltipPosition.maxWidth,
@@ -6272,12 +6526,10 @@ function CreatorTopicSummaryRow({
               }}
             >
               {remainingTopics.map((topic) => (
-                <div key={topic.label}>
-                  {topic.label}
-                </div>
+                <div key={topic.label}>{topic.label}</div>
               ))}
             </div>,
-            document.body
+            document.body,
           )
         : null}
     </div>
@@ -6300,10 +6552,10 @@ function SidebarContentTabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition-colors",
+        "inline-flex items-center gap-2 border-b-2 px-1 pt-1 pb-3 text-sm font-semibold transition-colors",
         active
           ? "border-[#c96442] text-[#141413]"
-          : "border-transparent text-[#87867f] hover:text-[#4d4c48]"
+          : "border-transparent text-[#87867f] hover:text-[#4d4c48]",
       )}
     >
       <Icon className={cn("h-4 w-4", active ? "text-[#c96442]" : "text-[#9b9a93]")} />
@@ -6337,7 +6589,7 @@ function AudienceHighlightBar({
                   key={`${label}-${item}-${index}`}
                   className={cn(
                     "inline-flex h-5 w-5 items-center justify-center rounded-full border border-white bg-[#faf9f5] text-[11px] leading-none shadow-sm",
-                    index > 0 && "-ml-1.5"
+                    index > 0 && "-ml-1.5",
                   )}
                 >
                   {item}
@@ -6396,7 +6648,7 @@ function SidebarAction({
           ? "bg-[#c96442] text-[#faf9f5] hover:bg-[#d97757]"
           : active
             ? "border border-emerald-300/45 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-            : "border border-[#e8e6dc] bg-white text-[#5e5d59] hover:bg-[#f5f4ed]"
+            : "border border-[#e8e6dc] bg-white text-[#5e5d59] hover:bg-[#f5f4ed]",
       )}
     >
       {text}
@@ -6566,7 +6818,7 @@ function CreateProjectModal({
               value={productDescription}
               onChange={(event) => onProductDescriptionChange(event.target.value)}
               placeholder="例如：主推便携露营灯、折叠桌和配套收纳包，本轮想找户外露营场景达人做新品曝光。"
-              className="min-h-[108px] w-full rounded-[20px] border border-[#e8e6dc] bg-[#faf9f5] px-3 py-3 text-sm leading-6 text-[#141413] outline-none transition-colors focus:border-[#c96442]/35"
+              className="min-h-[108px] w-full rounded-[20px] border border-[#e8e6dc] bg-[#faf9f5] px-3 py-3 text-sm leading-6 text-[#141413] transition-colors outline-none focus:border-[#c96442]/35"
             />
           </div>
 
@@ -6582,9 +6834,7 @@ function CreateProjectModal({
                 type="file"
                 multiple
                 className="hidden"
-                onChange={(event) =>
-                  onFilesChange(Array.from(event.target.files ?? []))
-                }
+                onChange={(event) => onFilesChange(Array.from(event.target.files ?? []))}
               />
             </label>
             {files.length > 0 ? (
@@ -6594,7 +6844,10 @@ function CreateProjectModal({
                 </div>
                 <div className="mt-1 space-y-1">
                   {files.map((file) => (
-                    <div key={`${file.name}-${file.size}`} className="truncate text-xs text-[#87867f]">
+                    <div
+                      key={`${file.name}-${file.size}`}
+                      className="truncate text-xs text-[#87867f]"
+                    >
                       {file.name}
                     </div>
                   ))}
@@ -6605,11 +6858,7 @@ function CreateProjectModal({
         </div>
 
         <div className="relative mt-6 flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className={SIDEBAR_SECONDARY_BUTTON_CLASSES}
-          >
+          <button type="button" onClick={onClose} className={SIDEBAR_SECONDARY_BUTTON_CLASSES}>
             取消
           </button>
           <button
@@ -6681,7 +6930,8 @@ function SearchResultPopup({
               <div className="text-2xl font-semibold">共找到 {total} 位相似博主</div>
             </div>
             <p className="mt-3 text-sm leading-6 text-[#5e5d59]">
-              当前模式为&ldquo;{modeLabel}&rdquo;。你可以直接去后台批量筛选，也可以进入逐个筛选路径，逐位查看创作者主页。
+              当前模式为&ldquo;{modeLabel}
+              &rdquo;。你可以直接去后台批量筛选，也可以进入逐个筛选路径，逐位查看创作者主页。
             </p>
           </div>
           <button

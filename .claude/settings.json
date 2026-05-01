@@ -1,0 +1,16 @@
+{
+  "$comment": "Project-level Claude Code settings. Hooks here run only when working in this repo. Edit with care — these are deliberate guardrails to keep AI changes from drifting.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const c=i.tool_input?.content||'';const fp=i.tool_input?.file_path||'';if(!/\\\\.(ts|tsx|js|jsx|mjs|cjs)$/.test(fp))process.exit(0);const lines=c.split('\\n').length;if(lines>600){console.error('[hook] BLOCKED: '+fp+' is '+lines+' lines. Project rule: split files at ~300, hard cap 600. See CLAUDE.md §5.');process.exit(2)}if(lines>400){console.error('[hook] WARNING: '+fp+' is '+lines+' lines (soft cap 400). Consider splitting before it grows further.')}}catch(e){}process.exit(0)})\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -12,5 +12,4 @@ export const T = {
 
 export const FIND_SIMILAR_REMINDER_STORAGE_KEY =
   "2linkr:discovery-find-similar-mode-switch-reminder-v2";
-export const EXIT_SCREEN_REMINDER_STORAGE_KEY =
-  "2linkr:discovery-exit-screen-reminder-v1";
+export const EXIT_SCREEN_REMINDER_STORAGE_KEY = "2linkr:discovery-exit-screen-reminder-v1";

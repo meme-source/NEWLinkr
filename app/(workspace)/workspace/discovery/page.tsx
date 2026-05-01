@@ -3,9 +3,27 @@
 import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  AlertCircle, ArrowLeft, ArrowUp, Bookmark, Check, ChevronDown, Download,
-  Globe2, Hand, Handshake, Heart, Link2, Plus, Share2, Sparkles,
-  TrendingUp, Upload, Users, UsersRound, X, Zap,
+  AlertCircle,
+  ArrowLeft,
+  ArrowUp,
+  Bookmark,
+  Check,
+  ChevronDown,
+  Download,
+  Globe2,
+  Hand,
+  Handshake,
+  Heart,
+  Link2,
+  Plus,
+  Share2,
+  Sparkles,
+  TrendingUp,
+  Upload,
+  Users,
+  UsersRound,
+  X,
+  Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -38,11 +56,7 @@ import {
   GOALS,
   VIEW_STEPS,
 } from "@/features/discovery/data/filter-options";
-import {
-  MOCK_AI_CATEGORY,
-  MOCK_OG_PREVIEW,
-  MOCK_SCENES,
-} from "@/features/discovery/data/scenes";
+import { MOCK_AI_CATEGORY, MOCK_OG_PREVIEW, MOCK_SCENES } from "@/features/discovery/data/scenes";
 import { FIND_SIMILAR_MODE_META } from "@/features/discovery/data/find-similar-modes";
 import { MOCK_CREATORS } from "@/features/discovery/data/mock-creators";
 
@@ -71,7 +85,12 @@ const MODES = [
     evidenceTitle: "系统会验证",
     evidenceItems: ["品牌 @ / 官网链接", "#ad / sponsored", "折扣码与合作话术", "合作帖表现倍数"],
     resultPromise: "结果优先展示合作证据强、合作帖表现高、可联系的达人。",
-    basis: { range: "近 90 天", posts: "12,430", candidates: "286", filtered: "已 No / 长期不活跃 / 高风险账号" },
+    basis: {
+      range: "近 90 天",
+      posts: "12,430",
+      candidates: "286",
+      filtered: "已 No / 长期不活跃 / 高风险账号",
+    },
     Icon: Users,
     iconBg: "bg-[#f5ede8]",
     iconColor: "text-[#c96442]",
@@ -89,7 +108,12 @@ const MODES = [
     evidenceTitle: "系统会拆解",
     evidenceItems: ["产品卖点", "内容可表达性", "同品类场景表现", "达人场景稳定性"],
     resultPromise: "先推荐 3-6 个内容场景，再给出适合这些场景的达人和 brief 方向。",
-    basis: { range: "场景库 5 类", posts: "8,960", candidates: "342", filtered: "场景弱相关 / 商业不可用 / 数据不稳" },
+    basis: {
+      range: "场景库 5 类",
+      posts: "8,960",
+      candidates: "342",
+      filtered: "场景弱相关 / 商业不可用 / 数据不稳",
+    },
     Icon: Zap,
     iconBg: "bg-[#eef1e7]",
     iconColor: "text-[#7a8a6a]",
@@ -107,7 +131,12 @@ const MODES = [
     evidenceTitle: "系统会计算",
     evidenceItems: ["真实评论密度", "种草内容稳定性", "受众匹配度", "商务可联系性"],
     resultPromise: "结果会优先给出评论质量好、种草稳定、适合做口碑扩散的达人。",
-    basis: { range: "近 30 天", posts: "8,230", candidates: "194", filtered: "内容不相关 / 风险账号 / 异常数据" },
+    basis: {
+      range: "近 30 天",
+      posts: "8,230",
+      candidates: "194",
+      filtered: "内容不相关 / 风险账号 / 异常数据",
+    },
     Icon: TrendingUp,
     iconBg: "bg-[#efede7]",
     iconColor: "text-[#5e5d59]",
@@ -122,7 +151,10 @@ function normalizeHandle(value: string) {
 }
 
 function buildAnchorNameFromHandle(handle: string) {
-  const cleaned = handle.replace(/^@/, "").replace(/[._-]+/g, " ").trim();
+  const cleaned = handle
+    .replace(/^@/, "")
+    .replace(/[._-]+/g, " ")
+    .trim();
   if (!cleaned) return "Creator";
   return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
 }
@@ -158,7 +190,9 @@ function parsePercent(value: string) {
 
 function scoreCreatorAgainstAnchor(candidate: Creator, anchor: Creator) {
   const sharedTags = candidate.smartTags.filter((tag) => anchor.smartTags.includes(tag)).length;
-  const followerGap = Math.abs(parseFollowersInK(candidate.followers) - parseFollowersInK(anchor.followers));
+  const followerGap = Math.abs(
+    parseFollowersInK(candidate.followers) - parseFollowersInK(anchor.followers),
+  );
   const sameRegion = candidate.region === anchor.region ? 18 : 0;
   const sameEmailType = candidate.email === anchor.email ? 8 : 0;
   const sameVerifiedState = candidate.verified === anchor.verified ? 6 : 0;
@@ -168,10 +202,12 @@ function scoreCreatorAgainstAnchor(candidate: Creator, anchor: Creator) {
 }
 
 function buildSimilarCreatorResults(anchor: Creator) {
-  return MOCK_CREATORS
-    .filter((creator) => creator.id !== anchor.id)
+  return MOCK_CREATORS.filter((creator) => creator.id !== anchor.id)
     .slice()
-    .sort((left, right) => scoreCreatorAgainstAnchor(right, anchor) - scoreCreatorAgainstAnchor(left, anchor))
+    .sort(
+      (left, right) =>
+        scoreCreatorAgainstAnchor(right, anchor) - scoreCreatorAgainstAnchor(left, anchor),
+    )
     .map((creator) => ({ ...creator, status: "pending" as const }));
 }
 
@@ -179,7 +215,10 @@ function scoreBudgetCreator(candidate: Creator, anchor: Creator) {
   const sharedTags = candidate.smartTags.filter((tag) => anchor.smartTags.includes(tag)).length;
   const followerGap = parseFollowersInK(anchor.followers) - parseFollowersInK(candidate.followers);
   const sameRegion = candidate.region === anchor.region ? 10 : 0;
-  const lowerBudgetBonus = followerGap >= 0 ? Math.min(28, 12 + followerGap / 8) : Math.max(0, 8 - Math.abs(followerGap) / 20);
+  const lowerBudgetBonus =
+    followerGap >= 0
+      ? Math.min(28, 12 + followerGap / 8)
+      : Math.max(0, 8 - Math.abs(followerGap) / 20);
   const styleFit = sharedTags * 7;
   const engagementBonus = parsePercent(candidate.er) * 1.8;
   const verificationPenalty = candidate.verified ? -2 : 4;
@@ -187,8 +226,7 @@ function scoreBudgetCreator(candidate: Creator, anchor: Creator) {
 }
 
 function buildBudgetCreatorResults(anchor: Creator) {
-  return MOCK_CREATORS
-    .filter((creator) => creator.id !== anchor.id)
+  return MOCK_CREATORS.filter((creator) => creator.id !== anchor.id)
     .slice()
     .sort((left, right) => scoreBudgetCreator(right, anchor) - scoreBudgetCreator(left, anchor))
     .map((creator) => ({ ...creator, status: "pending" as const }));
@@ -198,14 +236,17 @@ function scoreSeedCreator(candidate: Creator, anchor: Creator) {
   const sharedTags = candidate.smartTags.filter((tag) => anchor.smartTags.includes(tag)).length;
   const differentRegionBonus = candidate.region !== anchor.region ? 18 : 4;
   const lowOverlapBonus = Math.max(0, 22 - sharedTags * 5);
-  const sizeProximity = Math.max(0, 18 - Math.abs(parseFollowersInK(candidate.followers) - parseFollowersInK(anchor.followers)) / 18);
+  const sizeProximity = Math.max(
+    0,
+    18 -
+      Math.abs(parseFollowersInK(candidate.followers) - parseFollowersInK(anchor.followers)) / 18,
+  );
   const engagementBonus = parsePercent(candidate.er) * 2.4;
   return differentRegionBonus + lowOverlapBonus + sizeProximity + engagementBonus;
 }
 
 function buildSeedCreatorResults(anchor: Creator) {
-  return MOCK_CREATORS
-    .filter((creator) => creator.id !== anchor.id)
+  return MOCK_CREATORS.filter((creator) => creator.id !== anchor.id)
     .slice()
     .sort((left, right) => scoreSeedCreator(right, anchor) - scoreSeedCreator(left, anchor))
     .map((creator) => ({ ...creator, status: "pending" as const }));
@@ -223,16 +264,19 @@ function buildCreatorResultsByMode(anchor: Creator, mode: FindSimilarMode) {
 }
 
 function getModeMeta(mode: ModeId | null | undefined) {
-  return MODES.find(m => m.id === mode) ?? MODES[1];
+  return MODES.find((m) => m.id === mode) ?? MODES[1];
 }
 
 function getPlatformLabel(platform: PlatformId) {
-  return PLATFORMS.find(p => p.id === platform)?.label ?? "TikTok";
+  return PLATFORMS.find((p) => p.id === platform)?.label ?? "TikTok";
 }
 
 function getCreatorRecommendation(creator: Creator, mode: ModeId | null | undefined) {
   const topVideo = creator.videos[0];
-  const highAffinityTag = creator.smartTags.find(tag => ["同行验证", "爆款达人", "护肤教程", "成分党", "GRWM"].includes(tag)) ?? creator.smartTags[0];
+  const highAffinityTag =
+    creator.smartTags.find((tag) =>
+      ["同行验证", "爆款达人", "护肤教程", "成分党", "GRWM"].includes(tag),
+    ) ?? creator.smartTags[0];
 
   if (mode === "competitor") {
     return {
@@ -280,20 +324,42 @@ function TikTokIcon({ colored = false }: { colored?: boolean }) {
   if (colored) {
     return (
       <svg width={18} height={18} viewBox="0 0 32 32" fill="none" aria-hidden>
-        <path transform="translate(-1,1)" fill="#25F4EE" d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z" />
-        <path transform="translate(1,-1)" fill="#FE2C55" d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z" />
-        <path fill="#0b0b0b" d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z" />
+        <path
+          transform="translate(-1,1)"
+          fill="#25F4EE"
+          d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z"
+        />
+        <path
+          transform="translate(1,-1)"
+          fill="#FE2C55"
+          d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z"
+        />
+        <path
+          fill="#0b0b0b"
+          d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z"
+        />
       </svg>
     );
   }
-  return <svg width={18} height={18} viewBox="0 0 32 32" fill="currentColor" aria-hidden><path d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z"/></svg>;
+  return (
+    <svg width={18} height={18} viewBox="0 0 32 32" fill="currentColor" aria-hidden>
+      <path d="M25.3 8.9a7.1 7.1 0 0 1-5.5-6.2V2h-5v19.9a4.2 4.2 0 1 1-3.1-4V12.8a9.3 9.3 0 1 0 8.5 9.2V12.5a12 12 0 0 0 7 2.24V9.7a7.1 7.1 0 0 1-1.9-.8z" />
+    </svg>
+  );
 }
 function InstagramIcon({ colored = false }: { colored?: boolean }) {
   if (colored) {
     return (
       <svg width={18} height={18} viewBox="0 0 24 24" fill="none" aria-hidden>
         <defs>
-          <linearGradient id="discoveryInstagramGradient" x1="3" y1="22" x2="21" y2="2" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id="discoveryInstagramGradient"
+            x1="3"
+            y1="22"
+            x2="21"
+            y2="2"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop offset="0" stopColor="#FEDA75" />
             <stop offset=".35" stopColor="#FA7E1E" />
             <stop offset=".6" stopColor="#D62976" />
@@ -307,7 +373,21 @@ function InstagramIcon({ colored = false }: { colored?: boolean }) {
       </svg>
     );
   }
-  return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>;
+  return (
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
 }
 function YoutubeIcon({ colored = false }: { colored?: boolean }) {
   if (colored) {
@@ -318,46 +398,177 @@ function YoutubeIcon({ colored = false }: { colored?: boolean }) {
       </svg>
     );
   }
-  return <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M23 7s-.3-2-1.2-2.7C20.7 3.1 19.4 3.1 18.8 3 16.2 3 12 3 12 3S7.8 3 5.2 3.2c-.6 0-1.9 0-3 1.3C1.3 5 1 7 1 7S.7 9.2.7 11.5v2.1c0 2.3.3 4.5.3 4.5s.3 2 1.2 2.7c1.1 1.2 2.6 1.1 3.3 1.2C7.7 22 12 22 12 22s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.7 1.2-2.7 1.2-2.7s.3-2.2.3-4.5v-2.1C23.3 9.2 23 7 23 7zm-13.3 8.5V8.4l8.1 3.6-8.1 3.5z"/></svg>;
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M23 7s-.3-2-1.2-2.7C20.7 3.1 19.4 3.1 18.8 3 16.2 3 12 3 12 3S7.8 3 5.2 3.2c-.6 0-1.9 0-3 1.3C1.3 5 1 7 1 7S.7 9.2.7 11.5v2.1c0 2.3.3 4.5.3 4.5s.3 2 1.2 2.7c1.1 1.2 2.6 1.1 3.3 1.2C7.7 22 12 22 12 22s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.7 1.2-2.7 1.2-2.7s.3-2.2.3-4.5v-2.1C23.3 9.2 23 7 23 7zm-13.3 8.5V8.4l8.1 3.6-8.1 3.5z" />
+    </svg>
+  );
 }
 
-function PlatformButton({ id, selected, onClick }: { id: PlatformId; selected: boolean; onClick: () => void }) {
-  const cfg = { tiktok: { bg: "#000", color: "#fff" }, instagram: { bg: "linear-gradient(135deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888)", color: "#fff" }, youtube: { bg: "#FF0000", color: "#fff" } }[id];
+function PlatformButton({
+  id,
+  selected,
+  onClick,
+}: {
+  id: PlatformId;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const cfg = {
+    tiktok: { bg: "#000", color: "#fff" },
+    instagram: {
+      bg: "linear-gradient(135deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888)",
+      color: "#fff",
+    },
+    youtube: { bg: "#FF0000", color: "#fff" },
+  }[id];
   return (
-    <button type="button" onClick={onClick} className={cn("flex h-12 w-12 items-center justify-center rounded-[14px] transition-all duration-150", selected ? "ring-2 ring-[#c96442] ring-offset-2" : "hover:opacity-80 hover:scale-105")} style={{ background: cfg.bg, color: cfg.color }}>
-      {id === "tiktok" && <TikTokIcon />}{id === "instagram" && <InstagramIcon />}{id === "youtube" && <YoutubeIcon />}
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex h-12 w-12 items-center justify-center rounded-[14px] transition-all duration-150",
+        selected ? "ring-2 ring-[#c96442] ring-offset-2" : "hover:scale-105 hover:opacity-80",
+      )}
+      style={{ background: cfg.bg, color: cfg.color }}
+    >
+      {id === "tiktok" && <TikTokIcon />}
+      {id === "instagram" && <InstagramIcon />}
+      {id === "youtube" && <YoutubeIcon />}
     </button>
   );
 }
 
 // ── Filter sub-panels ─────────────────────────────────────────────────────────
-function RegionPanel({ selected, onChange }: { selected: string[]; onChange: (v: string[]) => void }) {
-  const toggle = (c: string) => onChange(selected.includes(c) ? selected.filter(x => x !== c) : [...selected, c]);
-  const toggleAll = (r: (typeof REGIONS)[0]) => { const all = r.countries; const hasAll = all.every(c => selected.includes(c)); onChange(hasAll ? selected.filter(c => !all.includes(c)) : [...selected, ...all.filter(c => !selected.includes(c))]); };
+function RegionPanel({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const toggle = (c: string) =>
+    onChange(selected.includes(c) ? selected.filter((x) => x !== c) : [...selected, c]);
+  const toggleAll = (r: (typeof REGIONS)[0]) => {
+    const all = r.countries;
+    const hasAll = all.every((c) => selected.includes(c));
+    onChange(
+      hasAll
+        ? selected.filter((c) => !all.includes(c))
+        : [...selected, ...all.filter((c) => !selected.includes(c))],
+    );
+  };
   return (
-    <div className="max-h-64 overflow-y-auto space-y-3 pr-0.5">
-      {REGIONS.map(r => (
+    <div className="max-h-64 space-y-3 overflow-y-auto pr-0.5">
+      {REGIONS.map((r) => (
         <div key={r.label}>
-          <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-[#87867f]">{r.label}</span><button type="button" onClick={() => toggleAll(r)} className="text-[10px] text-[#c96442] hover:underline">全选</button></div>
-          {r.countries.map(c => <label key={c} className="flex items-center gap-2 px-1 py-1 rounded-lg hover:bg-[#f5f4ed] cursor-pointer"><input type="checkbox" checked={selected.includes(c)} onChange={() => toggle(c)} className="h-3.5 w-3.5 rounded border-[#e8e6dc] accent-[#c96442]" /><span className="text-sm text-[#4d4c48]">{c}</span></label>)}
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-[#87867f]">{r.label}</span>
+            <button
+              type="button"
+              onClick={() => toggleAll(r)}
+              className="text-[10px] text-[#c96442] hover:underline"
+            >
+              全选
+            </button>
+          </div>
+          {r.countries.map((c) => (
+            <label
+              key={c}
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 hover:bg-[#f5f4ed]"
+            >
+              <input
+                type="checkbox"
+                checked={selected.includes(c)}
+                onChange={() => toggle(c)}
+                className="h-3.5 w-3.5 rounded border-[#e8e6dc] accent-[#c96442]"
+              />
+              <span className="text-sm text-[#4d4c48]">{c}</span>
+            </label>
+          ))}
         </div>
       ))}
     </div>
   );
 }
-function LanguagePanel({ selected, onChange }: { selected: string[]; onChange: (v: string[]) => void }) {
-  const toggle = (l: string) => onChange(selected.includes(l) ? selected.filter(x => x !== l) : [...selected, l]);
-  return <div className="max-h-64 overflow-y-auto pr-0.5">{LANGUAGES.map(l => <label key={l} className="flex items-center gap-2 px-1 py-1 rounded-lg hover:bg-[#f5f4ed] cursor-pointer"><input type="checkbox" checked={selected.includes(l)} onChange={() => toggle(l)} className="h-3.5 w-3.5 rounded border-[#e8e6dc] accent-[#c96442]" /><span className="text-sm text-[#4d4c48]">{l}</span></label>)}</div>;
+function LanguagePanel({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const toggle = (l: string) =>
+    onChange(selected.includes(l) ? selected.filter((x) => x !== l) : [...selected, l]);
+  return (
+    <div className="max-h-64 overflow-y-auto pr-0.5">
+      {LANGUAGES.map((l) => (
+        <label
+          key={l}
+          className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 hover:bg-[#f5f4ed]"
+        >
+          <input
+            type="checkbox"
+            checked={selected.includes(l)}
+            onChange={() => toggle(l)}
+            className="h-3.5 w-3.5 rounded border-[#e8e6dc] accent-[#c96442]"
+          />
+          <span className="text-sm text-[#4d4c48]">{l}</span>
+        </label>
+      ))}
+    </div>
+  );
 }
-function RangePanel({ presets, preset, from, to, onPreset, onFrom, onTo }: { presets: string[]; preset: string | null; from: string; to: string; onPreset: (v: string | null) => void; onFrom: (v: string) => void; onTo: (v: string) => void }) {
+function RangePanel({
+  presets,
+  preset,
+  from,
+  to,
+  onPreset,
+  onFrom,
+  onTo,
+}: {
+  presets: string[];
+  preset: string | null;
+  from: string;
+  to: string;
+  onPreset: (v: string | null) => void;
+  onFrom: (v: string) => void;
+  onTo: (v: string) => void;
+}) {
   return (
     <div className="space-y-1">
-      {presets.map(p => <label key={p} className="flex items-center gap-2.5 px-1 py-1.5 rounded-lg hover:bg-[#f5f4ed] cursor-pointer"><input type="radio" checked={preset === p} onChange={() => onPreset(preset === p ? null : p)} className="h-3.5 w-3.5 accent-[#c96442]" /><span className="text-sm text-[#4d4c48]">{p}</span></label>)}
+      {presets.map((p) => (
+        <label
+          key={p}
+          className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1 py-1.5 hover:bg-[#f5f4ed]"
+        >
+          <input
+            type="radio"
+            checked={preset === p}
+            onChange={() => onPreset(preset === p ? null : p)}
+            className="h-3.5 w-3.5 accent-[#c96442]"
+          />
+          <span className="text-sm text-[#4d4c48]">{p}</span>
+        </label>
+      ))}
       <div className="flex gap-2 pt-2">
-        <input type="text" placeholder="From" value={from} onChange={e => onFrom(e.target.value)} className="flex-1 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] px-3 py-1.5 text-xs text-[#4d4c48] placeholder:text-[#b0aea6] outline-none focus:border-[#c96442]/50" />
-        <input type="text" placeholder="To" value={to} onChange={e => onTo(e.target.value)} className="flex-1 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] px-3 py-1.5 text-xs text-[#4d4c48] placeholder:text-[#b0aea6] outline-none focus:border-[#c96442]/50" />
+        <input
+          type="text"
+          placeholder="From"
+          value={from}
+          onChange={(e) => onFrom(e.target.value)}
+          className="flex-1 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] px-3 py-1.5 text-xs text-[#4d4c48] outline-none placeholder:text-[#b0aea6] focus:border-[#c96442]/50"
+        />
+        <input
+          type="text"
+          placeholder="To"
+          value={to}
+          onChange={(e) => onTo(e.target.value)}
+          className="flex-1 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] px-3 py-1.5 text-xs text-[#4d4c48] outline-none placeholder:text-[#b0aea6] focus:border-[#c96442]/50"
+        />
       </div>
-      <input type="range" min={0} max={100} className="w-full mt-1 accent-[#c96442]" />
+      <input type="range" min={0} max={100} className="mt-1 w-full accent-[#c96442]" />
     </div>
   );
 }
@@ -372,17 +583,17 @@ function StepSlider({
   value: string | null;
   onChange: (v: string | null) => void;
 }) {
-  const rawIdx = value === null ? 0 : steps.findIndex(s => s.value === value);
+  const rawIdx = value === null ? 0 : steps.findIndex((s) => s.value === value);
   const idx = rawIdx < 0 ? 0 : rawIdx;
   const max = steps.length - 1;
   const pct = max === 0 ? 0 : (idx / max) * 100;
 
   return (
-    <div className="select-none px-1 pb-1 pt-3">
+    <div className="px-1 pt-3 pb-1 select-none">
       {/* Track */}
       <div className="relative h-5 cursor-pointer">
         {/* Track background */}
-        <div className="absolute left-0 right-0 top-1/2 h-[5px] -translate-y-1/2 overflow-hidden rounded-full bg-[#ede8de]">
+        <div className="absolute top-1/2 right-0 left-0 h-[5px] -translate-y-1/2 overflow-hidden rounded-full bg-[#ede8de]">
           <motion.div
             className="h-full rounded-full bg-[#c96442]"
             animate={{ width: `${pct}%` }}
@@ -417,7 +628,7 @@ function StepSlider({
           min={0}
           max={max}
           value={idx}
-          onChange={e => onChange(steps[Number(e.target.value)].value)}
+          onChange={(e) => onChange(steps[Number(e.target.value)].value)}
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         />
       </div>
@@ -434,8 +645,8 @@ function StepSlider({
               onClick={() => onChange(step.value)}
               style={{ left: `${tickPct}%` }}
               className={cn(
-                "absolute -translate-x-1/2 whitespace-nowrap text-[10px] font-medium transition-colors duration-150",
-                isActive ? "text-[#c96442] font-semibold" : "text-[#a3a098] hover:text-[#4d4c48]"
+                "absolute -translate-x-1/2 text-[10px] font-medium whitespace-nowrap transition-colors duration-150",
+                isActive ? "font-semibold text-[#c96442]" : "text-[#a3a098] hover:text-[#4d4c48]",
               )}
             >
               {step.label}
@@ -476,23 +687,93 @@ function ViewsPanel({
 }
 
 // ── Sentence helpers ──────────────────────────────────────────────────────────
-function B({ children }: { children: React.ReactNode }) { return <strong className="font-semibold text-[#141413]">{children}</strong>; }
-function AutoSentence({ platform, mode, countries, languages, followersPreset, followersFrom, followersTo, viewsPreset, viewsFrom, viewsTo }: { platform: PlatformId; mode: ModeId | null; countries: string[]; languages: string[]; followersPreset: string | null; followersFrom: string; followersTo: string; viewsPreset: string | null; viewsFrom: string; viewsTo: string }) {
+function B({ children }: { children: React.ReactNode }) {
+  return <strong className="font-semibold text-[#141413]">{children}</strong>;
+}
+function AutoSentence({
+  platform,
+  mode,
+  countries,
+  languages,
+  followersPreset,
+  followersFrom,
+  followersTo,
+  viewsPreset,
+  viewsFrom,
+  viewsTo,
+}: {
+  platform: PlatformId;
+  mode: ModeId | null;
+  countries: string[];
+  languages: string[];
+  followersPreset: string | null;
+  followersFrom: string;
+  followersTo: string;
+  viewsPreset: string | null;
+  viewsFrom: string;
+  viewsTo: string;
+}) {
   const pLabel = { tiktok: "TikTok", instagram: "Instagram", youtube: "YouTube" }[platform];
-  const mLabel = mode ? MODES.find(m => m.id === mode)?.title : null;
-  const regionText = countries.length === 0 ? null : countries.length <= 3 ? countries.join("、") : `${countries.slice(0,2).join("、")} 等 ${countries.length} 个地区`;
-  const langText = languages.length === 0 ? null : languages.length <= 3 ? languages.join("和") : `${languages.slice(0,2).join("和")} 等 ${languages.length} 种语言`;
-  const fText = followersPreset ?? (followersFrom||followersTo ? `${followersFrom||"0"} – ${followersTo||"∞"}` : null);
-  const vText = viewsPreset ?? (viewsFrom||viewsTo ? `${viewsFrom||"0"} – ${viewsTo||"∞"}` : null);
-  if (!mLabel && !regionText && !langText && !fText && !vText) return <p className="text-[15px] leading-8 text-[#b0aea6]">在 <B>{pLabel}</B> 平台上选择搜索方式，并配置筛选条件，系统将根据你的输入精准匹配博主。</p>;
+  const mLabel = mode ? MODES.find((m) => m.id === mode)?.title : null;
+  const regionText =
+    countries.length === 0
+      ? null
+      : countries.length <= 3
+        ? countries.join("、")
+        : `${countries.slice(0, 2).join("、")} 等 ${countries.length} 个地区`;
+  const langText =
+    languages.length === 0
+      ? null
+      : languages.length <= 3
+        ? languages.join("和")
+        : `${languages.slice(0, 2).join("和")} 等 ${languages.length} 种语言`;
+  const fText =
+    followersPreset ??
+    (followersFrom || followersTo ? `${followersFrom || "0"} – ${followersTo || "∞"}` : null);
+  const vText =
+    viewsPreset ?? (viewsFrom || viewsTo ? `${viewsFrom || "0"} – ${viewsTo || "∞"}` : null);
+  if (!mLabel && !regionText && !langText && !fText && !vText)
+    return (
+      <p className="text-[15px] leading-8 text-[#b0aea6]">
+        在 <B>{pLabel}</B> 平台上选择搜索方式，并配置筛选条件，系统将根据你的输入精准匹配博主。
+      </p>
+    );
   return (
     <p className="text-[15px] leading-8 text-[#5e5d59]">
-      {"我在 "}<B>{pLabel}</B>{" 平台"}
-      {mLabel && (<>{", 正在寻找 "}<B>{mLabel}</B>{" 类博主"}</>)}
-      {regionText && (<>{", 目标受众在 "}<B>{regionText}</B></>)}
-      {langText && (<>{", 内容语言为 "}<B>{langText}</B></>)}
-      {fText && (<>{", 粉丝量 "}<B>{fText}</B></>)}
-      {vText && (<>{", 平均播放量 "}<B>{vText}</B></>)}
+      {"我在 "}
+      <B>{pLabel}</B>
+      {" 平台"}
+      {mLabel && (
+        <>
+          {", 正在寻找 "}
+          <B>{mLabel}</B>
+          {" 类博主"}
+        </>
+      )}
+      {regionText && (
+        <>
+          {", 目标受众在 "}
+          <B>{regionText}</B>
+        </>
+      )}
+      {langText && (
+        <>
+          {", 内容语言为 "}
+          <B>{langText}</B>
+        </>
+      )}
+      {fText && (
+        <>
+          {", 粉丝量 "}
+          <B>{fText}</B>
+        </>
+      )}
+      {vText && (
+        <>
+          {", 平均播放量 "}
+          <B>{vText}</B>
+        </>
+      )}
       {"。"}
     </p>
   );
@@ -560,22 +841,42 @@ function CreatorCard({
   }, [onCloseFindSimilarReminder, showFindSimilarReminder]);
 
   return (
-    <div className={cn("flex flex-col rounded-2xl border bg-white overflow-hidden transition-all", dismissed ? "opacity-50" : "border-[#e8e6dc]")}>
+    <div
+      className={cn(
+        "flex flex-col overflow-hidden rounded-2xl border bg-white transition-all",
+        dismissed ? "opacity-50" : "border-[#e8e6dc]",
+      )}
+    >
       {/* Info row */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <button type="button" onClick={onOpenProfile} aria-label={`查看 ${creator.name} 的详细信息`} className="shrink-0 rounded-full transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#c96442] focus:ring-offset-2">
+        <button
+          type="button"
+          onClick={onOpenProfile}
+          aria-label={`查看 ${creator.name} 的详细信息`}
+          className="shrink-0 rounded-full transition-transform hover:scale-105 focus:ring-2 focus:ring-[#c96442] focus:ring-offset-2 focus:outline-none"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={getCreatorAvatarUrl(creator)} alt={creator.name} className="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow-sm" />
+          <img
+            src={getCreatorAvatarUrl(creator)}
+            alt={creator.name}
+            className="h-11 w-11 rounded-full object-cover shadow-sm ring-2 ring-white"
+          />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="font-semibold text-[#141413] text-sm leading-tight">{creator.name}</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-sm leading-tight font-semibold text-[#141413]">
+              {creator.name}
+            </span>
             <span className="text-base">{creator.region}</span>
-            {creator.verified && <span className="text-[10px] rounded-full border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-blue-600">认证</span>}
+            {creator.verified && (
+              <span className="rounded-full border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600">
+                认证
+              </span>
+            )}
           </div>
           <span className="text-xs text-[#87867f]">{creator.handle}</span>
         </div>
-        <div className="flex items-center gap-2 shrink-0 text-xs">
+        <div className="flex shrink-0 items-center gap-2 text-xs">
           <span className="text-[#87867f]">👥 {creator.followers}</span>
           <span className="font-semibold text-[#c96442]">ER {creator.er}</span>
         </div>
@@ -583,13 +884,22 @@ function CreatorCard({
 
       {/* Smart tags */}
       <div className="flex flex-wrap gap-1.5 px-4 pb-3">
-        {creator.smartTags.slice(0, 3).map(t => <span key={t} className="rounded-full bg-[#f5f4ed] px-2 py-0.5 text-[11px] text-[#4d4c48]">{t}</span>)}
+        {creator.smartTags.slice(0, 3).map((t) => (
+          <span
+            key={t}
+            className="rounded-full bg-[#f5f4ed] px-2 py-0.5 text-[11px] text-[#4d4c48]"
+          >
+            {t}
+          </span>
+        ))}
       </div>
 
       <div className="mx-4 mb-3 rounded-[18px] border border-[#efe4d8] bg-[linear-gradient(180deg,#fffdf9_0%,#faf6ef_100%)] p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c96442]">{recommendation.badge}</p>
+            <p className="text-[11px] font-semibold tracking-[0.16em] text-[#c96442] uppercase">
+              {recommendation.badge}
+            </p>
             <p className="mt-1 text-xs leading-5 text-[#5e5d59]">{recommendation.summary}</p>
           </div>
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#f0d5c4] bg-white text-sm font-bold text-[#c96442]">
@@ -597,14 +907,17 @@ function CreatorCard({
           </div>
         </div>
         <div className="mt-2 space-y-1.5">
-          {recommendation.reasons.map(reason => (
+          {recommendation.reasons.map((reason) => (
             <div key={reason} className="flex gap-2 text-[11px] leading-5 text-[#4d4c48]">
               <Check className="mt-1 h-3 w-3 shrink-0 text-[#7a8a6a]" />
               <span>{reason}</span>
             </div>
           ))}
         </div>
-        <button type="button" className="mt-3 rounded-full border border-[#e8e6dc] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#4d4c48] transition-colors hover:border-[#c96442]/35 hover:text-[#c96442]">
+        <button
+          type="button"
+          className="mt-3 rounded-full border border-[#e8e6dc] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#4d4c48] transition-colors hover:border-[#c96442]/35 hover:text-[#c96442]"
+        >
           {recommendation.action}
         </button>
       </div>
@@ -612,7 +925,11 @@ function CreatorCard({
       {/* Portrait video thumbnails */}
       <div className="grid grid-cols-3 gap-1.5 px-4">
         {creator.videos.map((v, i) => (
-          <div key={i} className="relative overflow-hidden rounded-xl" style={{ aspectRatio: "9/16" }}>
+          <div
+            key={i}
+            className="relative overflow-hidden rounded-xl"
+            style={{ aspectRatio: "9/16" }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`https://picsum.photos/seed/${v.seed}/300/533`}
@@ -623,12 +940,14 @@ function CreatorCard({
             {/* gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
             {/* ER badge top-right */}
-            <div className="absolute right-1.5 top-1.5">
-              <span className="rounded-md bg-emerald-500/85 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">ER {v.er}</span>
+            <div className="absolute top-1.5 right-1.5">
+              <span className="rounded-md bg-emerald-500/85 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                ER {v.er}
+              </span>
             </div>
             {/* Stats bottom */}
-            <div className="absolute bottom-2 left-2 right-2">
-              <p className="text-[9px] text-white/75 leading-tight">{v.age}</p>
+            <div className="absolute right-2 bottom-2 left-2">
+              <p className="text-[9px] leading-tight text-white/75">{v.age}</p>
               <div className="mt-0.5 flex items-center gap-2 text-[10px] font-medium text-white">
                 <span>▶ {v.plays}</span>
                 <span>♥ {v.likes}</span>
@@ -644,26 +963,45 @@ function CreatorCard({
           type="button"
           onClick={onNo}
           title="不感兴趣：后续推荐会降低这类相似特征权重"
-          className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-[20px] border py-2.5 text-sm font-medium transition-all", dismissed ? "border-[#c96442]/25 bg-[#fdf5f0] text-[#c96442]" : "border-[#e8e6dc] bg-white text-[#87867f] hover:bg-[#f5f4ed] hover:text-[#4d4c48]")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-1.5 rounded-[20px] border py-2.5 text-sm font-medium transition-all",
+            dismissed
+              ? "border-[#c96442]/25 bg-[#fdf5f0] text-[#c96442]"
+              : "border-[#e8e6dc] bg-white text-[#87867f] hover:bg-[#f5f4ed] hover:text-[#4d4c48]",
+          )}
         >
-          <Hand className="h-3.5 w-3.5" />No
+          <Hand className="h-3.5 w-3.5" />
+          No
         </button>
         <button
           type="button"
           onClick={onSave}
           title="感兴趣：后续推荐会强化这类相似特征权重"
-          className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-[20px] border py-2.5 text-sm font-medium transition-all", saved ? "border-[#c96442]/30 bg-[#fdf5f0] text-[#c96442]" : "border-[#e8e6dc] bg-white text-[#87867f] hover:bg-[#fdf5f0] hover:text-[#c96442]")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-1.5 rounded-[20px] border py-2.5 text-sm font-medium transition-all",
+            saved
+              ? "border-[#c96442]/30 bg-[#fdf5f0] text-[#c96442]"
+              : "border-[#e8e6dc] bg-white text-[#87867f] hover:bg-[#fdf5f0] hover:text-[#c96442]",
+          )}
         >
-          <Heart className={cn("h-3.5 w-3.5", saved && "fill-[#c96442]")} />收藏
+          <Heart className={cn("h-3.5 w-3.5", saved && "fill-[#c96442]")} />
+          收藏
         </button>
         <div className="relative" ref={reminderRef}>
           {showFindSimilarReminder ? (
             <div className="absolute bottom-[calc(100%+10px)] left-1/2 z-20 w-[280px] -translate-x-1/2 rounded-[18px] border border-[#e8e6dc] bg-[linear-gradient(180deg,#fffdf9_0%,#faf9f5_100%)] p-3 shadow-[0_22px_60px_-28px_rgba(20,20,19,0.32)]">
-              <div className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold" style={{ color: reminderMeta.accent, background: reminderMeta.softBg, borderColor: reminderMeta.softBorder }}>
+              <div
+                className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold"
+                style={{
+                  color: reminderMeta.accent,
+                  background: reminderMeta.softBg,
+                  borderColor: reminderMeta.softBorder,
+                }}
+              >
                 <span>{reminderMeta.icon}</span>
                 <span>当前状态：{reminderMeta.title}</span>
               </div>
-              <p className="mt-2 text-[13px] font-semibold leading-5 text-[#141413]">
+              <p className="mt-2 text-[13px] leading-5 font-semibold text-[#141413]">
                 点击带头像的“找相似”按钮后，将以该博主作为新的相似基准。
               </p>
               <p className="mt-1 text-[11px] leading-5 text-[#87867f]">
@@ -681,14 +1019,22 @@ function CreatorCard({
                 <span>不再提醒</span>
               </label>
               <div className="mt-3 flex justify-end gap-2">
-                <button type="button" onClick={onCloseFindSimilarReminder} className="rounded-xl border border-[#e8e6dc] bg-[#f5f4ed] px-3 py-2 text-[11px] font-medium text-[#87867f] transition-colors hover:bg-[#ece8dd] hover:text-[#4d4c48]">
+                <button
+                  type="button"
+                  onClick={onCloseFindSimilarReminder}
+                  className="rounded-xl border border-[#e8e6dc] bg-[#f5f4ed] px-3 py-2 text-[11px] font-medium text-[#87867f] transition-colors hover:bg-[#ece8dd] hover:text-[#4d4c48]"
+                >
                   取消
                 </button>
-                <button type="button" onClick={onConfirmFindSimilar} className="rounded-xl bg-[#c96442] px-3 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#d97757]">
+                <button
+                  type="button"
+                  onClick={onConfirmFindSimilar}
+                  className="rounded-xl bg-[#c96442] px-3 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#d97757]"
+                >
                   确认切换
                 </button>
               </div>
-              <div className="absolute left-1/2 top-full h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-r border-[#e8e6dc] bg-[#faf9f5]" />
+              <div className="absolute top-full left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 border-r border-b border-[#e8e6dc] bg-[#faf9f5]" />
             </div>
           ) : null}
           <button
@@ -744,15 +1090,35 @@ function ExitConfirmModal({
           <span>不再提醒</span>
         </label>
         <div className="mt-5 flex gap-2">
-          <button type="button" onClick={onCancel} className="flex-1 rounded-xl border border-[#e8e6dc] bg-[#f5f4ed] py-2.5 text-sm font-medium text-[#4d4c48] transition-colors hover:bg-[#e8e6dc]">取消</button>
-          <button type="button" onClick={onConfirm} className="flex-1 rounded-xl bg-[#c96442] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#d97757]">结束</button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 rounded-xl border border-[#e8e6dc] bg-[#f5f4ed] py-2.5 text-sm font-medium text-[#4d4c48] transition-colors hover:bg-[#e8e6dc]"
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 rounded-xl bg-[#c96442] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#d97757]"
+          >
+            结束
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function ExportModal({ savedCount, totalCount, onClose }: { savedCount: number; totalCount: number; onClose: () => void }) {
+function ExportModal({
+  savedCount,
+  totalCount,
+  onClose,
+}: {
+  savedCount: number;
+  totalCount: number;
+  onClose: () => void;
+}) {
   const unmarked = totalCount - savedCount;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -761,7 +1127,11 @@ function ExportModal({ savedCount, totalCount, onClose }: { savedCount: number; 
         {/* Radial glow at top */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,#c9644233,transparent_70%)]" />
         {/* Close button */}
-        <button type="button" onClick={onClose} className="absolute right-5 top-5 z-10 rounded-full border border-[#e8e6dc] bg-white p-2 text-[#87867f] transition-colors hover:bg-[#f5f4ed]">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-5 right-5 z-10 rounded-full border border-[#e8e6dc] bg-white p-2 text-[#87867f] transition-colors hover:bg-[#f5f4ed]"
+        >
           <X className="h-4 w-4" />
         </button>
         {/* Header */}
@@ -772,7 +1142,8 @@ function ExportModal({ savedCount, totalCount, onClose }: { savedCount: number; 
           </div>
           <div className="mt-3 text-2xl font-semibold">导出 {savedCount} 位已收藏博主</div>
           <p className="mt-2 text-sm leading-6 text-[#5e5d59]">
-            表格包含博主名称、平台主页链接、粉丝量、互动率、平均播放量、报价区间及邮箱，格式为 .xlsx（Excel 兼容）。
+            表格包含博主名称、平台主页链接、粉丝量、互动率、平均播放量、报价区间及邮箱，格式为
+            .xlsx（Excel 兼容）。
           </p>
         </div>
         {/* Warning */}
@@ -781,17 +1152,28 @@ function ExportModal({ savedCount, totalCount, onClose }: { savedCount: number; 
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <div>
               <p className="text-sm font-semibold text-amber-800">还有 {unmarked} 位博主未标记</p>
-              <p className="mt-1 text-xs leading-5 text-amber-700">未打标记的博主不会出现在导出表格中。建议先完成所有博主的收藏/No 标记，再导出完整数据。</p>
+              <p className="mt-1 text-xs leading-5 text-amber-700">
+                未打标记的博主不会出现在导出表格中。建议先完成所有博主的收藏/No
+                标记，再导出完整数据。
+              </p>
             </div>
           </div>
         )}
         {/* Action buttons */}
         <div className="relative mt-5 flex gap-2.5">
-          <button type="button" onClick={onClose} className="flex-1 rounded-2xl border border-[#e8e6dc] bg-white py-2.5 text-sm font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 rounded-2xl border border-[#e8e6dc] bg-white py-2.5 text-sm font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"
+          >
             取消
           </button>
-          <button type="button" className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[#c96442] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#d97757]">
-            <Download className="h-3.5 w-3.5" />继续并下载
+          <button
+            type="button"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[#c96442] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#d97757]"
+          >
+            <Download className="h-3.5 w-3.5" />
+            继续并下载
           </button>
         </div>
       </div>
@@ -832,13 +1214,23 @@ function FindSimilarModeModal({
       <div className="relative w-full max-w-[360px] rounded-[24px] border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#faf9f5_62%,#f5f4ed_100%)] p-4 shadow-[0_28px_80px_-30px_rgba(20,20,19,0.28)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-20 rounded-t-[24px] bg-[radial-gradient(circle_at_top,#c9644216,transparent_72%)]" />
         <div className="relative z-10 flex items-start gap-3">
-          <button type="button" onClick={() => openCreatorProfile(creatorToProfileInput(creator))} className="shrink-0 rounded-full transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#c96442] focus:ring-offset-2">
+          <button
+            type="button"
+            onClick={() => openCreatorProfile(creatorToProfileInput(creator))}
+            className="shrink-0 rounded-full transition-transform hover:scale-105 focus:ring-2 focus:ring-[#c96442] focus:ring-offset-2 focus:outline-none"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={getCreatorAvatarUrl(creator)} alt={creator.name} className="h-11 w-11 rounded-full border-2 border-white object-cover shadow-sm" />
+            <img
+              src={getCreatorAvatarUrl(creator)}
+              alt={creator.name}
+              className="h-11 w-11 rounded-full border-2 border-white object-cover shadow-sm"
+            />
           </button>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-medium text-[#87867f]">根据此博主继续搜索</p>
-            <p className="truncate text-[16px] font-semibold leading-tight text-[#141413]">{creator.handle}</p>
+            <p className="truncate text-[16px] leading-tight font-semibold text-[#141413]">
+              {creator.handle}
+            </p>
             <p className="mt-1 text-[11px] leading-5 text-[#87867f]">
               请选择本次要切换到的搜索方式。
             </p>
@@ -900,19 +1292,33 @@ function FindSimilarModeModal({
 }
 
 // ── Filter select (styled) ────────────────────────────────────────────────────
-function FilterSelect({ label, value, onChange, opts }: { label: string; value: string; onChange: (v: string) => void; opts: [string, string][] }) {
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  opts,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  opts: [string, string][];
+}) {
   return (
     <div className="space-y-1.5">
       <p className="text-xs font-semibold text-[#4d4c48]">{label}</p>
       <div className="relative">
         <select
           value={value}
-          onChange={e => onChange(e.target.value)}
-          className="w-full appearance-none rounded-xl border border-[#e8e6dc] bg-white py-2 pl-3 pr-8 text-sm text-[#4d4c48] outline-none transition-colors focus:border-[#c96442]/50 focus:ring-0"
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full appearance-none rounded-xl border border-[#e8e6dc] bg-white py-2 pr-8 pl-3 text-sm text-[#4d4c48] transition-colors outline-none focus:border-[#c96442]/50 focus:ring-0"
         >
-          {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          {opts.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
+        <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[#87867f]" />
       </div>
     </div>
   );
@@ -959,7 +1365,9 @@ function ResultsView({
   const [filterFollowers, setFilterFollowers] = useState("all");
   const [filterVerified, setFilterVerified] = useState("all");
   const [filterEmail, setFilterEmail] = useState("all");
-  const [findSimilarMode, setFindSimilarMode] = useState<FindSimilarMode>(initialFindSimilarMode ?? "找相似");
+  const [findSimilarMode, setFindSimilarMode] = useState<FindSimilarMode>(
+    initialFindSimilarMode ?? "找相似",
+  );
   const [pendingSimilarCreator, setPendingSimilarCreator] = useState<Creator | null>(null);
   const [dontRemindFindSimilarAgain, setDontRemindFindSimilarAgain] = useState(false);
   const [skipFindSimilarReminder, setSkipFindSimilarReminder] = useState(false);
@@ -991,15 +1399,13 @@ function ResultsView({
   useEffect(() => {
     if (typeof window === "undefined") return;
     setSkipFindSimilarReminder(
-      window.localStorage.getItem(FIND_SIMILAR_REMINDER_STORAGE_KEY) === "true"
+      window.localStorage.getItem(FIND_SIMILAR_REMINDER_STORAGE_KEY) === "true",
     );
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setSkipExitReminder(
-      window.localStorage.getItem(EXIT_SCREEN_REMINDER_STORAGE_KEY) === "true"
-    );
+    setSkipExitReminder(window.localStorage.getItem(EXIT_SCREEN_REMINDER_STORAGE_KEY) === "true");
   }, []);
 
   useEffect(() => {
@@ -1012,7 +1418,9 @@ function ResultsView({
 
   useEffect(() => {
     if (!shareOpen) return;
-    const h = (e: MouseEvent) => { if (shareRef.current && !shareRef.current.contains(e.target as Node)) setShareOpen(false); };
+    const h = (e: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) setShareOpen(false);
+    };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, [shareOpen]);
@@ -1039,7 +1447,11 @@ function ResultsView({
   };
 
   const updateStatus = (id: string, status: Creator["status"]) =>
-    setCreators(prev => prev.map(c => c.id === id ? { ...c, status: c.status === status ? "pending" : status } : c));
+    setCreators((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, status: c.status === status ? "pending" : status } : c,
+      ),
+    );
 
   const applyFindSimilar = (creator: Creator, mode: FindSimilarMode) => {
     setFindSimilarMode(mode);
@@ -1055,7 +1467,11 @@ function ResultsView({
 
   const handleAnchorFindSimilar = () => {
     if (!anchor) return;
-    const sourceCreator = anchorCreator ?? creators.find((creator) => creator.status === "pending") ?? creators[0] ?? MOCK_CREATORS[0];
+    const sourceCreator =
+      anchorCreator ??
+      creators.find((creator) => creator.status === "pending") ??
+      creators[0] ??
+      MOCK_CREATORS[0];
     setFindSimilarMode("找相似");
     setCreators(buildCreatorResultsByMode(sourceCreator, "找相似"));
     setActiveTab("pending");
@@ -1122,7 +1538,26 @@ function ResultsView({
       }
     }
 
-    if (appliedFilters.language !== "all" && !creator.smartTags.includes(appliedFilters.language === "en" ? "英语" : appliedFilters.language === "zh" ? "中文" : appliedFilters.language === "ja" ? "日语" : appliedFilters.language === "ko" ? "韩语" : appliedFilters.language === "hi" ? "印地语" : appliedFilters.language === "pt" ? "葡萄牙语" : appliedFilters.language === "tr" ? "土耳其语" : appliedFilters.language)) {
+    if (
+      appliedFilters.language !== "all" &&
+      !creator.smartTags.includes(
+        appliedFilters.language === "en"
+          ? "英语"
+          : appliedFilters.language === "zh"
+            ? "中文"
+            : appliedFilters.language === "ja"
+              ? "日语"
+              : appliedFilters.language === "ko"
+                ? "韩语"
+                : appliedFilters.language === "hi"
+                  ? "印地语"
+                  : appliedFilters.language === "pt"
+                    ? "葡萄牙语"
+                    : appliedFilters.language === "tr"
+                      ? "土耳其语"
+                      : appliedFilters.language,
+      )
+    ) {
       return false;
     }
 
@@ -1149,25 +1584,54 @@ function ResultsView({
   };
 
   const filteredCreators = creators.filter(creatorMatchesAppliedFilters);
-  const pending = filteredCreators.filter(c => c.status === "pending");
-  const noList = filteredCreators.filter(c => c.status === "no");
-  const saved = filteredCreators.filter(c => c.status === "saved");
+  const pending = filteredCreators.filter((c) => c.status === "pending");
+  const noList = filteredCreators.filter((c) => c.status === "no");
+  const saved = filteredCreators.filter((c) => c.status === "saved");
   const visible = activeTab === "pending" ? pending : activeTab === "no" ? noList : saved;
 
   return (
-    <div className="flex flex-col -mx-6 -my-8">
+    <div className="-mx-6 -my-8 flex flex-col">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3 border-b border-[#e8e6dc] bg-white px-5 py-3">
         <div className="flex items-center gap-3">
-          <button type="button" onClick={handleExitAttempt} className="flex h-8 w-8 items-center justify-center rounded-lg text-[#87867f] transition-colors hover:bg-[#f5f4ed] hover:text-[#141413]">
+          <button
+            type="button"
+            onClick={handleExitAttempt}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#87867f] transition-colors hover:bg-[#f5f4ed] hover:text-[#141413]"
+          >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div className="flex items-center gap-0.5 rounded-xl border border-[#e8e6dc] bg-[#f5f4ed] p-0.5">
-            {([["pending","待收藏",pending.length],["no","NO",noList.length],["saved","已收藏",saved.length]] as const).map(([tab, label, count]) => (
-              <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all", activeTab === tab ? "bg-white text-[#141413] shadow-sm" : "text-[#87867f] hover:text-[#4d4c48]")}>
+            {(
+              [
+                ["pending", "待收藏", pending.length],
+                ["no", "NO", noList.length],
+                ["saved", "已收藏", saved.length],
+              ] as const
+            ).map(([tab, label, count]) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+                  activeTab === tab
+                    ? "bg-white text-[#141413] shadow-sm"
+                    : "text-[#87867f] hover:text-[#4d4c48]",
+                )}
+              >
                 {tab === "pending" && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
                 {label}
-                <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-bold", activeTab === tab ? "bg-[#f5f4ed] text-[#4d4c48]" : "bg-[#e8e6dc] text-[#87867f]")}>{count}</span>
+                <span
+                  className={cn(
+                    "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+                    activeTab === tab
+                      ? "bg-[#f5f4ed] text-[#4d4c48]"
+                      : "bg-[#e8e6dc] text-[#87867f]",
+                  )}
+                >
+                  {count}
+                </span>
               </button>
             ))}
           </div>
@@ -1177,9 +1641,26 @@ function ResultsView({
           <div className="flex min-w-[280px] flex-1 justify-center">
             <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#e8e6dc] bg-[linear-gradient(180deg,#ffffff_0%,#f5f4ed_100%)] px-4 py-2.5 text-center shadow-[0_14px_34px_-26px_rgba(77,76,72,0.32)]">
               <span className="text-sm font-medium text-[#5e5d59]">根据</span>
-              <button type="button" onClick={() => openCreatorProfile({ name: anchor.name, handle: anchor.handle, avatarUrl: getAnchorAvatarUrl(anchor.avatarSeed), region: "🌐", followers: "--", er: "--" })} className="shrink-0 rounded-full transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#c96442] focus:ring-offset-2">
+              <button
+                type="button"
+                onClick={() =>
+                  openCreatorProfile({
+                    name: anchor.name,
+                    handle: anchor.handle,
+                    avatarUrl: getAnchorAvatarUrl(anchor.avatarSeed),
+                    region: "🌐",
+                    followers: "--",
+                    er: "--",
+                  })
+                }
+                className="shrink-0 rounded-full transition-transform hover:scale-105 focus:ring-2 focus:ring-[#c96442] focus:ring-offset-2 focus:outline-none"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={getAnchorAvatarUrl(anchor.avatarSeed)} alt={anchor.name} className="h-9 w-9 rounded-full border border-white bg-white object-cover shadow-sm" />
+                <img
+                  src={getAnchorAvatarUrl(anchor.avatarSeed)}
+                  alt={anchor.name}
+                  className="h-9 w-9 rounded-full border border-white bg-white object-cover shadow-sm"
+                />
               </button>
               <button
                 type="button"
@@ -1196,25 +1677,48 @@ function ResultsView({
 
         <div className="ml-auto flex items-center gap-2">
           <div className="relative" ref={shareRef}>
-            <button type="button" onClick={() => setShareOpen(v => !v)} className="flex items-center gap-1.5 rounded-xl border border-[#e8e6dc] bg-white px-3 py-1.5 text-xs font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]">
-              <Share2 className="h-3.5 w-3.5" />分享
+            <button
+              type="button"
+              onClick={() => setShareOpen((v) => !v)}
+              className="flex items-center gap-1.5 rounded-xl border border-[#e8e6dc] bg-white px-3 py-1.5 text-xs font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              分享
             </button>
             {shareOpen && (
-              <div className="absolute right-0 top-full z-20 mt-1.5 w-40 rounded-xl border border-[#e8e6dc] bg-white py-1 shadow-[0_12px_32px_-8px_rgba(20,20,19,0.16)]">
-                <button type="button" onClick={() => { setShareOpen(false); setShowExport(true); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"><Download className="h-3.5 w-3.5" />导出博主表格</button>
+              <div className="absolute top-full right-0 z-20 mt-1.5 w-40 rounded-xl border border-[#e8e6dc] bg-white py-1 shadow-[0_12px_32px_-8px_rgba(20,20,19,0.16)]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShareOpen(false);
+                    setShowExport(true);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  导出博主表格
+                </button>
               </div>
             )}
           </div>
-          <button type="button" className="flex items-center gap-1.5 rounded-xl border border-[#e8e6dc] bg-white px-3 py-1.5 text-xs font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"><Bookmark className="h-3.5 w-3.5" />批量操作</button>
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-xl border border-[#e8e6dc] bg-white px-3 py-1.5 text-xs font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"
+          >
+            <Bookmark className="h-3.5 w-3.5" />
+            批量操作
+          </button>
         </div>
       </div>
 
       {/* Body */}
       <div className="flex flex-1">
         {/* Left filter sidebar */}
-        <div className="w-52 shrink-0 border-r border-[#e8e6dc] bg-[#faf9f5] px-4 py-5 flex flex-col gap-4">
+        <div className="flex w-52 shrink-0 flex-col gap-4 border-r border-[#e8e6dc] bg-[#faf9f5] px-4 py-5">
           <div className="rounded-2xl border border-[#e8e6dc] bg-white p-3.5">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-[#87867f]">当前项目</p>
+            <p className="text-[11px] font-medium tracking-wide text-[#87867f] uppercase">
+              当前项目
+            </p>
             <div className="mt-2 text-sm font-semibold text-[#141413]">{currentProject.name}</div>
             <p className="mt-1 text-xs leading-5 text-[#5e5d59]">
               {currentProject.productName} · {currentProject.category}
@@ -1235,14 +1739,94 @@ function ResultsView({
             </button>
           </div>
           <div className="h-px bg-[#e8e6dc]" />
-          <FilterSelect label="地区" value={filterRegion} onChange={setFilterRegion} opts={[["all","请选择地区"],["us","🇺🇸 美国"],["gb","🇬🇧 英国"],["in","🇮🇳 印度"],["jp","🇯🇵 日本"],["kr","🇰🇷 韩国"],["br","🇧🇷 巴西"],["tr","🇹🇷 土耳其"]]} />
-          <FilterSelect label="语言" value={filterLanguage} onChange={setFilterLanguage} opts={[["all","请选择语言"],["en","英语"],["zh","中文"],["ja","日语"],["ko","韩语"],["hi","印地语"],["pt","葡萄牙语"],["tr","土耳其语"]]} />
-          <FilterSelect label="粉丝数" value={filterFollowers} onChange={setFilterFollowers} opts={[["all","请选择粉丝数"],["1k-10k","1K-10K"],["10k-100k","10K-100K"],["100k-500k","100K-500K"],["500k+","500K+"]]} />
-          <FilterSelect label="是否认证用户" value={filterVerified} onChange={setFilterVerified} opts={[["all","请选择是否认证用户"],["yes","是"],["no","否"]]} />
-          <FilterSelect label="是否有邮箱" value={filterEmail} onChange={setFilterEmail} opts={[["all","请选择是否有邮箱"],["corporate","公司邮箱"],["personal","个人邮箱"],["risk","风险邮箱"],["none","无邮箱"]]} />
+          <FilterSelect
+            label="地区"
+            value={filterRegion}
+            onChange={setFilterRegion}
+            opts={[
+              ["all", "请选择地区"],
+              ["us", "🇺🇸 美国"],
+              ["gb", "🇬🇧 英国"],
+              ["in", "🇮🇳 印度"],
+              ["jp", "🇯🇵 日本"],
+              ["kr", "🇰🇷 韩国"],
+              ["br", "🇧🇷 巴西"],
+              ["tr", "🇹🇷 土耳其"],
+            ]}
+          />
+          <FilterSelect
+            label="语言"
+            value={filterLanguage}
+            onChange={setFilterLanguage}
+            opts={[
+              ["all", "请选择语言"],
+              ["en", "英语"],
+              ["zh", "中文"],
+              ["ja", "日语"],
+              ["ko", "韩语"],
+              ["hi", "印地语"],
+              ["pt", "葡萄牙语"],
+              ["tr", "土耳其语"],
+            ]}
+          />
+          <FilterSelect
+            label="粉丝数"
+            value={filterFollowers}
+            onChange={setFilterFollowers}
+            opts={[
+              ["all", "请选择粉丝数"],
+              ["1k-10k", "1K-10K"],
+              ["10k-100k", "10K-100K"],
+              ["100k-500k", "100K-500K"],
+              ["500k+", "500K+"],
+            ]}
+          />
+          <FilterSelect
+            label="是否认证用户"
+            value={filterVerified}
+            onChange={setFilterVerified}
+            opts={[
+              ["all", "请选择是否认证用户"],
+              ["yes", "是"],
+              ["no", "否"],
+            ]}
+          />
+          <FilterSelect
+            label="是否有邮箱"
+            value={filterEmail}
+            onChange={setFilterEmail}
+            opts={[
+              ["all", "请选择是否有邮箱"],
+              ["corporate", "公司邮箱"],
+              ["personal", "个人邮箱"],
+              ["risk", "风险邮箱"],
+              ["none", "无邮箱"],
+            ]}
+          />
           <div className="flex gap-2 pt-4">
-            <button type="button" onClick={handleResetDiscoveryState} className="flex-1 rounded-xl border border-[#e8e6dc] bg-white py-2 text-xs font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]">重置</button>
-            <button type="button" onClick={() => { setAppliedFilters({ region: filterRegion, language: filterLanguage, followers: filterFollowers, verified: filterVerified, email: filterEmail }); setResultsRefreshKey(prev => prev + 1); }} className="flex-1 rounded-xl bg-[#c96442] py-2 text-xs font-semibold text-white transition-colors hover:bg-[#d97757]">应用</button>
+            <button
+              type="button"
+              onClick={handleResetDiscoveryState}
+              className="flex-1 rounded-xl border border-[#e8e6dc] bg-white py-2 text-xs font-medium text-[#4d4c48] transition-colors hover:bg-[#f5f4ed]"
+            >
+              重置
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAppliedFilters({
+                  region: filterRegion,
+                  language: filterLanguage,
+                  followers: filterFollowers,
+                  verified: filterVerified,
+                  email: filterEmail,
+                });
+                setResultsRefreshKey((prev) => prev + 1);
+              }}
+              className="flex-1 rounded-xl bg-[#c96442] py-2 text-xs font-semibold text-white transition-colors hover:bg-[#d97757]"
+            >
+              应用
+            </button>
           </div>
         </div>
 
@@ -1252,15 +1836,24 @@ function ResultsView({
             <div className="grid gap-4 p-5 xl:grid-cols-[1.25fr_0.75fr]">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={cn("flex h-9 w-9 items-center justify-center rounded-2xl", discoveryMeta.iconBg)}>
+                  <span
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-2xl",
+                      discoveryMeta.iconBg,
+                    )}
+                  >
                     <discoveryMeta.Icon className={cn("h-4.5 w-4.5", discoveryMeta.iconColor)} />
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#87867f]">本次搜索依据</p>
+                    <p className="text-[11px] font-semibold tracking-[0.18em] text-[#87867f] uppercase">
+                      本次搜索依据
+                    </p>
                     <h2 className="text-lg font-semibold text-[#141413]">{discoveryMeta.title}</h2>
                   </div>
                 </div>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#5e5d59]">{discoveryMeta.resultPromise}</p>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#5e5d59]">
+                  {discoveryMeta.resultPromise}
+                </p>
                 <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                   {[
                     ["平台", platformLabel],
@@ -1268,7 +1861,10 @@ function ResultsView({
                     ["分析内容", `${discoveryMeta.basis.posts} 条帖子`],
                     ["找到候选", `${discoveryMeta.basis.candidates} 位达人`],
                   ].map(([label, value]) => (
-                    <div key={label} className="rounded-2xl border border-[#efe8dc] bg-white/75 px-3 py-2">
+                    <div
+                      key={label}
+                      className="rounded-2xl border border-[#efe8dc] bg-white/75 px-3 py-2"
+                    >
                       <p className="text-[10px] font-medium text-[#87867f]">{label}</p>
                       <p className="mt-0.5 text-sm font-semibold text-[#141413]">{value}</p>
                     </div>
@@ -1277,9 +1873,11 @@ function ResultsView({
               </div>
               <div className="rounded-2xl border border-[#efe8dc] bg-white/70 p-4">
                 <p className="text-xs font-semibold text-[#4d4c48]">已默认过滤</p>
-                <p className="mt-1 text-xs leading-5 text-[#87867f]">{discoveryMeta.basis.filtered}</p>
+                <p className="mt-1 text-xs leading-5 text-[#87867f]">
+                  {discoveryMeta.basis.filtered}
+                </p>
                 <div className="mt-3 space-y-2">
-                  {discoveryMeta.evidenceItems.map(item => (
+                  {discoveryMeta.evidenceItems.map((item) => (
                     <div key={item} className="flex items-center gap-2 text-xs text-[#4d4c48]">
                       <span className="h-1.5 w-1.5 rounded-full bg-[#c96442]" />
                       <span>{item}</span>
@@ -1292,18 +1890,24 @@ function ResultsView({
 
           {visible.length === 0 ? (
             <div className="flex h-48 items-center justify-center rounded-2xl border border-[#e8e6dc] bg-white text-sm text-[#87867f]">
-              {activeTab === "no" ? "暂无 No 的博主" : activeTab === "saved" ? "还没有收藏博主" : "所有博主已标记完成 🎉"}
+              {activeTab === "no"
+                ? "暂无 No 的博主"
+                : activeTab === "saved"
+                  ? "还没有收藏博主"
+                  : "所有博主已标记完成 🎉"}
             </div>
           ) : (
             <div key={resultsRefreshKey} className="grid gap-4 lg:grid-cols-2">
-              {visible.map(c => (
+              {visible.map((c) => (
                 <CreatorCard
                   key={c.id}
                   creator={c}
                   currentFindSimilarMode={findSimilarMode}
                   discoveryMode={discoveryMode}
                   isQuickScreenContext={entrySource === "quick-screen"}
-                  showFindSimilarReminder={showFindSimilarReminder && pendingSimilarCreator?.id === c.id}
+                  showFindSimilarReminder={
+                    showFindSimilarReminder && pendingSimilarCreator?.id === c.id
+                  }
                   dontRemindAgain={dontRemindFindSimilarAgain}
                   onNo={() => updateStatus(c.id, "no")}
                   onSave={() => updateStatus(c.id, "saved")}
@@ -1327,7 +1931,13 @@ function ResultsView({
           onCancel={handleCancelExit}
         />
       )}
-      {showExport && <ExportModal savedCount={saved.length} totalCount={creators.length} onClose={() => setShowExport(false)} />}
+      {showExport && (
+        <ExportModal
+          savedCount={saved.length}
+          totalCount={creators.length}
+          onClose={() => setShowExport(false)}
+        />
+      )}
       {showFindSimilarModeModal && pendingSimilarCreator ? (
         <FindSimilarModeModal
           creator={pendingSimilarCreator}
@@ -1350,7 +1960,13 @@ type ProductInfo = {
   aiInferred: boolean;
 };
 
-function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v: ProductInfo) => void }) {
+function ProductInfoForm({
+  value,
+  onChange,
+}: {
+  value: ProductInfo;
+  onChange: (v: ProductInfo) => void;
+}) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fetching, setFetching] = useState(false);
 
@@ -1363,7 +1979,13 @@ function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v
     const raw = value.link.trim();
     if (!raw || !/^https?:\/\//.test(raw)) {
       if (value.ogPreview || value.aiInferred) {
-        onChange({ ...value, ogPreview: null, aiInferred: false, categoryL1: value.aiInferred ? null : value.categoryL1, categoryL2: value.aiInferred ? null : value.categoryL2 });
+        onChange({
+          ...value,
+          ogPreview: null,
+          aiInferred: false,
+          categoryL1: value.aiInferred ? null : value.categoryL1,
+          categoryL2: value.aiInferred ? null : value.categoryL2,
+        });
       }
       return;
     }
@@ -1379,27 +2001,37 @@ function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v
         aiInferred: true,
       });
     }, 800);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value.link]);
 
-  const l2Options = value.categoryL1 ? CATEGORIES.find(c => c.l1 === value.categoryL1)?.l2 ?? [] : [];
+  const l2Options = value.categoryL1
+    ? (CATEGORIES.find((c) => c.l1 === value.categoryL1)?.l2 ?? [])
+    : [];
 
   return (
     <div className="space-y-4">
       {/* Product link */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[#4d4c48]">产品链接 <span className="text-[#87867f]">（优先）</span></label>
+        <label className="mb-1.5 block text-xs font-medium text-[#4d4c48]">
+          产品链接 <span className="text-[#87867f]">（优先）</span>
+        </label>
         <div className="flex gap-2">
           <div className="flex flex-1 items-center gap-2 rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 focus-within:border-[#c96442]/40">
             <Link2 className="h-3.5 w-3.5 shrink-0 text-[#87867f]" />
-            <input type="url" value={value.link}
-              onChange={e => onChange({ ...value, link: e.target.value })}
+            <input
+              type="url"
+              value={value.link}
+              onChange={(e) => onChange({ ...value, link: e.target.value })}
               placeholder="https://..."
-              className="flex-1 bg-transparent text-sm text-[#141413] placeholder:text-[#c8c7c3] focus:outline-none" />
+              className="flex-1 bg-transparent text-sm text-[#141413] placeholder:text-[#c8c7c3] focus:outline-none"
+            />
             {fetching && (
               <span className="flex items-center gap-1 text-[10px] text-[#87867f]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c96442]" />抓取中
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c96442]" />
+                抓取中
               </span>
             )}
           </div>
@@ -1408,7 +2040,11 @@ function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v
         {hasPreview && value.ogPreview && (
           <div className="mt-2 flex items-center gap-3 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={value.ogPreview.image} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+            <img
+              src={value.ogPreview.image}
+              alt=""
+              className="h-12 w-12 shrink-0 rounded-lg object-cover"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-[#141413]">{value.ogPreview.title}</p>
               <p className="text-[11px] text-[#87867f]">{value.ogPreview.domain}</p>
@@ -1421,24 +2057,37 @@ function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v
       {/* Manual upload (mutually exclusive with link) */}
       {!hasLink && (
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#4d4c48]">或手动上传产品图片</label>
-          <label htmlFor="product-upload"
-            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#e8e6dc] bg-[#faf9f5] px-4 py-6 text-sm text-[#87867f] transition-colors hover:border-[#c96442]/40 hover:bg-[#fbf5ed] hover:text-[#c96442]">
+          <label className="mb-1.5 block text-xs font-medium text-[#4d4c48]">
+            或手动上传产品图片
+          </label>
+          <label
+            htmlFor="product-upload"
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#e8e6dc] bg-[#faf9f5] px-4 py-6 text-sm text-[#87867f] transition-colors hover:border-[#c96442]/40 hover:bg-[#fbf5ed] hover:text-[#c96442]"
+          >
             <Upload className="h-4 w-4" />
             <span>点击或拖拽图片到此处</span>
           </label>
-          <input id="product-upload" type="file" accept="image/*" className="hidden"
-            onChange={e => {
+          <input
+            id="product-upload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
                 const url = URL.createObjectURL(file);
                 onChange({ ...value, imagePreview: url });
               }
-            }} />
+            }}
+          />
           {value.imagePreview && !value.ogPreview && (
             <div className="mt-2 flex items-center gap-3 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={value.imagePreview} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+              <img
+                src={value.imagePreview}
+                alt=""
+                className="h-12 w-12 shrink-0 rounded-lg object-cover"
+              />
               <span className="text-sm text-[#141413]">已上传</span>
             </div>
           )}
@@ -1452,25 +2101,47 @@ function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v
             品类
             {value.aiInferred && (
               <span className="flex items-center gap-0.5 rounded-full bg-[#fbf5ed] px-1.5 py-0.5 text-[9px] font-medium text-[#c96442]">
-                <Sparkles className="h-2.5 w-2.5" />AI 推断
+                <Sparkles className="h-2.5 w-2.5" />
+                AI 推断
               </span>
             )}
           </label>
-          <select value={value.categoryL1 ?? ""}
-            onChange={e => onChange({ ...value, categoryL1: e.target.value || null, categoryL2: null, aiInferred: false })}
-            className="w-full rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] focus:border-[#c96442]/40 focus:outline-none">
+          <select
+            value={value.categoryL1 ?? ""}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                categoryL1: e.target.value || null,
+                categoryL2: null,
+                aiInferred: false,
+              })
+            }
+            className="w-full rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] focus:border-[#c96442]/40 focus:outline-none"
+          >
             <option value="">请选择</option>
-            {CATEGORIES.map(c => <option key={c.l1} value={c.l1}>{c.l1}</option>)}
+            {CATEGORIES.map((c) => (
+              <option key={c.l1} value={c.l1}>
+                {c.l1}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-[#4d4c48]">子品类</label>
-          <select value={value.categoryL2 ?? ""}
+          <select
+            value={value.categoryL2 ?? ""}
             disabled={!value.categoryL1}
-            onChange={e => onChange({ ...value, categoryL2: e.target.value || null, aiInferred: false })}
-            className="w-full rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] focus:border-[#c96442]/40 focus:outline-none disabled:cursor-not-allowed disabled:bg-[#faf9f5] disabled:text-[#b0aea6]">
+            onChange={(e) =>
+              onChange({ ...value, categoryL2: e.target.value || null, aiInferred: false })
+            }
+            className="w-full rounded-xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] focus:border-[#c96442]/40 focus:outline-none disabled:cursor-not-allowed disabled:bg-[#faf9f5] disabled:text-[#b0aea6]"
+          >
             <option value="">请选择</option>
-            {l2Options.map(l2 => <option key={l2} value={l2}>{l2}</option>)}
+            {l2Options.map((l2) => (
+              <option key={l2} value={l2}>
+                {l2}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -1482,29 +2153,36 @@ function ProductInfoForm({ value, onChange }: { value: ProductInfo; onChange: (v
 type ModalVariant = "scenario" | "viral";
 
 function DiscoveryModal({
-  variant, onClose, onSubmit,
+  variant,
+  onClose,
+  onSubmit,
 }: {
   variant: ModalVariant;
   onClose: () => void;
   onSubmit: (payload: { scenes: string[]; primaryGoal: string | null }) => void;
 }) {
   const [product, setProduct] = useState<ProductInfo>({
-    link: "", ogPreview: null, imagePreview: null,
-    categoryL1: null, categoryL2: null, aiInferred: false,
+    link: "",
+    ogPreview: null,
+    imagePreview: null,
+    categoryL1: null,
+    categoryL2: null,
+    aiInferred: false,
   });
-  const [primaryGoal, setPrimaryGoal]     = useState<string | null>(null);
+  const [primaryGoal, setPrimaryGoal] = useState<string | null>(null);
   const [secondaryGoal, setSecondaryGoal] = useState<string | null>(null);
-  const [step, setStep]                   = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [selectedScenes, setSelectedScenes] = useState<string[]>([]);
 
   const isScenario = variant === "scenario";
 
-  const hasProduct = (product.link.trim().length > 0 && product.ogPreview) || !!product.imagePreview;
+  const hasProduct =
+    (product.link.trim().length > 0 && product.ogPreview) || !!product.imagePreview;
   const hasCategory = !!product.categoryL1 && !!product.categoryL2;
   const step1Ready = hasProduct && hasCategory && (isScenario ? !!primaryGoal : true);
 
   const toggleScene = (id: string) =>
-    setSelectedScenes(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+    setSelectedScenes((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
 
   const handlePrimary = () => {
     if (!step1Ready) return;
@@ -1524,11 +2202,17 @@ function DiscoveryModal({
         <div className="border-b border-[#e8e6dc] bg-white px-6 py-5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                isScenario ? "bg-[#fbf5ed] text-[#c96442]" : "bg-[#f0ebdc] text-[#7a8a6a]"
-              )}>
-                {isScenario ? <Zap className="h-4.5 w-4.5" /> : <TrendingUp className="h-4.5 w-4.5" />}
+              <div
+                className={cn(
+                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                  isScenario ? "bg-[#fbf5ed] text-[#c96442]" : "bg-[#f0ebdc] text-[#7a8a6a]",
+                )}
+              >
+                {isScenario ? (
+                  <Zap className="h-4.5 w-4.5" />
+                ) : (
+                  <TrendingUp className="h-4.5 w-4.5" />
+                )}
               </div>
               <div>
                 <h2 className="text-base font-semibold text-[#141413]">
@@ -1541,8 +2225,11 @@ function DiscoveryModal({
                 </p>
               </div>
             </div>
-            <button type="button" onClick={onClose}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[#87867f] hover:bg-[#f5f4ed] hover:text-[#141413]">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[#87867f] hover:bg-[#f5f4ed] hover:text-[#141413]"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -1556,14 +2243,19 @@ function DiscoveryModal({
                 { n: 3, label: "达人结果" },
               ].map((s, i) => (
                 <div key={s.n} className="flex items-center gap-2">
-                  <span className={cn(
-                    "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
-                    step >= s.n ? "bg-[#c96442] text-white"
-                                : "bg-[#f0ece4] text-[#87867f]"
-                  )}>
+                  <span
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
+                      step >= s.n ? "bg-[#c96442] text-white" : "bg-[#f0ece4] text-[#87867f]",
+                    )}
+                  >
                     {step > s.n ? <Check className="h-3 w-3" /> : s.n}
                   </span>
-                  <span className={cn(step >= s.n ? "font-medium text-[#141413]" : "text-[#87867f]")}>{s.label}</span>
+                  <span
+                    className={cn(step >= s.n ? "font-medium text-[#141413]" : "text-[#87867f]")}
+                  >
+                    {s.label}
+                  </span>
                   {i < 2 && <span className="mx-1 text-[#c8c7c3]">→</span>}
                 </div>
               ))}
@@ -1585,10 +2277,12 @@ function DiscoveryModal({
                       主营销目标 <span className="text-[#c96442]">*</span>
                     </label>
                     <div className="grid grid-cols-4 gap-2">
-                      {GOALS.map(g => {
+                      {GOALS.map((g) => {
                         const active = primaryGoal === g.id;
                         return (
-                          <button key={g.id} type="button"
+                          <button
+                            key={g.id}
+                            type="button"
                             onClick={() => {
                               setPrimaryGoal(active ? null : g.id);
                               if (secondaryGoal === g.id) setSecondaryGoal(null);
@@ -1597,8 +2291,9 @@ function DiscoveryModal({
                               "rounded-xl border px-3 py-2 text-xs font-medium transition-all",
                               active
                                 ? "border-[#c96442]/30 bg-[#fdf5f0] text-[#c96442] ring-2 ring-[#c96442]/15"
-                                : "border-[#e8e6dc] bg-white text-[#4d4c48] hover:border-[#c96442]/30"
-                            )}>
+                                : "border-[#e8e6dc] bg-white text-[#4d4c48] hover:border-[#c96442]/30",
+                            )}
+                          >
                             {g.label}
                           </button>
                         );
@@ -1612,11 +2307,13 @@ function DiscoveryModal({
                         次要目标 <span className="text-[#87867f]">（可选，最多 1 个）</span>
                       </label>
                       <div className="grid grid-cols-4 gap-2">
-                        {GOALS.map(g => {
+                        {GOALS.map((g) => {
                           const isPrimary = primaryGoal === g.id;
                           const active = secondaryGoal === g.id;
                           return (
-                            <button key={g.id} type="button"
+                            <button
+                              key={g.id}
+                              type="button"
                               disabled={isPrimary}
                               onClick={() => setSecondaryGoal(active ? null : g.id)}
                               className={cn(
@@ -1625,8 +2322,9 @@ function DiscoveryModal({
                                   ? "cursor-not-allowed border-[#f0ece4] bg-[#f5f4ed] text-[#c8c7c3]"
                                   : active
                                     ? "border-[#c96442]/30 bg-[#fdf5f0] text-[#c96442]"
-                                    : "border-[#e8e6dc] bg-white text-[#4d4c48] hover:border-[#c96442]/30"
-                              )}>
+                                    : "border-[#e8e6dc] bg-white text-[#4d4c48] hover:border-[#c96442]/30",
+                              )}
+                            >
                               {g.label}
                             </button>
                           );
@@ -1643,25 +2341,34 @@ function DiscoveryModal({
               <div className="flex items-start gap-2 rounded-xl bg-[#fbf5ed] px-3.5 py-2.5">
                 <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#c96442]" />
                 <p className="text-xs leading-relaxed text-[#4d4c48]">
-                  AI 为你识别了以下内容场景，请选择你希望投放的方向<span className="text-[#87867f]">（支持多选）</span>
+                  AI 为你识别了以下内容场景，请选择你希望投放的方向
+                  <span className="text-[#87867f]">（支持多选）</span>
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {MOCK_SCENES.map(s => {
+                {MOCK_SCENES.map((s) => {
                   const active = selectedScenes.includes(s.id);
                   return (
-                    <button key={s.id} type="button" onClick={() => toggleScene(s.id)}
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => toggleScene(s.id)}
                       className={cn(
                         "relative flex flex-col items-start gap-2 rounded-2xl border bg-white p-4 text-left transition-all hover:-translate-y-0.5",
                         active
                           ? "border-[#c96442]/40 bg-[#fdf5f0] shadow-[0_0_0_2px_rgba(201,100,66,0.12)]"
-                          : "border-[#e8e6dc] hover:shadow-[0_8px_24px_-12px_rgba(77,76,72,0.14)]"
-                      )}>
+                          : "border-[#e8e6dc] hover:shadow-[0_8px_24px_-12px_rgba(77,76,72,0.14)]",
+                      )}
+                    >
                       <div className="flex w-full items-start justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg leading-none">{s.icon}</span>
-                          <span className={cn("text-sm font-semibold",
-                            active ? "text-[#c96442]" : "text-[#141413]")}>
+                          <span
+                            className={cn(
+                              "text-sm font-semibold",
+                              active ? "text-[#c96442]" : "text-[#141413]",
+                            )}
+                          >
                             {s.name}
                           </span>
                         </div>
@@ -1673,8 +2380,12 @@ function DiscoveryModal({
                       </div>
                       <p className="text-[11px] text-[#87867f]">{s.type}</p>
                       <div className="mt-1 flex items-center gap-3 text-[11px]">
-                        <span className="text-[#4d4c48]">达人数 <span className="font-medium">{s.creatorCount}</span></span>
-                        <span className="text-[#4d4c48]">互动 <span className="font-medium">{s.avgEngagement}</span></span>
+                        <span className="text-[#4d4c48]">
+                          达人数 <span className="font-medium">{s.creatorCount}</span>
+                        </span>
+                        <span className="text-[#4d4c48]">
+                          互动 <span className="font-medium">{s.avgEngagement}</span>
+                        </span>
                       </div>
                     </button>
                   );
@@ -1686,31 +2397,39 @@ function DiscoveryModal({
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-[#e8e6dc] bg-white px-6 py-4">
-          <button type="button"
+          <button
+            type="button"
             onClick={() => (step === 2 ? setStep(1) : onClose())}
-            className="rounded-xl border border-[#e8e6dc] bg-white px-4 py-2 text-sm text-[#4d4c48] hover:bg-[#f5f4ed]">
+            className="rounded-xl border border-[#e8e6dc] bg-white px-4 py-2 text-sm text-[#4d4c48] hover:bg-[#f5f4ed]"
+          >
             {step === 2 ? "← 返回修改" : "取消"}
           </button>
           {step === 1 ? (
-            <button type="button" onClick={handlePrimary} disabled={!step1Ready}
+            <button
+              type="button"
+              onClick={handlePrimary}
+              disabled={!step1Ready}
               className={cn(
                 "flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm font-semibold transition-all",
                 step1Ready
                   ? "bg-[#c96442] text-white hover:bg-[#d97757] active:scale-[0.97]"
-                  : "cursor-not-allowed bg-[#f0ece4] text-[#b0aea6]"
-              )}>
+                  : "cursor-not-allowed bg-[#f0ece4] text-[#b0aea6]",
+              )}
+            >
               开始匹配 →
             </button>
           ) : (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => onSubmit({ scenes: selectedScenes, primaryGoal })}
               disabled={selectedScenes.length === 0}
               className={cn(
                 "flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm font-semibold transition-all",
                 selectedScenes.length > 0
                   ? "bg-[#c96442] text-white hover:bg-[#d97757] active:scale-[0.97]"
-                  : "cursor-not-allowed bg-[#f0ece4] text-[#b0aea6]"
-              )}>
+                  : "cursor-not-allowed bg-[#f0ece4] text-[#b0aea6]",
+              )}
+            >
               查看匹配达人 →
             </button>
           )}
@@ -1723,13 +2442,14 @@ function DiscoveryModal({
 // ── Progressive loading indicator (Strategy Architect) ──────────────────────
 type LoadingState = {
   variant: ModalVariant;
-  step: 0 | 1 | 2 | 3;   // 0 = not started, 3 = done
+  step: 0 | 1 | 2 | 3; // 0 = not started, 3 = done
 };
 
 function ProgressiveLoader({ state }: { state: LoadingState }) {
-  const lines = state.variant === "scenario"
-    ? ["产品信息解析完成", "正在匹配内容场景", "筛选最佳达人"]
-    : ["品类识别完成",       "正在分析近期爆款内容", "筛选高潜达人"];
+  const lines =
+    state.variant === "scenario"
+      ? ["产品信息解析完成", "正在匹配内容场景", "筛选最佳达人"]
+      : ["品类识别完成", "正在分析近期爆款内容", "筛选高潜达人"];
   return (
     <div className="space-y-2.5">
       {lines.map((line, i) => {
@@ -1737,22 +2457,31 @@ function ProgressiveLoader({ state }: { state: LoadingState }) {
         const active = state.step === i;
         return (
           <div key={line} className="flex items-center gap-2.5 text-sm">
-            <span className={cn(
-              "flex h-5 w-5 items-center justify-center rounded-full",
-              done    ? "bg-[#7a8a6a] text-white"
-              : active ? "bg-[#fbf5ed] text-[#c96442]"
-                       : "bg-[#f0ece4] text-[#c8c7c3]"
-            )}>
-              {done ? <Check className="h-3 w-3" />
-                    : active ? <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c96442]" />
-                             : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+            <span
+              className={cn(
+                "flex h-5 w-5 items-center justify-center rounded-full",
+                done
+                  ? "bg-[#7a8a6a] text-white"
+                  : active
+                    ? "bg-[#fbf5ed] text-[#c96442]"
+                    : "bg-[#f0ece4] text-[#c8c7c3]",
+              )}
+            >
+              {done ? (
+                <Check className="h-3 w-3" />
+              ) : active ? (
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c96442]" />
+              ) : (
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              )}
             </span>
-            <span className={cn(
-              done   ? "text-[#141413]"
-              : active ? "font-medium text-[#c96442]"
-                       : "text-[#b0aea6]"
-            )}>
-              {line}{active ? "…" : ""}
+            <span
+              className={cn(
+                done ? "text-[#141413]" : active ? "font-medium text-[#c96442]" : "text-[#b0aea6]",
+              )}
+            >
+              {line}
+              {active ? "…" : ""}
             </span>
           </div>
         );
@@ -1802,8 +2531,13 @@ interface DimensionPreviewCardProps {
   onOpen: () => void;
 }
 
-function DimensionPreviewCard({ mode, platformLabel, regionSummary, onOpen }: DimensionPreviewCardProps) {
-  const meta = MODES.find(m => m.id === mode)!;
+function DimensionPreviewCard({
+  mode,
+  platformLabel,
+  regionSummary,
+  onOpen,
+}: DimensionPreviewCardProps) {
+  const meta = MODES.find((m) => m.id === mode)!;
   const previewCreators = MOCK_CREATORS.slice(0, 3);
   const totalCount = mode === "competitor" ? 86 : mode === "scenario" ? 124 : 57;
 
@@ -1813,7 +2547,12 @@ function DimensionPreviewCard({ mode, platformLabel, regionSummary, onOpen }: Di
       onClick={onOpen}
       className="group flex w-full items-center gap-4 rounded-2xl border border-[#e8e6dc] bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:border-[#c96442]/30 hover:shadow-[0_12px_32px_-16px_rgba(77,76,72,0.2)]"
     >
-      <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", meta.iconBg)}>
+      <div
+        className={cn(
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+          meta.iconBg,
+        )}
+      >
         <meta.Icon className={cn("h-5 w-5", meta.iconColor)} />
       </div>
 
@@ -1825,12 +2564,13 @@ function DimensionPreviewCard({ mode, platformLabel, regionSummary, onOpen }: Di
           </span>
         </div>
         <p className="mt-1 text-xs text-[#87867f]">
-          已为你预筛 <span className="font-semibold text-[#141413]">{totalCount}</span> 位达人 · 点击进入快速筛选
+          已为你预筛 <span className="font-semibold text-[#141413]">{totalCount}</span> 位达人 ·
+          点击进入快速筛选
         </p>
       </div>
 
       <div className="hidden items-center -space-x-2 sm:flex">
-        {previewCreators.map(c => (
+        {previewCreators.map((c) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={c.id}
@@ -1847,7 +2587,13 @@ function DimensionPreviewCard({ mode, platformLabel, regionSummary, onOpen }: Di
 
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#c96442] text-white transition-transform group-hover:translate-x-0.5">
         <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
-          <path d="M5.5 3.5L10 8l-4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M5.5 3.5L10 8l-4.5 4.5"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
     </button>
@@ -1856,19 +2602,19 @@ function DimensionPreviewCard({ mode, platformLabel, regionSummary, onOpen }: Di
 
 // ── Mock follow-up data (would be API-driven in prod) ────────────────────────
 const MOCK_COMPETITOR_BRANDS: { id: string; name: string; logo: string }[] = [
-  { id: "b1", name: "The Ordinary",    logo: "🧪" },
-  { id: "b2", name: "Paula's Choice",  logo: "✨" },
-  { id: "b3", name: "Drunk Elephant",  logo: "🐘" },
-  { id: "b4", name: "La Roche-Posay",  logo: "💧" },
-  { id: "b5", name: "CeraVe",          logo: "🛡️" },
-  { id: "b6", name: "SkinCeuticals",   logo: "🧬" },
+  { id: "b1", name: "The Ordinary", logo: "🧪" },
+  { id: "b2", name: "Paula's Choice", logo: "✨" },
+  { id: "b3", name: "Drunk Elephant", logo: "🐘" },
+  { id: "b4", name: "La Roche-Posay", logo: "💧" },
+  { id: "b5", name: "CeraVe", logo: "🛡️" },
+  { id: "b6", name: "SkinCeuticals", logo: "🧬" },
 ];
 
 type ViralCriterion = "plays" | "engagement" | "growth";
 const VIRAL_CRITERIA: { id: ViralCriterion; label: string; desc: string }[] = [
-  { id: "growth",     label: "长期种草型",     desc: "持续输出真实体验和复购内容" },
-  { id: "plays",      label: "测评说服型",     desc: "擅长把卖点拆开讲清楚" },
-  { id: "engagement", label: "评论高信任型",   desc: "评论区问题多、互动质量高" },
+  { id: "growth", label: "长期种草型", desc: "持续输出真实体验和复购内容" },
+  { id: "plays", label: "测评说服型", desc: "擅长把卖点拆开讲清楚" },
+  { id: "engagement", label: "评论高信任型", desc: "评论区问题多、互动质量高" },
 ];
 
 const DISCOVERY_CATEGORIES = [
@@ -1882,26 +2628,91 @@ const DISCOVERY_CATEGORIES = [
 
 type DiscoveryCategoryId = (typeof DISCOVERY_CATEGORIES)[number]["id"];
 
-const AGENT_GUIDE_CARDS: Record<ModeId, Array<{ id: string; title: string; desc: string; meta: string }>> = {
+const AGENT_GUIDE_CARDS: Record<
+  ModeId,
+  Array<{ id: string; title: string; desc: string; meta: string }>
+> = {
   competitor: [
-    { id: "brand-evidence", title: "按合作证据强度优先", desc: "优先找出现 #ad、品牌 @、官网链接、折扣码的达人。", meta: "更适合想快速验证同行投放的人" },
-    { id: "repeat-collab", title: "按重复投放品牌优先", desc: "找多次给同类品牌做内容的人，降低试错成本。", meta: "更适合长期建联池" },
+    {
+      id: "brand-evidence",
+      title: "按合作证据强度优先",
+      desc: "优先找出现 #ad、品牌 @、官网链接、折扣码的达人。",
+      meta: "更适合想快速验证同行投放的人",
+    },
+    {
+      id: "repeat-collab",
+      title: "按重复投放品牌优先",
+      desc: "找多次给同类品牌做内容的人，降低试错成本。",
+      meta: "更适合长期建联池",
+    },
   ],
   scenario: [
-    { id: "routine-brief", title: "先拆内容场景", desc: "把产品卖点拆成 routine、测评、开箱、对比等拍法。", meta: "更适合新品或卖点复杂产品" },
-    { id: "creator-format", title: "按达人擅长形式匹配", desc: "优先匹配擅长真人出镜、步骤教程、测评解释的达人。", meta: "更适合明确内容 brief 的项目" },
+    {
+      id: "routine-brief",
+      title: "先拆内容场景",
+      desc: "把产品卖点拆成 routine、测评、开箱、对比等拍法。",
+      meta: "更适合新品或卖点复杂产品",
+    },
+    {
+      id: "creator-format",
+      title: "按达人擅长形式匹配",
+      desc: "优先匹配擅长真人出镜、步骤教程、测评解释的达人。",
+      meta: "更适合明确内容 brief 的项目",
+    },
   ],
   viral: [
-    { id: "review-trust", title: "按真实评论质量优先", desc: "看评论区问题密度、真实反馈和达人回复质量。", meta: "更适合口碑种草" },
-    { id: "stable-seeding", title: "按稳定种草能力优先", desc: "不追单条爆款，优先找稳定讲产品、互动不水的达人。", meta: "更适合长期铺量" },
+    {
+      id: "review-trust",
+      title: "按真实评论质量优先",
+      desc: "看评论区问题密度、真实反馈和达人回复质量。",
+      meta: "更适合口碑种草",
+    },
+    {
+      id: "stable-seeding",
+      title: "按稳定种草能力优先",
+      desc: "不追单条爆款，优先找稳定讲产品、互动不水的达人。",
+      meta: "更适合长期铺量",
+    },
   ],
 };
 
 const PREVIEW_CREATORS = [
-  { id: "pc1", name: "Sarah K Beauty", handle: "@sarakhbeauty", avatarImg: 9, score: 92, reason: "测评解释强，评论区询问购买渠道较多", proof: "近 30 天 4 条护肤测评，平均 ER 6.8%" },
-  { id: "pc2", name: "GlowWithSun", handle: "@glowwithsun", avatarImg: 21, score: 89, reason: "GRWM 和 routine 场景自然，适合软种草", proof: "同类内容中位播放 42K，高于本人基线 1.4x" },
-  { id: "pc3", name: "TechLifeJapan", handle: "@techlifejapan", avatarImg: 16, score: 86, reason: "3C 使用体验讲解清楚，受众垂直", proof: "近期 3 条配件测评收藏率高于同量级均值" },
-  { id: "pc4", name: "BeautyBySelin", handle: "@beautybyselin", avatarImg: 48, score: 84, reason: "小语种市场互动质量好，可做区域测试", proof: "评论回复率高，邮箱可联系" },
+  {
+    id: "pc1",
+    name: "Sarah K Beauty",
+    handle: "@sarakhbeauty",
+    avatarImg: 9,
+    score: 92,
+    reason: "测评解释强，评论区询问购买渠道较多",
+    proof: "近 30 天 4 条护肤测评，平均 ER 6.8%",
+  },
+  {
+    id: "pc2",
+    name: "GlowWithSun",
+    handle: "@glowwithsun",
+    avatarImg: 21,
+    score: 89,
+    reason: "GRWM 和 routine 场景自然，适合软种草",
+    proof: "同类内容中位播放 42K，高于本人基线 1.4x",
+  },
+  {
+    id: "pc3",
+    name: "TechLifeJapan",
+    handle: "@techlifejapan",
+    avatarImg: 16,
+    score: 86,
+    reason: "3C 使用体验讲解清楚，受众垂直",
+    proof: "近期 3 条配件测评收藏率高于同量级均值",
+  },
+  {
+    id: "pc4",
+    name: "BeautyBySelin",
+    handle: "@beautybyselin",
+    avatarImg: 48,
+    score: 84,
+    reason: "小语种市场互动质量好，可做区域测试",
+    proof: "评论回复率高，邮箱可联系",
+  },
 ];
 
 // ── Warm welcome logo (replaces blue gradient, keeps Claude palette) ─────────
@@ -1981,7 +2792,7 @@ function DiscoveryModeTabs({
       ref={containerRef}
       role="radiogroup"
       aria-label="选择达人发现方式"
-      className="relative z-10 flex h-[44px] items-stretch overflow-x-auto overflow-y-visible px-[3px] pt-1 hide-scrollbar"
+      className="hide-scrollbar relative z-10 flex h-[44px] items-stretch overflow-x-auto overflow-y-visible px-[3px] pt-1"
     >
       {/* Active tab folder body — warm white, merges into the composer below */}
       {activeMode && folder ? (
@@ -1991,11 +2802,9 @@ function DiscoveryModeTabs({
           animate={{ x: folder.x, width: folder.w }}
           onAnimationStart={() => setHasAnimated(true)}
           transition={
-            hasAnimated
-              ? { ease: FOLDER_EASE, duration: FOLDER_DURATION }
-              : { duration: 0 }
+            hasAnimated ? { ease: FOLDER_EASE, duration: FOLDER_DURATION } : { duration: 0 }
           }
-          className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 rounded-t-[16px]"
+          className="pointer-events-none absolute top-0 bottom-0 left-0 z-0 rounded-t-[16px]"
           style={{
             backgroundColor: TAB_PANEL_COLOR,
             boxShadow: "0 1px 0 rgba(255,255,255,0.92)",
@@ -2046,7 +2855,7 @@ function DiscoveryModeTabs({
             }}
             className={cn(
               "group/tab relative z-10 flex shrink-0 items-center outline-none",
-              selected ? "cursor-default" : "cursor-pointer"
+              selected ? "cursor-default" : "cursor-pointer",
             )}
           >
             <input
@@ -2059,11 +2868,11 @@ function DiscoveryModeTabs({
             />
             <span
               className={cn(
-                "relative z-10 flex items-center whitespace-nowrap px-4 text-[14px] leading-none transition-colors duration-150 sm:text-[15px]",
+                "relative z-10 flex items-center px-4 text-[14px] leading-none whitespace-nowrap transition-colors duration-150 sm:text-[15px]",
                 "peer-focus-visible:rounded-md peer-focus-visible:ring-2 peer-focus-visible:ring-[#c96442]/30 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#f5f4ed]",
                 selected
                   ? "font-semibold"
-                  : "font-medium text-[#87867f] group-hover/tab:text-[#4d4c48]"
+                  : "font-medium text-[#87867f] group-hover/tab:text-[#4d4c48]",
               )}
               style={selected ? { color: item.accent } : undefined}
             >
@@ -2077,7 +2886,15 @@ function DiscoveryModeTabs({
 }
 
 // ── Platform pill (inside the composer) ──────────────────────────────────────
-function PlatformPill({ id, selected, onClick }: { id: PlatformId; selected: boolean; onClick: () => void }) {
+function PlatformPill({
+  id,
+  selected,
+  onClick,
+}: {
+  id: PlatformId;
+  selected: boolean;
+  onClick: () => void;
+}) {
   const Icon = id === "tiktok" ? TikTokIcon : id === "instagram" ? InstagramIcon : YoutubeIcon;
   return (
     <button
@@ -2085,11 +2902,11 @@ function PlatformPill({ id, selected, onClick }: { id: PlatformId; selected: boo
       onClick={onClick}
       className={cn(
         "relative inline-flex h-8 w-9 items-center justify-center rounded-full transition-colors",
-        selected ? "text-[#c96442]" : "text-[#87867f] hover:text-[#4d4c48]"
+        selected ? "text-[#c96442]" : "text-[#87867f] hover:text-[#4d4c48]",
       )}
       aria-pressed={selected}
-      aria-label={PLATFORMS.find(p => p.id === id)?.label ?? id}
-      title={PLATFORMS.find(p => p.id === id)?.label ?? id}
+      aria-label={PLATFORMS.find((p) => p.id === id)?.label ?? id}
+      title={PLATFORMS.find((p) => p.id === id)?.label ?? id}
     >
       {selected ? (
         <motion.span
@@ -2098,7 +2915,12 @@ function PlatformPill({ id, selected, onClick }: { id: PlatformId; selected: boo
           className="absolute inset-0 rounded-full bg-[#fdf5f0]"
         />
       ) : null}
-      <span className={cn("relative z-10 flex h-5 w-5 items-center justify-center", !selected && "text-[#87867f]")}>
+      <span
+        className={cn(
+          "relative z-10 flex h-5 w-5 items-center justify-center",
+          !selected && "text-[#87867f]",
+        )}
+      >
         <Icon colored={selected} />
       </span>
     </button>
@@ -2139,17 +2961,27 @@ function FilterChip({
           ? "border-[#c96442]/55 bg-[#fdf5f0] text-[#c96442] shadow-[0_0_0_3px_rgba(201,100,66,0.08)]"
           : active
             ? "border-[#f0d5c4] bg-[#fdf5f0] text-[#c96442] hover:border-[#c96442]/45"
-            : "border-[#e8e6dc] bg-[#FFFFFF] text-[#4d4c48] hover:border-[#d1cfc5] hover:text-[#141413]"
+            : "border-[#e8e6dc] bg-[#FFFFFF] text-[#4d4c48] hover:border-[#d1cfc5] hover:text-[#141413]",
       )}
     >
-      <Icon className={cn("h-3.5 w-3.5 shrink-0", open || active ? "text-[#c96442]" : "text-[#87867f] group-hover:text-[#4d4c48]")} strokeWidth={2.2} />
-      <span className="text-[11px] font-semibold tracking-wide text-[#87867f] group-hover:text-[#4d4c48]">{prefix}</span>
+      <Icon
+        className={cn(
+          "h-3.5 w-3.5 shrink-0",
+          open || active ? "text-[#c96442]" : "text-[#87867f] group-hover:text-[#4d4c48]",
+        )}
+        strokeWidth={2.2}
+      />
+      <span className="text-[11px] font-semibold tracking-wide text-[#87867f] group-hover:text-[#4d4c48]">
+        {prefix}
+      </span>
       <span className="font-medium">{label}</span>
       {typeof count === "number" && count > 0 ? (
-        <span className={cn(
-          "ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none",
-          open || active ? "bg-[#c96442] text-white" : "bg-[#f0ece4] text-[#4d4c48]"
-        )}>
+        <span
+          className={cn(
+            "ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold",
+            open || active ? "bg-[#c96442] text-white" : "bg-[#f0ece4] text-[#4d4c48]",
+          )}
+        >
           {count}
         </span>
       ) : null}
@@ -2160,7 +2992,10 @@ function FilterChip({
 
 // ── Composite panels (matched to the 3 footer chips) ─────────────────────────
 function GeoPanel({
-  countries, languages, onCountriesChange, onLanguagesChange,
+  countries,
+  languages,
+  onCountriesChange,
+  onLanguagesChange,
 }: {
   countries: string[];
   languages: string[];
@@ -2171,9 +3006,17 @@ function GeoPanel({
     <div className="grid gap-4 md:grid-cols-2">
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#87867f]">国家 / 地区</span>
+          <span className="text-[11px] font-semibold tracking-wider text-[#87867f] uppercase">
+            国家 / 地区
+          </span>
           {countries.length > 0 ? (
-            <button type="button" onClick={() => onCountriesChange([])} className="text-[10px] text-[#c96442] hover:underline">清空</button>
+            <button
+              type="button"
+              onClick={() => onCountriesChange([])}
+              className="text-[10px] text-[#c96442] hover:underline"
+            >
+              清空
+            </button>
           ) : null}
         </div>
         <div className="rounded-2xl border border-[#efe8dc] bg-white p-2">
@@ -2182,9 +3025,17 @@ function GeoPanel({
       </div>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#87867f]">内容语言</span>
+          <span className="text-[11px] font-semibold tracking-wider text-[#87867f] uppercase">
+            内容语言
+          </span>
           {languages.length > 0 ? (
-            <button type="button" onClick={() => onLanguagesChange([])} className="text-[10px] text-[#c96442] hover:underline">清空</button>
+            <button
+              type="button"
+              onClick={() => onLanguagesChange([])}
+              className="text-[10px] text-[#c96442] hover:underline"
+            >
+              清空
+            </button>
           ) : null}
         </div>
         <div className="rounded-2xl border border-[#efe8dc] bg-white p-2">
@@ -2196,19 +3047,21 @@ function GeoPanel({
 }
 
 function ApplicationsPanel({
-  selected, onChange,
+  selected,
+  onChange,
 }: {
   selected: string[];
   onChange: (v: string[]) => void;
 }) {
-  const toggle = (id: string) => onChange(selected.includes(id) ? selected.filter(s => s !== id) : [...selected, id]);
+  const toggle = (id: string) =>
+    onChange(selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id]);
   return (
     <div className="space-y-3">
       <p className="text-[11px] leading-5 text-[#87867f]">
         勾选你能接受的合作形式，Agent 会过滤掉不匹配的达人，避免无效建联。
       </p>
       <div className="flex flex-wrap gap-2">
-        {APPLICATION_CONDITIONS.map(cond => {
+        {APPLICATION_CONDITIONS.map((cond) => {
           const picked = selected.includes(cond.id);
           return (
             <button
@@ -2219,17 +3072,28 @@ function ApplicationsPanel({
                 "group inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-left transition-all",
                 picked
                   ? "border-[#c96442]/45 bg-[#fdf5f0] shadow-[0_0_0_2px_rgba(201,100,66,0.1)]"
-                  : "border-[#e8e6dc] bg-white hover:border-[#d1cfc5] hover:bg-[#faf9f5]"
+                  : "border-[#e8e6dc] bg-white hover:border-[#d1cfc5] hover:bg-[#faf9f5]",
               )}
             >
-              <span className={cn(
-                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
-                picked ? "border-[#c96442] bg-[#c96442] text-white" : "border-[#d8d5cb] bg-white text-transparent"
-              )}>
+              <span
+                className={cn(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+                  picked
+                    ? "border-[#c96442] bg-[#c96442] text-white"
+                    : "border-[#d8d5cb] bg-white text-transparent",
+                )}
+              >
                 <Check className="h-3 w-3" strokeWidth={3} />
               </span>
               <div className="flex flex-col leading-tight">
-                <span className={cn("text-[13px] font-medium", picked ? "text-[#c96442]" : "text-[#141413]")}>{cond.label}</span>
+                <span
+                  className={cn(
+                    "text-[13px] font-medium",
+                    picked ? "text-[#c96442]" : "text-[#141413]",
+                  )}
+                >
+                  {cond.label}
+                </span>
                 <span className="mt-0.5 text-[10px] text-[#87867f]">{cond.hint}</span>
               </div>
             </button>
@@ -2241,8 +3105,18 @@ function ApplicationsPanel({
 }
 
 function AudiencePanel({
-  followersPreset, followersFrom, followersTo, onFollowersPreset, onFollowersFrom, onFollowersTo,
-  viewsPreset, viewsFrom, viewsTo, onViewsPreset, onViewsFrom, onViewsTo,
+  followersPreset,
+  followersFrom,
+  followersTo,
+  onFollowersPreset,
+  onFollowersFrom,
+  onFollowersTo,
+  viewsPreset,
+  viewsFrom,
+  viewsTo,
+  onViewsPreset,
+  onViewsFrom,
+  onViewsTo,
 }: {
   followersPreset: string | null;
   followersFrom: string;
@@ -2262,19 +3136,39 @@ function AudiencePanel({
       <div>
         <div className="mb-2 flex items-center gap-2">
           <UsersRound className="h-3.5 w-3.5 text-[#87867f]" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#87867f]">粉丝量</span>
+          <span className="text-[11px] font-semibold tracking-wider text-[#87867f] uppercase">
+            粉丝量
+          </span>
         </div>
         <div className="rounded-2xl border border-[#efe8dc] bg-white p-3">
-          <RangePanel presets={FOLLOWER_STEPS.slice(1).map(s => s.value as string)} preset={followersPreset} from={followersFrom} to={followersTo} onPreset={onFollowersPreset} onFrom={onFollowersFrom} onTo={onFollowersTo} />
+          <RangePanel
+            presets={FOLLOWER_STEPS.slice(1).map((s) => s.value as string)}
+            preset={followersPreset}
+            from={followersFrom}
+            to={followersTo}
+            onPreset={onFollowersPreset}
+            onFrom={onFollowersFrom}
+            onTo={onFollowersTo}
+          />
         </div>
       </div>
       <div>
         <div className="mb-2 flex items-center gap-2">
           <TrendingUp className="h-3.5 w-3.5 text-[#87867f]" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#87867f]">平均播放量</span>
+          <span className="text-[11px] font-semibold tracking-wider text-[#87867f] uppercase">
+            平均播放量
+          </span>
         </div>
         <div className="rounded-2xl border border-[#efe8dc] bg-white p-3">
-          <RangePanel presets={VIEW_STEPS.slice(1).map(s => s.value as string)} preset={viewsPreset} from={viewsFrom} to={viewsTo} onPreset={onViewsPreset} onFrom={onViewsFrom} onTo={onViewsTo} />
+          <RangePanel
+            presets={VIEW_STEPS.slice(1).map((s) => s.value as string)}
+            preset={viewsPreset}
+            from={viewsFrom}
+            to={viewsTo}
+            onPreset={onViewsPreset}
+            onFrom={onViewsFrom}
+            onTo={onViewsTo}
+          />
         </div>
       </div>
     </div>
@@ -2300,22 +3194,33 @@ function ScenarioCard({ mode, selected, onPick }: ScenarioCardProps) {
         "group relative min-h-[210px] overflow-hidden rounded-[26px] border p-5 text-left transition-all",
         selected
           ? "border-[#c96442]/45 bg-[#fff8f1] shadow-[0_16px_40px_-30px_rgba(201,100,66,0.5)]"
-          : "border-[#e8e6dc] bg-white/88 hover:border-[#d8cfc0] hover:shadow-[0_16px_38px_-30px_rgba(77,76,72,0.34)]"
+          : "border-[#e8e6dc] bg-white/88 hover:border-[#d8cfc0] hover:shadow-[0_16px_38px_-30px_rgba(77,76,72,0.34)]",
       )}
     >
-      <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#c96442]/[0.06] transition-transform group-hover:scale-110" />
+      <div className="pointer-events-none absolute -top-10 -right-8 h-28 w-28 rounded-full bg-[#c96442]/[0.06] transition-transform group-hover:scale-110" />
       <div className="relative flex items-start justify-between gap-3">
         <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", mode.iconBg)}>
           <Icon className={cn("h-5 w-5", mode.iconColor)} />
         </div>
         {selected ? (
-          <span className="rounded-full bg-[#c96442] px-2.5 py-1 text-[10px] font-semibold text-white">已选择</span>
+          <span className="rounded-full bg-[#c96442] px-2.5 py-1 text-[10px] font-semibold text-white">
+            已选择
+          </span>
         ) : (
-          <span className="rounded-full border border-[#e8e6dc] bg-white px-2.5 py-1 text-[10px] font-medium text-[#87867f]">入口</span>
+          <span className="rounded-full border border-[#e8e6dc] bg-white px-2.5 py-1 text-[10px] font-medium text-[#87867f]">
+            入口
+          </span>
         )}
       </div>
       <div className="relative mt-4">
-        <p className={cn("text-[16px] font-semibold", selected ? "text-[#c96442]" : "text-[#141413]")}>{mode.title}</p>
+        <p
+          className={cn(
+            "text-[16px] font-semibold",
+            selected ? "text-[#c96442]" : "text-[#141413]",
+          )}
+        >
+          {mode.title}
+        </p>
         <p className="mt-1 text-[12px] leading-relaxed text-[#87867f]">{mode.desc}</p>
         <div className="mt-4 rounded-2xl border border-[#efe8dc] bg-white/72 p-3">
           <p className="text-[11px] font-semibold text-[#4d4c48]">{mode.question}</p>
@@ -2338,62 +3243,72 @@ function CompetitorFollowUp({
   onQueryChange: (v: string) => void;
   onChange: (v: string[]) => void;
 }) {
-  const toggle = (id: string) => onChange(value.includes(id) ? value.filter(v => v !== id) : [...value, id]);
+  const toggle = (id: string) =>
+    onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
   return (
     <div className="rounded-[26px] border border-[#e8e6dc] bg-[#fffdf9] p-4">
       <div className="grid gap-4 md:grid-cols-[1fr_1.1fr]">
         <div>
           <div className="flex items-center gap-2 text-[11px] text-[#87867f]">
             <Sparkles className="h-3 w-3 text-[#c96442]" />
-            <span className="font-semibold uppercase tracking-wider">AI 推断 · 同品类竞品</span>
+            <span className="font-semibold tracking-wider uppercase">AI 推断 · 同品类竞品</span>
           </div>
           <p className="mt-2 text-[13px] leading-6 text-[#4d4c48]">
-            输入竞品品牌 / 官网 / 社媒账号，或从推荐竞品中选择。系统会优先找「有合作证据」且合作帖表现好的达人。
+            输入竞品品牌 / 官网 /
+            社媒账号，或从推荐竞品中选择。系统会优先找「有合作证据」且合作帖表现好的达人。
           </p>
           <input
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="例如：CeraVe、Rhode、Glow Recipe…"
-            className="mt-3 w-full rounded-2xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] outline-none transition-colors placeholder:text-[#b0aea5] focus:border-[#c96442]/40"
+            className="mt-3 w-full rounded-2xl border border-[#e8e6dc] bg-white px-3 py-2.5 text-sm text-[#141413] transition-colors outline-none placeholder:text-[#b0aea5] focus:border-[#c96442]/40"
           />
         </div>
         <div className="flex flex-wrap content-start gap-2">
-        {MOCK_COMPETITOR_BRANDS.map(b => {
-          const picked = value.includes(b.id);
-          return (
-            <button
-              key={b.id}
-              type="button"
-              onClick={() => toggle(b.id)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] transition-colors",
-                picked
-                  ? "border-[#c96442] bg-white text-[#c96442]"
-                  : "border-[#e8e6dc] bg-white text-[#4d4c48] hover:border-[#d1cfc5]"
-              )}
-            >
-              <span>{b.logo}</span>
-              <span>{b.name}</span>
-              {picked && <Check className="h-3 w-3" />}
-            </button>
-          );
-        })}
+          {MOCK_COMPETITOR_BRANDS.map((b) => {
+            const picked = value.includes(b.id);
+            return (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => toggle(b.id)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] transition-colors",
+                  picked
+                    ? "border-[#c96442] bg-white text-[#c96442]"
+                    : "border-[#e8e6dc] bg-white text-[#4d4c48] hover:border-[#d1cfc5]",
+                )}
+              >
+                <span>{b.logo}</span>
+                <span>{b.name}</span>
+                {picked && <Check className="h-3 w-3" />}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-function ScenarioFollowUp({ value, onToggle }: { value: string[]; onToggle: (id: string) => void }) {
+function ScenarioFollowUp({
+  value,
+  onToggle,
+}: {
+  value: string[];
+  onToggle: (id: string) => void;
+}) {
   return (
     <div className="rounded-[26px] border border-[#e8e6dc] bg-[#fffdf9] p-4">
       <div className="flex items-center gap-2 text-[11px] text-[#87867f]">
         <Sparkles className="h-3 w-3 text-[#c96442]" />
-        <span className="font-semibold uppercase tracking-wider">AI 推断 · 内容场景</span>
+        <span className="font-semibold tracking-wider uppercase">AI 推断 · 内容场景</span>
       </div>
-      <p className="mt-1 text-[13px] text-[#4d4c48]">先选 1-3 个场景。结果会按「场景匹配度 + 该场景内容表现」排序，而不是只按品类标签。</p>
+      <p className="mt-1 text-[13px] text-[#4d4c48]">
+        先选 1-3 个场景。结果会按「场景匹配度 + 该场景内容表现」排序，而不是只按品类标签。
+      </p>
       <div className="mt-3 grid gap-2 md:grid-cols-2">
-        {MOCK_SCENES.map(s => {
+        {MOCK_SCENES.map((s) => {
           const picked = value.includes(s.id);
           return (
             <button
@@ -2404,17 +3319,26 @@ function ScenarioFollowUp({ value, onToggle }: { value: string[]; onToggle: (id:
                 "flex items-start gap-3 rounded-2xl border p-3 text-left transition-all",
                 picked
                   ? "border-[#c96442] bg-white shadow-[0_0_0_2px_rgba(201,100,66,0.08)]"
-                  : "border-[#e8e6dc] bg-white hover:border-[#d1cfc5]"
+                  : "border-[#e8e6dc] bg-white hover:border-[#d1cfc5]",
               )}
             >
               <span className="text-xl">{s.icon}</span>
               <div className="min-w-0 flex-1">
-                <p className={cn("text-[13px] font-semibold", picked ? "text-[#c96442]" : "text-[#141413]")}>{s.name}</p>
-                <p className="text-[11px] text-[#87867f]">{s.type} · {s.format}</p>
+                <p
+                  className={cn(
+                    "text-[13px] font-semibold",
+                    picked ? "text-[#c96442]" : "text-[#141413]",
+                  )}
+                >
+                  {s.name}
+                </p>
+                <p className="text-[11px] text-[#87867f]">
+                  {s.type} · {s.format}
+                </p>
                 <p className="mt-1 text-[11px] leading-5 text-[#5e5d59]">{s.reason}</p>
                 <p className="mt-1 text-[11px] text-[#87867f]">
-                  约 <span className="font-medium text-[#4d4c48]">{s.creatorCount}</span> 位达人 · 平均 ER{" "}
-                  <span className="font-medium text-[#4d4c48]">{s.avgEngagement}</span>
+                  约 <span className="font-medium text-[#4d4c48]">{s.creatorCount}</span> 位达人 ·
+                  平均 ER <span className="font-medium text-[#4d4c48]">{s.avgEngagement}</span>
                 </p>
               </div>
             </button>
@@ -2425,16 +3349,24 @@ function ScenarioFollowUp({ value, onToggle }: { value: string[]; onToggle: (id:
   );
 }
 
-function ViralFollowUp({ value, onPick }: { value: ViralCriterion | null; onPick: (id: ViralCriterion) => void }) {
+function ViralFollowUp({
+  value,
+  onPick,
+}: {
+  value: ViralCriterion | null;
+  onPick: (id: ViralCriterion) => void;
+}) {
   return (
     <div className="rounded-[26px] border border-[#e8e6dc] bg-[#fffdf9] p-4">
       <div className="flex items-center gap-2 text-[11px] text-[#87867f]">
         <TrendingUp className="h-3 w-3 text-[#c96442]" />
-        <span className="font-semibold uppercase tracking-wider">爆款口径</span>
+        <span className="font-semibold tracking-wider uppercase">爆款口径</span>
       </div>
-      <p className="mt-1 text-[13px] text-[#4d4c48]">先告诉我你想要的「爆」是哪一种。系统会同时看本人历史基线和同类账号基线。</p>
+      <p className="mt-1 text-[13px] text-[#4d4c48]">
+        先告诉我你想要的「爆」是哪一种。系统会同时看本人历史基线和同类账号基线。
+      </p>
       <div className="mt-3 grid gap-2 md:grid-cols-3">
-        {VIRAL_CRITERIA.map(c => {
+        {VIRAL_CRITERIA.map((c) => {
           const picked = value === c.id;
           return (
             <button
@@ -2445,10 +3377,17 @@ function ViralFollowUp({ value, onPick }: { value: ViralCriterion | null; onPick
                 "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
                 picked
                   ? "border-[#c96442] bg-white shadow-[0_0_0_2px_rgba(201,100,66,0.08)]"
-                  : "border-[#e8e6dc] bg-white hover:border-[#d1cfc5]"
+                  : "border-[#e8e6dc] bg-white hover:border-[#d1cfc5]",
               )}
             >
-              <p className={cn("text-[13px] font-semibold", picked ? "text-[#c96442]" : "text-[#141413]")}>{c.label}</p>
+              <p
+                className={cn(
+                  "text-[13px] font-semibold",
+                  picked ? "text-[#c96442]" : "text-[#141413]",
+                )}
+              >
+                {c.label}
+              </p>
               <p className="text-[11px] text-[#87867f]">{c.desc}</p>
             </button>
           );
@@ -2491,22 +3430,26 @@ function ConversationFlow({
   onPreview,
 }: ConversationFlowProps) {
   const ModeIcon = activeMode.Icon;
-  const userChips: string[] = [
-    `场景：${activeMode.title}`,
-    `平台：${platformLabel}`,
-  ];
+  const userChips: string[] = [`场景：${activeMode.title}`, `平台：${platformLabel}`];
   if (category) userChips.unshift(`品类：${category}`);
   if (countries.length > 0) {
-    userChips.push(`国家：${countries.length > 2 ? `${countries[0]} +${countries.length - 1}` : countries.join("、")}`);
+    userChips.push(
+      `国家：${countries.length > 2 ? `${countries[0]} +${countries.length - 1}` : countries.join("、")}`,
+    );
   }
   if (languages.length > 0) {
-    userChips.push(`语言：${languages.length > 1 ? `${languages[0]} +${languages.length - 1}` : languages[0]}`);
+    userChips.push(
+      `语言：${languages.length > 1 ? `${languages[0]} +${languages.length - 1}` : languages[0]}`,
+    );
   }
   if (applicationConditions.length > 0) {
     const labels = applicationConditions
-      .map(id => APPLICATION_CONDITIONS.find(c => c.id === id)?.label)
+      .map((id) => APPLICATION_CONDITIONS.find((c) => c.id === id)?.label)
       .filter(Boolean);
-    if (labels.length > 0) userChips.push(`申请：${labels.length > 1 ? `${labels[0]} +${labels.length - 1}` : labels[0]}`);
+    if (labels.length > 0)
+      userChips.push(
+        `申请：${labels.length > 1 ? `${labels[0]} +${labels.length - 1}` : labels[0]}`,
+      );
   }
   if (followersText) userChips.push(`粉丝：${followersText}`);
   if (viewsText) userChips.push(`播放：${viewsText}`);
@@ -2523,10 +3466,10 @@ function ConversationFlow({
       {/* User message bubble */}
       <div className="flex justify-end">
         <div className="max-w-[85%] rounded-[22px] rounded-tr-md border border-[#e8e6dc] bg-[#fffdf9] px-4 py-3 text-[15px] leading-7 text-[#141413] shadow-[0_10px_30px_-26px_rgba(77,76,72,0.45)]">
-          <p className="whitespace-pre-wrap break-words">{productName.trim()}</p>
+          <p className="break-words whitespace-pre-wrap">{productName.trim()}</p>
           {userChips.length > 0 ? (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {userChips.map(chip => (
+              {userChips.map((chip) => (
                 <span
                   key={chip}
                   className="inline-flex items-center rounded-full border border-[#f0ece4] bg-[#faf9f5] px-2.5 py-0.5 text-[11px] font-medium text-[#5e5d59]"
@@ -2543,27 +3486,39 @@ function ConversationFlow({
       <div className="flex items-start gap-3">
         <div
           className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#f0d5c4]"
-          style={{ background: "radial-gradient(closest-side, #f5d0a9 0%, #f0b48a 60%, #c96442 110%)" }}
+          style={{
+            background: "radial-gradient(closest-side, #f5d0a9 0%, #f0b48a 60%, #c96442 110%)",
+          }}
         >
           <Sparkles className="h-4 w-4 text-white" />
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <div className="rounded-[22px] rounded-tl-md border border-[#eee8dc] bg-[#fffdf9] px-4 py-3 text-[15px] leading-7 text-[#141413] shadow-[0_10px_30px_-28px_rgba(77,76,72,0.4)]">
             <div className="mb-1.5 flex items-center gap-2">
-              <span className={cn("flex h-6 w-6 items-center justify-center rounded-md", activeMode.iconBg)}>
+              <span
+                className={cn(
+                  "flex h-6 w-6 items-center justify-center rounded-md",
+                  activeMode.iconBg,
+                )}
+              >
                 <ModeIcon className={cn("h-3.5 w-3.5", activeMode.iconColor)} strokeWidth={2.4} />
               </span>
-              <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#87867f]">Linkr Agent</span>
+              <span className="text-[12px] font-semibold tracking-[0.14em] text-[#87867f] uppercase">
+                Linkr Agent
+              </span>
             </div>
             <p>
-              收到。我会按「<span className="font-semibold" style={{ color: activeMode.accent }}>{activeMode.title}</span>
+              收到。我会按「
+              <span className="font-semibold" style={{ color: activeMode.accent }}>
+                {activeMode.title}
+              </span>
               」的思路展开。先选一个排序偏好，我会按它生成第一批达人缩略卡。
             </p>
           </div>
 
           {/* Inline option cards (chat card element) */}
           <div className="grid gap-2.5 sm:grid-cols-2">
-            {agentChoices.map(choice => {
+            {agentChoices.map((choice) => {
               const selected = selectedAgentChoice === choice.id;
               return (
                 <button
@@ -2574,7 +3529,7 @@ function ConversationFlow({
                     "group/choice relative overflow-hidden rounded-2xl border p-3.5 text-left transition-all duration-200",
                     selected
                       ? "border-[#c96442] bg-[#fffaf3] shadow-[0_14px_34px_-26px_rgba(201,100,66,0.6)]"
-                      : "border-[#eee8dc] bg-[#fffdf9] hover:-translate-y-0.5 hover:border-[#d8cfc0] hover:shadow-[0_14px_34px_-30px_rgba(77,76,72,0.4)]"
+                      : "border-[#eee8dc] bg-[#fffdf9] hover:-translate-y-0.5 hover:border-[#d8cfc0] hover:shadow-[0_14px_34px_-30px_rgba(77,76,72,0.4)]",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -2589,7 +3544,9 @@ function ConversationFlow({
                     ) : null}
                   </div>
                   <p className="mt-1 text-xs leading-5 text-[#5e5d59]">{choice.desc}</p>
-                  <p className="mt-2 text-[11px] font-medium" style={{ color: activeMode.accent }}>{choice.meta}</p>
+                  <p className="mt-2 text-[11px] font-medium" style={{ color: activeMode.accent }}>
+                    {choice.meta}
+                  </p>
                 </button>
               );
             })}
@@ -2604,7 +3561,7 @@ function ConversationFlow({
                 "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all",
                 selectedAgentChoice
                   ? "bg-[#c96442] text-white shadow-[0_10px_24px_-14px_rgba(201,100,66,0.6)] hover:bg-[#d97757] active:scale-[0.98]"
-                  : "cursor-not-allowed bg-[#f0ece4] text-[#b0aea5]"
+                  : "cursor-not-allowed bg-[#f0ece4] text-[#b0aea5]",
               )}
             >
               <Sparkles className="h-3.5 w-3.5" />
@@ -2666,7 +3623,11 @@ function DiscoveryPageInner() {
     }
 
     const platformParam = searchParams.get("platform");
-    if (platformParam === "tiktok" || platformParam === "instagram" || platformParam === "youtube") {
+    if (
+      platformParam === "tiktok" ||
+      platformParam === "instagram" ||
+      platformParam === "youtube"
+    ) {
       setPlatform(platformParam);
     }
 
@@ -2679,14 +3640,26 @@ function DiscoveryPageInner() {
     }
 
     setInitialEntrySource(
-      entryParam === "quick-screen" || entryParam === "seed-finder" ? entryParam : null
+      entryParam === "quick-screen" || entryParam === "seed-finder" ? entryParam : null,
     );
     setInitialFindSimilarMode(entryParam === "seed-finder" ? "找种子达人" : "找相似");
 
     const countriesRaw = searchParams.get("countries");
-    if (countriesRaw) setCountries(countriesRaw.split("|").map(s => s.trim()).filter(Boolean));
+    if (countriesRaw)
+      setCountries(
+        countriesRaw
+          .split("|")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
     const languagesRaw = searchParams.get("languages");
-    if (languagesRaw) setLanguages(languagesRaw.split("|").map(s => s.trim()).filter(Boolean));
+    if (languagesRaw)
+      setLanguages(
+        languagesRaw
+          .split("|")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
 
     const fp = searchParams.get("fp");
     if (fp) setFollowersPreset(fp);
@@ -2701,12 +3674,19 @@ function DiscoveryPageInner() {
     if (vf) setViewsFrom(vf);
     if (vt) setViewsTo(vt);
     const acRaw = searchParams.get("ac");
-    if (acRaw) setApplicationConditions(acRaw.split("|").map(s => s.trim()).filter(Boolean));
+    if (acRaw)
+      setApplicationConditions(
+        acRaw
+          .split("|")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
 
     const seedHandleRaw = searchParams.get("seedHandle");
     const seedName = searchParams.get("seedName");
     const seedId = searchParams.get("seedId") ?? searchParams.get("creator");
-    const seedAvatarSeed = searchParams.get("seedAvatarSeed") ?? seedId ?? seedHandleRaw ?? seedName;
+    const seedAvatarSeed =
+      searchParams.get("seedAvatarSeed") ?? seedId ?? seedHandleRaw ?? seedName;
     if (seedHandleRaw || seedName) {
       const normalizedHandle = normalizeHandle(seedHandleRaw ?? seedName ?? "");
       setInitialAnchor({
@@ -2740,12 +3720,22 @@ function DiscoveryPageInner() {
   // Deeplink → ResultsView (unchanged)
   if (searched) {
     const countryToRegionCode: Record<string, string> = {
-      美国: "us", 英国: "gb", 印度: "in", 日本: "jp", 韩国: "kr", 巴西: "br", 土耳其: "tr",
+      美国: "us",
+      英国: "gb",
+      印度: "in",
+      日本: "jp",
+      韩国: "kr",
+      巴西: "br",
+      土耳其: "tr",
     };
-    const initialRegionFromPlugin = countries.map(c => countryToRegionCode[c]).find(Boolean) ?? null;
+    const initialRegionFromPlugin =
+      countries.map((c) => countryToRegionCode[c]).find(Boolean) ?? null;
     return (
       <ResultsView
-        onBack={() => { setSearched(false); setInitialAnchor(null); }}
+        onBack={() => {
+          setSearched(false);
+          setInitialAnchor(null);
+        }}
         initialAnchor={initialAnchor}
         initialFindSimilarMode={initialFindSimilarMode}
         initialRegionCode={initialRegionFromPlugin}
@@ -2770,18 +3760,22 @@ function DiscoveryPageInner() {
   };
 
   const toggleScenePick = (id: string) => {
-    setScenePicks(prev => prev.includes(id) ? prev.filter(sceneId => sceneId !== id) : [...prev, id]);
+    setScenePicks((prev) =>
+      prev.includes(id) ? prev.filter((sceneId) => sceneId !== id) : [...prev, id],
+    );
   };
 
   const basicsFilled = !!category && productName.trim().length > 0;
   const canSend = basicsFilled && mode !== null;
   const activeMode = mode ? getModeMeta(mode) : null;
 
-  const missingHint =
-    !category                       ? "先选品类"
-    : productName.trim().length === 0 ? "填写具体产品信息"
-    : mode === null                 ? "选择筛选思路"
-    : "";
+  const missingHint = !category
+    ? "先选品类"
+    : productName.trim().length === 0
+      ? "填写具体产品信息"
+      : mode === null
+        ? "选择筛选思路"
+        : "";
 
   const handleSend = () => {
     if (!canSend || !mode) return;
@@ -2790,51 +3784,80 @@ function DiscoveryPageInner() {
   };
 
   // Derived chip labels — grouped to match the three footer chips
-  const followersText = followersPreset ?? (followersFrom || followersTo ? `${followersFrom || "0"}–${followersTo || "∞"}` : "");
-  const viewsText     = viewsPreset     ?? (viewsFrom     || viewsTo     ? `${viewsFrom     || "0"}–${viewsTo     || "∞"}` : "");
+  const followersText =
+    followersPreset ??
+    (followersFrom || followersTo ? `${followersFrom || "0"}–${followersTo || "∞"}` : "");
+  const viewsText =
+    viewsPreset ?? (viewsFrom || viewsTo ? `${viewsFrom || "0"}–${viewsTo || "∞"}` : "");
 
   const geoLabel = (() => {
     if (countries.length === 0 && languages.length === 0) return "全球 · 任意语言";
-    const c = countries.length === 0 ? "全球" : countries.length > 2 ? `${countries[0]} +${countries.length - 1}` : countries.join("、");
-    const l = languages.length === 0 ? "任意语言" : languages.length > 1 ? `${languages[0]} +${languages.length - 1}` : languages[0];
+    const c =
+      countries.length === 0
+        ? "全球"
+        : countries.length > 2
+          ? `${countries[0]} +${countries.length - 1}`
+          : countries.join("、");
+    const l =
+      languages.length === 0
+        ? "任意语言"
+        : languages.length > 1
+          ? `${languages[0]} +${languages.length - 1}`
+          : languages[0];
     return `${c} · ${l}`;
   })();
-  const applicationsLabel = applicationConditions.length === 0
-    ? "未限制"
-    : applicationConditions.length === 1
-      ? APPLICATION_CONDITIONS.find(c => c.id === applicationConditions[0])?.label ?? "已选 1"
-      : `已选 ${applicationConditions.length} 项`;
+  const applicationsLabel =
+    applicationConditions.length === 0
+      ? "未限制"
+      : applicationConditions.length === 1
+        ? (APPLICATION_CONDITIONS.find((c) => c.id === applicationConditions[0])?.label ?? "已选 1")
+        : `已选 ${applicationConditions.length} 项`;
   const followersLabel = followersPreset ?? "不限";
-  const viewsLabel     = viewsPreset ?? "不限";
+  const viewsLabel = viewsPreset ?? "不限";
 
   const hasGeo = countries.length > 0 || languages.length > 0;
   const hasApplications = applicationConditions.length > 0;
   const hasFollowers = !!followersPreset;
-  const hasViews     = !!viewsPreset;
+  const hasViews = !!viewsPreset;
   const geoCount = countries.length + languages.length;
   const applicationsCount = applicationConditions.length;
-  const selectedCategory = DISCOVERY_CATEGORIES.find(item => item.id === category);
+  const selectedCategory = DISCOVERY_CATEGORIES.find((item) => item.id === category);
   const agentChoices = mode ? AGENT_GUIDE_CARDS[mode] : [];
   const ModeIcon = activeMode?.Icon;
 
   const openQuickScreen = () => {
     if (!mode) return;
-    router.push(buildQuickScreenHref({
-      platform, mode, countries, languages,
-      followersPreset, followersFrom, followersTo,
-      viewsPreset, viewsFrom, viewsTo,
-      applicationConditions,
-    }));
+    router.push(
+      buildQuickScreenHref({
+        platform,
+        mode,
+        countries,
+        languages,
+        followersPreset,
+        followersFrom,
+        followersTo,
+        viewsPreset,
+        viewsFrom,
+        viewsTo,
+        applicationConditions,
+      }),
+    );
   };
 
   return (
     <div className="relative -mx-6 -my-8 min-h-[calc(100vh-80px)] overflow-hidden bg-[#f5f4ed] px-4 py-8 text-[#141413] sm:px-8">
-      <div aria-hidden className="pointer-events-none absolute -left-36 top-16 h-72 w-72 rounded-full bg-[#f0b48a]/18 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute right-[-120px] top-24 h-80 w-80 rounded-full bg-[#d8cfc0]/35 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-16 -left-36 h-72 w-72 rounded-full bg-[#f0b48a]/18 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-24 right-[-120px] h-80 w-80 rounded-full bg-[#d8cfc0]/35 blur-3xl"
+      />
       <div
         className={cn(
           "relative mx-auto flex min-h-[calc(100vh-150px)] w-full max-w-3xl flex-col py-8",
-          agentStarted ? "justify-end" : "justify-center"
+          agentStarted ? "justify-end" : "justify-center",
         )}
       >
         <AnimatePresence initial={false}>
@@ -2869,14 +3892,14 @@ function DiscoveryPageInner() {
               "group/composer relative z-10 overflow-hidden rounded-[30px] border border-[#e2dbcf] bg-[#e9e2d5] p-[3px] transition-all duration-300",
               "shadow-[0_1px_2px_rgba(20,20,19,0.04),0_18px_60px_-44px_rgba(77,76,72,0.48)]",
               "hover:shadow-[0_1px_2px_rgba(20,20,19,0.06),0_24px_80px_-44px_rgba(77,76,72,0.55)]",
-              "focus-within:shadow-[0_0_0_3px_rgba(201,100,66,0.08),0_24px_80px_-40px_rgba(77,76,72,0.55)]"
+              "focus-within:shadow-[0_0_0_3px_rgba(201,100,66,0.08),0_24px_80px_-40px_rgba(77,76,72,0.55)]",
             )}
           >
             <DiscoveryModeTabs value={mode} onChange={handlePickMode} />
 
             <div className={cn("relative rounded-[24px] bg-[#fffdf9]", activeMode && "-mt-px")}>
               {/* ── Input area ───────────────────────────────────────────── */}
-              <div className="px-5 pb-1 pt-2">
+              <div className="px-5 pt-2 pb-1">
                 <textarea
                   value={productName}
                   onChange={(event) => {
@@ -2890,20 +3913,25 @@ function DiscoveryPageInner() {
                     }
                   }}
                   placeholder={
-                    activeMode?.inputPlaceholder
-                    ?? "粘贴产品链接、写品类关键词，或直接说要找哪类博主…"
+                    activeMode?.inputPlaceholder ??
+                    "粘贴产品链接、写品类关键词，或直接说要找哪类博主…"
                   }
-                  className="min-h-[68px] w-full resize-none bg-transparent text-[16px] leading-7 text-[#141413] outline-none placeholder:text-[#b0aea5] antialiased"
+                  className="min-h-[68px] w-full resize-none bg-transparent text-[16px] leading-7 text-[#141413] antialiased outline-none placeholder:text-[#b0aea5]"
                 />
               </div>
 
               {/* ── Toolbar row 1: context (品类 + platform) + send ──────── */}
-              <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-0.5">
+              <div className="flex items-center justify-between gap-3 px-3 pt-0.5 pb-1">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-[#87867f]">
                   {/* 平台 segmented pills (preserved) */}
                   <div className="hidden items-center gap-0.5 rounded-full bg-[#f0ece4] p-0.5 sm:inline-flex">
-                    {PLATFORMS.map(p => (
-                      <PlatformPill key={p.id} id={p.id} selected={platform === p.id} onClick={() => setPlatform(p.id)} />
+                    {PLATFORMS.map((p) => (
+                      <PlatformPill
+                        key={p.id}
+                        id={p.id}
+                        selected={platform === p.id}
+                        onClick={() => setPlatform(p.id)}
+                      />
                     ))}
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -2915,7 +3943,10 @@ function DiscoveryPageInner() {
                       active={hasGeo}
                       open={openChip === "geo"}
                       count={geoCount}
-                      onClick={() => { setCategoryMenuOpen(false); setOpenChip(prev => prev === "geo" ? null : "geo"); }}
+                      onClick={() => {
+                        setCategoryMenuOpen(false);
+                        setOpenChip((prev) => (prev === "geo" ? null : "geo"));
+                      }}
                     />
                     <FilterChip
                       id="followers"
@@ -2924,7 +3955,10 @@ function DiscoveryPageInner() {
                       label={followersLabel}
                       active={hasFollowers}
                       open={openChip === "followers"}
-                      onClick={() => { setCategoryMenuOpen(false); setOpenChip(prev => prev === "followers" ? null : "followers"); }}
+                      onClick={() => {
+                        setCategoryMenuOpen(false);
+                        setOpenChip((prev) => (prev === "followers" ? null : "followers"));
+                      }}
                     />
                     <FilterChip
                       id="views"
@@ -2933,17 +3967,25 @@ function DiscoveryPageInner() {
                       label={viewsLabel}
                       active={hasViews}
                       open={openChip === "views"}
-                      onClick={() => { setCategoryMenuOpen(false); setOpenChip(prev => prev === "views" ? null : "views"); }}
+                      onClick={() => {
+                        setCategoryMenuOpen(false);
+                        setOpenChip((prev) => (prev === "views" ? null : "views"));
+                      }}
                     />
                   </div>
-                  {(hasGeo || hasApplications || hasFollowers || hasViews) ? (
+                  {hasGeo || hasApplications || hasFollowers || hasViews ? (
                     <button
                       type="button"
                       onClick={() => {
-                        setCountries([]); setLanguages([]);
+                        setCountries([]);
+                        setLanguages([]);
                         setApplicationConditions([]);
-                        setFollowersPreset(null); setFollowersFrom(""); setFollowersTo("");
-                        setViewsPreset(null); setViewsFrom(""); setViewsTo("");
+                        setFollowersPreset(null);
+                        setFollowersFrom("");
+                        setFollowersTo("");
+                        setViewsPreset(null);
+                        setViewsFrom("");
+                        setViewsTo("");
                       }}
                       className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] text-[#87867f] hover:bg-white hover:text-[#c96442]"
                     >
@@ -2962,10 +4004,16 @@ function DiscoveryPageInner() {
                     "relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl transition-all duration-300",
                     canSend
                       ? "scale-100 cursor-pointer bg-[#c96442] text-white shadow-[0_6px_18px_-6px_rgba(201,100,66,0.5)] hover:bg-[#d97757]"
-                      : "scale-95 cursor-not-allowed bg-[#f0ece4] text-[#b0aea5]"
+                      : "scale-95 cursor-not-allowed bg-[#f0ece4] text-[#b0aea5]",
                   )}
                 >
-                  <ArrowUp className={cn("h-[20px] w-[20px] transition-transform duration-300", canSend ? "translate-y-0" : "translate-y-0.5")} strokeWidth={2.5} />
+                  <ArrowUp
+                    className={cn(
+                      "h-[20px] w-[20px] transition-transform duration-300",
+                      canSend ? "translate-y-0" : "translate-y-0.5",
+                    )}
+                    strokeWidth={2.5}
+                  />
                 </button>
               </div>
 
@@ -2980,7 +4028,7 @@ function DiscoveryPageInner() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="mx-2 mb-2 mt-2 rounded-2xl border border-[#f0ece4] bg-[#faf9f5] p-4">
+                    <div className="mx-2 mt-2 mb-2 rounded-2xl border border-[#f0ece4] bg-[#faf9f5] p-4">
                       {openChip === "geo" && (
                         <GeoPanel
                           countries={countries}
@@ -2998,13 +4046,21 @@ function DiscoveryPageInner() {
                       {openChip === "followers" && (
                         <FollowersPanel
                           value={followersPreset}
-                          onChange={v => { setFollowersPreset(v); setFollowersFrom(""); setFollowersTo(""); }}
+                          onChange={(v) => {
+                            setFollowersPreset(v);
+                            setFollowersFrom("");
+                            setFollowersTo("");
+                          }}
                         />
                       )}
                       {openChip === "views" && (
                         <ViewsPanel
                           value={viewsPreset}
-                          onChange={v => { setViewsPreset(v); setViewsFrom(""); setViewsTo(""); }}
+                          onChange={(v) => {
+                            setViewsPreset(v);
+                            setViewsFrom("");
+                            setViewsTo("");
+                          }}
                         />
                       )}
                     </div>
@@ -3037,9 +4093,15 @@ function DiscoveryPageInner() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#87867f]">Agent 预筛结果</p>
-                    <h3 className="mt-1 text-xl font-semibold text-[#141413]">先看这批达人缩略卡</h3>
-                    <p className="mt-1 text-sm text-[#87867f]">点击卡片进入快速筛选；也可以先展开查看推荐依据。</p>
+                    <p className="text-[11px] font-semibold tracking-[0.16em] text-[#87867f] uppercase">
+                      Agent 预筛结果
+                    </p>
+                    <h3 className="mt-1 text-xl font-semibold text-[#141413]">
+                      先看这批达人缩略卡
+                    </h3>
+                    <p className="mt-1 text-sm text-[#87867f]">
+                      点击卡片进入快速筛选；也可以先展开查看推荐依据。
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -3051,7 +4113,7 @@ function DiscoveryPageInner() {
                 </div>
 
                 <div className="mt-5 grid gap-3 md:grid-cols-2">
-                  {PREVIEW_CREATORS.map(creator => {
+                  {PREVIEW_CREATORS.map((creator) => {
                     const expanded = expandedPreviewId === creator.id;
                     return (
                       <div
@@ -3066,12 +4128,20 @@ function DiscoveryPageInner() {
                       >
                         <div className="flex items-center gap-3">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={`https://i.pravatar.cc/100?img=${creator.avatarImg}`} alt={creator.name} className="h-12 w-12 rounded-full object-cover" />
+                          <img
+                            src={`https://i.pravatar.cc/100?img=${creator.avatarImg}`}
+                            alt={creator.name}
+                            className="h-12 w-12 rounded-full object-cover"
+                          />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-[#141413]">{creator.name}</p>
+                            <p className="truncate text-sm font-semibold text-[#141413]">
+                              {creator.name}
+                            </p>
                             <p className="text-xs text-[#87867f]">{creator.handle}</p>
                           </div>
-                          <div className="rounded-full bg-[#fff6ef] px-2.5 py-1 text-xs font-bold text-[#c96442]">{creator.score}</div>
+                          <div className="rounded-full bg-[#fff6ef] px-2.5 py-1 text-xs font-bold text-[#c96442]">
+                            {creator.score}
+                          </div>
                         </div>
                         <p className="mt-3 text-sm leading-6 text-[#4d4c48]">{creator.reason}</p>
                         {expanded ? (

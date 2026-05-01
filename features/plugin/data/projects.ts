@@ -44,10 +44,4 @@ export const noteTagPresets: Array<{ label: string; tone: TagTone }> = [
   { label: "Campaign", tone: "violet" },
 ];
 
-export const tagToneOrder: TagTone[] = [
-  "amber",
-  "blue",
-  "emerald",
-  "violet",
-  "rose",
-];
+export const tagToneOrder: TagTone[] = ["amber", "blue", "emerald", "violet", "rose"];

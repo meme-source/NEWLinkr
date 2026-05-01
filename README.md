@@ -12,18 +12,18 @@ npm run dev                      # http://localhost:3000
 
 ## 路由结构
 
-| URL | 说明 |
-|---|---|
-| `/` | 重定向到 `/demo`（插件预览） |
-| `/demo` | 浏览器插件原型预览页（找相似 / 找平替） |
-| `/landing` | 营销落地页 |
-| `/workspace` | 工作台首页（→ `/workspace/discovery`） |
-| `/workspace/discovery` | 博主发现 |
-| `/workspace/library` | 博主库 |
-| `/workspace/outreach` | 建联中心 |
-| `/workspace/tracking` | 投放追踪 |
-| `/workspace/settings` | 设置 |
-| `/api/*` | 后端 API（详见 `app/api/`） |
+| URL                    | 说明                                    |
+| ---------------------- | --------------------------------------- |
+| `/`                    | 重定向到 `/demo`（插件预览）            |
+| `/demo`                | 浏览器插件原型预览页（找相似 / 找平替） |
+| `/landing`             | 营销落地页                              |
+| `/workspace`           | 工作台首页（→ `/workspace/discovery`）  |
+| `/workspace/discovery` | 博主发现                                |
+| `/workspace/library`   | 博主库                                  |
+| `/workspace/outreach`  | 建联中心                                |
+| `/workspace/tracking`  | 投放追踪                                |
+| `/workspace/settings`  | 设置                                    |
+| `/api/*`               | 后端 API（详见 `app/api/`）             |
 
 ## 技术栈
 
