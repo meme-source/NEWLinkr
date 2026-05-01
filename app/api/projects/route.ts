@@ -1,26 +1,20 @@
 // 项目（产品/品牌）管理
 // GET  /api/projects     列出当前用户所有项目
 // POST /api/projects     创建项目
-import { ok, fail, failValidation } from "@/lib/api/envelope";
+import { ok } from "@/lib/api/envelope";
+import { BadRequestError } from "@/lib/api/errors";
+import { withRoute } from "@/lib/api/handler";
 import { CreateProjectInputSchema } from "@/lib/api/schemas";
-import type { Project } from "@/types/api";
+import { createProject, listProjects } from "@/lib/services/projects";
 
-export async function GET() {
-  // TODO Phase 1: 接 Supabase Auth 取 user_id，从 DB 查
-  const stub: Project[] = [];
-  return ok(stub);
-}
+export const GET = withRoute(async () => {
+  return ok(await listProjects());
+});
 
-export async function POST(req: Request) {
+export const POST = withRoute(async (req: Request) => {
   const json = await req.json().catch(() => null);
-  if (json === null) return fail("Request body must be valid JSON");
+  if (json === null) throw new BadRequestError("Request body must be valid JSON");
 
-  const parsed = CreateProjectInputSchema.safeParse(json);
-  if (!parsed.success) return failValidation(parsed.error);
-
-  // TODO Phase 1: 写入数据库并返回创建后的 Project。
-  // Echoing the validated input is safe (it is the user's own data, not a
-  // raw request body that could include extra fields), but the final
-  // implementation should return a freshly-read Project row from the DB.
-  return ok({ message: "TODO: 实现创建项目", input: parsed.data });
-}
+  const input = CreateProjectInputSchema.parse(json);
+  return ok(await createProject(input));
+});
