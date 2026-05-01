@@ -49,3 +49,6 @@ Thumbs.db
 # scratch
 .tmp
 ~$*
+
+# legacy / pre-refactor archive (kept on disk for reference, not tracked)
+_legacy/
