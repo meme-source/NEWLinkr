@@ -1027,10 +1027,11 @@ export function SimilarCardCarousel({
 
                 {/* ── Compact metric strip ── */}
                 <div
-                  className="mx-4 mt-3 grid grid-cols-4 overflow-hidden rounded-xl"
+                  className="relative z-10 mx-4 mt-3 grid h-[66px] shrink-0 grid-cols-4 overflow-hidden rounded-[26px]"
                   style={{
-                    background: TOKEN.ivory,
+                    background: "#fffdf8",
                     border: `1px solid ${TOKEN.borderWarm}`,
+                    boxShadow: "0 1px 0 rgba(255,255,255,0.72) inset",
                   }}
                 >
                   <CompactMetric
@@ -1176,6 +1177,42 @@ export function SimilarCardCarousel({
                             </li>
                           ))}
                         </ul>
+                      </div>
+                    );
+                  }
+
+                  if (filterMode !== "找平替") {
+                    return (
+                      <div className="px-4 mt-3">
+                        <div className="flex items-center justify-between">
+                          <div
+                            className="inline-flex items-center gap-1"
+                            style={{
+                              color: TOKEN.olive,
+                              fontSize: "9.5px",
+                              fontWeight: 600,
+                              letterSpacing: "0.14em",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            <Sparkles className="w-2.5 h-2.5" style={{ color: accent }} />
+                            <span>{heading}</span>
+                          </div>
+                          <span
+                            className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-[1px]"
+                            style={{
+                              background: accentBg,
+                              color: accent,
+                              fontSize: "9px",
+                              fontWeight: 600,
+                              letterSpacing: "0.04em",
+                            }}
+                            title="5.0 分制：主题、形式、视觉、活跃、数据"
+                          >
+                            5.0 分制
+                          </span>
+                        </div>
+                        <SimilarDeepAnalysisWidget card={card} reasons={reasonsList} />
                       </div>
                     );
                   }
@@ -1802,6 +1839,257 @@ function scoreLabel(value: number): string {
   return "差异较大";
 }
 
+type SimilarRadarDatum = {
+  subject: string;
+  cand: number;
+  seed: number;
+  score5: string;
+  color: string;
+  tagClass: string;
+  tags: string[];
+};
+
+function clampScore(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function toFivePointScore(value: number): string {
+  return (clampScore(value) / 20).toFixed(1);
+}
+
+function buildSimilarRadarData(card: CardItem): SimilarRadarDatum[] {
+  const s = card.subscores;
+  const sourceTags = card.tags.filter((tag) => !/%$/.test(tag.trim())).slice(0, 2);
+  const topicTags = sourceTags.length > 0 ? sourceTags : ["精致露营", "户外装备"];
+  const visualTags = card.visualPending
+    ? ["视觉分析中", "低饱和度", "风格待确认"]
+    : ["自然冷杉色", "低饱和度", "高沉浸感"];
+
+  const values = {
+    topic: s?.topic ?? 82,
+    format: s?.format ?? 76,
+    visual: s?.visual ?? 80,
+    activity: s?.activity ?? 86,
+    data: s?.data ?? 78,
+  };
+
+  return [
+    {
+      subject: "主题",
+      cand: values.topic,
+      seed: 100,
+      score5: toFivePointScore(values.topic),
+      color: "#8b5cf6",
+      tagClass: "bg-purple-50 text-purple-600 border-purple-200",
+      tags: [...topicTags, "受众高度重合"].slice(0, 3),
+    },
+    {
+      subject: "形式",
+      cand: values.format,
+      seed: 100,
+      score5: toFivePointScore(values.format),
+      color: "#3b82f6",
+      tagClass: "bg-blue-50 text-blue-600 border-blue-200",
+      tags: ["沉浸式 Vlog", "全景 B-roll", "极少口播"],
+    },
+    {
+      subject: "视觉",
+      cand: values.visual,
+      seed: 100,
+      score5: toFivePointScore(values.visual),
+      color: "#10b981",
+      tagClass: "bg-emerald-50 text-emerald-600 border-emerald-200",
+      tags: visualTags,
+    },
+    {
+      subject: "活跃",
+      cand: values.activity,
+      seed: 100,
+      score5: toFivePointScore(values.activity),
+      color: "#9ca3af",
+      tagClass: "bg-gray-50 text-gray-600 border-gray-200",
+      tags: [],
+    },
+    {
+      subject: "数据",
+      cand: values.data,
+      seed: 100,
+      score5: toFivePointScore(values.data),
+      color: "#9ca3af",
+      tagClass: "bg-gray-50 text-gray-600 border-gray-200",
+      tags: [],
+    },
+  ];
+}
+
+function polygonPoints(data: SimilarRadarDatum[], key: "cand" | "seed", radius: number) {
+  const center = 68;
+  return data
+    .map((datum, index) => {
+      const angle = (-90 + index * 72) * (Math.PI / 180);
+      const value = key === "cand" ? datum.cand : datum.seed;
+      const r = radius * (clampScore(value) / 100);
+      return `${center + Math.cos(angle) * r},${center + Math.sin(angle) * r}`;
+    })
+    .join(" ");
+}
+
+function SimilarRadarChart({ data }: { data: SimilarRadarDatum[] }) {
+  const center = 68;
+  const radius = 40;
+  const labelRadius = 57;
+  const rings = [20, 40, 60, 80, 100];
+
+  return (
+    <div className="relative mx-auto h-[136px] w-[136px] shrink-0">
+      <svg viewBox="0 0 136 136" className="h-full w-full overflow-visible" aria-hidden="true">
+        {rings.map((level) => (
+          <polygon
+            key={level}
+            points={polygonPoints(data, "seed", radius * (level / 100))}
+            fill="none"
+            stroke="#e5e7eb"
+            strokeDasharray="2 2"
+            strokeWidth="1"
+          />
+        ))}
+        {data.map((_, index) => {
+          const angle = (-90 + index * 72) * (Math.PI / 180);
+          return (
+            <line
+              key={index}
+              x1={center}
+              y1={center}
+              x2={center + Math.cos(angle) * radius}
+              y2={center + Math.sin(angle) * radius}
+              stroke="#ece7df"
+              strokeDasharray="2 2"
+              strokeWidth="1"
+            />
+          );
+        })}
+        <polygon
+          points={polygonPoints(data, "seed", radius)}
+          fill="none"
+          stroke="#d1d5db"
+          strokeDasharray="4 3"
+          strokeWidth="1.5"
+        />
+        <polygon
+          points={polygonPoints(data, "cand", radius)}
+          fill="#ea580c"
+          fillOpacity="0.15"
+          stroke="#ea580c"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        {data.map((datum, index) => {
+          const angle = (-90 + index * 72) * (Math.PI / 180);
+          const x = center + Math.cos(angle) * labelRadius;
+          const y = center + Math.sin(angle) * labelRadius;
+          const anchor = Math.abs(x - center) < 4 ? "middle" : x < center ? "end" : "start";
+          const isTop = y < center;
+          return (
+            <text
+              key={datum.subject}
+              x={x}
+              y={y}
+              textAnchor={anchor}
+              fill={datum.color}
+              fontSize="9"
+              fontWeight="700"
+            >
+              <tspan x={x} dy={isTop ? -4 : 4}>
+                {datum.subject}
+              </tspan>
+              <tspan x={x} dy="11" fontWeight="900" opacity="0.8">
+                {datum.score5}
+              </tspan>
+            </text>
+          );
+        })}
+      </svg>
+
+      <div className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 scale-75 items-center justify-center gap-2 whitespace-nowrap opacity-60">
+        <span className="flex items-center gap-1 text-[10px] font-bold text-gray-700">
+          <span className="h-px w-2 border-t border-dashed border-gray-500" />
+          满分基准
+        </span>
+        <span className="flex items-center gap-1 text-[10px] font-bold text-gray-700">
+          <span className="h-1.5 w-1.5 rounded-[2px] bg-[#ea580c] opacity-60" />
+          该候选人
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SimilarDeepAnalysisWidget({
+  card,
+  reasons,
+}: {
+  card: CardItem;
+  reasons: string[];
+}) {
+  const radarData = buildSimilarRadarData(card);
+  const activeLabel = (card.subscores?.activity ?? 0) >= 90 ? "高频更新" : "稳定更新";
+  const contactLabel = typeof card.email === "string" && card.email.trim() ? "已关联商务邮箱" : "商务邮箱待确认";
+  const operationalSummary =
+    reasons[2] ??
+    `同量级播放表现，互动率 ${card.er ?? "优于大盘"}；近期${activeLabel}，且${contactLabel}。`;
+  const tags = radarData.flatMap((datum) =>
+    datum.tags.map((tag) => ({
+      tag,
+      tagClass: datum.tagClass,
+      key: `${datum.subject}-${tag}`,
+    }))
+  );
+
+  return (
+    <div className="mt-2 rounded-[16px] border border-[#f0eadd] bg-[#faf9f7] p-3 shadow-sm">
+      <div className="flex justify-center pb-1">
+        <SimilarRadarChart data={radarData} />
+      </div>
+
+      <div className="mt-3 border-t border-dashed border-[#e8e4dc] pt-3">
+        <div
+          className="mb-2 px-1"
+          style={{
+            color: TOKEN.stone,
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+          }}
+        >
+          核心匹配特征提取：
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {tags.map(({ tag, tagClass, key }) => (
+            <span
+              key={key}
+              className={`rounded-[6px] border px-2 py-1 text-[10px] font-bold shadow-sm ${tagClass}`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+        <p
+          className="mt-2.5 px-1"
+          style={{
+            color: TOKEN.olive,
+            fontSize: "10.5px",
+            fontWeight: 500,
+            lineHeight: 1.45,
+          }}
+        >
+          <span style={{ color: TOKEN.charcoal, fontWeight: 700 }}>数据状态：</span>
+          {operationalSummary}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SubscoreBar({
   label,
   value,
@@ -2072,7 +2360,7 @@ function CompactMetric({
 }) {
   return (
     <div
-      className="relative flex flex-col items-center justify-center px-1.5 py-2"
+      className="relative flex h-full min-h-0 flex-col items-center justify-center px-1.5 py-2"
       style={{
         borderLeft: divider ? `1px solid ${TOKEN.borderCream}` : "none",
       }}
@@ -2080,7 +2368,7 @@ function CompactMetric({
     >
       <div
         className="inline-flex items-center gap-0.5"
-        style={{ color: TOKEN.stone, fontSize: "9.5px", fontWeight: 500, letterSpacing: "0.02em" }}
+        style={{ color: TOKEN.stone, fontSize: "12px", fontWeight: 500, letterSpacing: "0" }}
       >
         <span>{label}</span>
         {estimated ? (
@@ -2102,9 +2390,9 @@ function CompactMetric({
         className="mt-1 truncate max-w-full"
         style={{
           color: highlight ? TOKEN.terracotta : TOKEN.nearBlack,
-          fontSize: "13px",
+          fontSize: "17px",
           fontWeight: 600,
-          letterSpacing: "-0.01em",
+          letterSpacing: "0",
           lineHeight: 1,
         }}
       >
