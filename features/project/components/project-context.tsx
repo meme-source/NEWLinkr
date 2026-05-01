@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { ProjectSheet } from "@/features/project/components/project-sheet";
 
@@ -159,6 +159,11 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     variant: "quick",
   });
 
+  // SSR-safe hydration from localStorage. This is one of the few legitimate
+  // places to call setState in an effect: localStorage is only available after
+  // mount, and reading it inside a useState initializer would cause a Next.js
+  // hydration mismatch (server has DEFAULT, client would have stored value).
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const storedProjectsRaw = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
@@ -181,16 +186,15 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
       console.warn("Failed to hydrate workspace projects from localStorage.", error);
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const stableProjects = projects.length > 0 ? projects : DEFAULT_WORKSPACE_PROJECTS;
+  // currentProject derivation already falls back to stableProjects[0] when the
+  // selected id is missing, so we don't need a separate "correct stale state"
+  // effect — the localStorage-write effect below persists currentProject.id,
+  // which keeps storage consistent on the next hydrate.
   const currentProject =
     stableProjects.find((project) => project.id === selectedProjectId) ?? stableProjects[0];
-
-  useEffect(() => {
-    if (!projects.some((project) => project.id === selectedProjectId) && projects[0]) {
-      setSelectedProjectId(projects[0].id);
-    }
-  }, [projects, selectedProjectId]);
 
   useEffect(() => {
     try {
@@ -203,68 +207,79 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     }
   }, [currentProject, projects]);
 
-  const closeProjectDrawer = () => {
+  const closeProjectDrawer = useCallback(() => {
     setDrawerState((current) => ({
       ...current,
       open: false,
       projectId: undefined,
     }));
-  };
+  }, []);
 
-  const openCreateProject = (variant: ProjectDrawerVariant = "quick") => {
+  const openCreateProject = useCallback((variant: ProjectDrawerVariant = "quick") => {
     setDrawerState({
       open: true,
       mode: "create",
       variant,
     });
-  };
+  }, []);
 
-  const openEditProject = (projectId = currentProject.id) => {
-    setDrawerState({
-      open: true,
-      mode: "edit",
-      variant: "detailed",
-      projectId,
-    });
-  };
+  const openEditProject = useCallback(
+    (projectId?: string) => {
+      setDrawerState({
+        open: true,
+        mode: "edit",
+        variant: "detailed",
+        projectId: projectId ?? currentProject.id,
+      });
+    },
+    [currentProject.id],
+  );
 
-  const handleSaveProject = (draft: WorkspaceProjectDraft) => {
-    const normalizedDraft = normalizeDraft(draft);
-    const now = new Date().toISOString();
+  const handleSaveProject = useCallback(
+    (draft: WorkspaceProjectDraft) => {
+      const normalizedDraft = normalizeDraft(draft);
+      const now = new Date().toISOString();
 
-    if (drawerState.mode === "edit" && drawerState.projectId) {
-      setProjects((current) =>
-        current.map((project) =>
-          project.id === drawerState.projectId
-            ? {
-                ...project,
-                ...normalizedDraft,
-                updatedAt: now,
-              }
-            : project,
-        ),
-      );
+      if (drawerState.mode === "edit" && drawerState.projectId) {
+        setProjects((current) =>
+          current.map((project) =>
+            project.id === drawerState.projectId
+              ? {
+                  ...project,
+                  ...normalizedDraft,
+                  updatedAt: now,
+                }
+              : project,
+          ),
+        );
+        closeProjectDrawer();
+        return;
+      }
+
+      const nextProject: WorkspaceProject = {
+        id: `project-${Date.now()}`,
+        ...normalizedDraft,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      setProjects((current) => [nextProject, ...current]);
+      setSelectedProjectId(nextProject.id);
       closeProjectDrawer();
-      return;
-    }
+    },
+    [drawerState.mode, drawerState.projectId, closeProjectDrawer],
+  );
 
-    const nextProject: WorkspaceProject = {
-      id: `project-${Date.now()}`,
-      ...normalizedDraft,
-      createdAt: now,
-      updatedAt: now,
-    };
+  const resolveProjectName = useCallback(
+    (projectId: string) =>
+      stableProjects.find((project) => project.id === projectId)?.name ?? "未分配",
+    [stableProjects],
+  );
 
-    setProjects((current) => [nextProject, ...current]);
-    setSelectedProjectId(nextProject.id);
-    closeProjectDrawer();
-  };
-
-  const resolveProjectName = (projectId: string) =>
-    stableProjects.find((project) => project.id === projectId)?.name ?? "未分配";
-
-  const getProject = (projectId: string) =>
-    stableProjects.find((project) => project.id === projectId);
+  const getProject = useCallback(
+    (projectId: string) => stableProjects.find((project) => project.id === projectId),
+    [stableProjects],
+  );
 
   const value = useMemo<WorkspaceProjectContextValue>(
     () => ({
@@ -278,7 +293,15 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
       resolveProjectName,
       getProject,
     }),
-    [currentProject, stableProjects],
+    [
+      currentProject,
+      stableProjects,
+      openCreateProject,
+      openEditProject,
+      closeProjectDrawer,
+      resolveProjectName,
+      getProject,
+    ],
   );
 
   const editingProject = drawerState.projectId
@@ -288,7 +311,11 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
   return (
     <WorkspaceProjectContext.Provider value={value}>
       {children}
+      {/* The `key` here intentionally re-mounts ProjectSheet each time the
+          drawer transitions from closed→open or the editing target changes,
+          so its internal draft state resets cleanly without a useEffect. */}
       <ProjectSheet
+        key={drawerState.open ? (drawerState.projectId ?? "new") : "_closed"}
         open={drawerState.open}
         mode={drawerState.mode}
         variant={drawerState.variant}

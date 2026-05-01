@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarDays, Coins, FolderKanban, Link2, Package2, Sparkles, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -116,14 +116,11 @@ export function ProjectSheet({
   onClose: () => void;
   onSave: (draft: WorkspaceProjectDraft) => void;
 }) {
+  // Draft and errors are initialized from the `project` prop at mount.
+  // The parent re-mounts this component (via key) whenever it wants the form
+  // to reset, so we don't need a useEffect to re-derive state from props.
   const [draft, setDraft] = useState<WorkspaceProjectDraft>(buildDraft(project));
   const [errors, setErrors] = useState<FieldErrors>({});
-
-  useEffect(() => {
-    if (!open) return;
-    setDraft(buildDraft(project));
-    setErrors({});
-  }, [open, project]);
 
   const title = mode === "create" ? "新建项目" : "编辑项目";
   const description =
