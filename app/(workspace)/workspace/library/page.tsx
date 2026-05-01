@@ -37,7 +37,7 @@ type SourceKey = "插件收藏" | "搜索收藏" | "手动导入";
 type PriorityTab = "pending" | "active" | "archived";
 type SortKey = "followers" | "avgViews" | "avgLikes";
 
-interface Creator {
+interface LibraryCreatorRow {
   id: string;
   handle: string;
   name: string;
@@ -105,7 +105,7 @@ function fmtFollowers(n: number) {
   return String(n);
 }
 
-function creatorToProfile(c: Creator) {
+function creatorToProfile(c: LibraryCreatorRow) {
   return {
     name: c.name,
     handle: c.handle,
@@ -129,7 +129,7 @@ function fmtN(n: number) {
 const GRID = "auto minmax(0,2fr) 64px 108px 72px 72px 72px 92px 68px 108px 40px";
 
 // ── Mock data — expanded to better fill the library table for scroll testing ──
-const INIT_CREATORS: Creator[] = [
+const INIT_CREATORS: LibraryCreatorRow[] = [
   // ===== Q2夏季 Campaign =====
   // pending
   {
@@ -712,7 +712,7 @@ export default function LibraryPage() {
     resolveProjectName,
   } = useWorkspaceProject();
   const { openCreatorProfile } = useCreatorProfile();
-  const [creators, setCreators] = useState<Creator[]>(() =>
+  const [creators, setCreators] = useState<LibraryCreatorRow[]>(() =>
     INIT_CREATORS.map((creator) => ({
       ...creator,
       projectId: PROJECT_NAME_TO_ID[creator.project] ?? WORKSPACE_UNASSIGNED_PROJECT_ID,
@@ -795,7 +795,7 @@ export default function LibraryPage() {
     setStatusPopId(null);
   };
 
-  const handleImportComplete = (imported: Creator[], targetProjectId: string) => {
+  const handleImportComplete = (imported: LibraryCreatorRow[], targetProjectId: string) => {
     setCreators((prev) => [...imported, ...prev]);
     selectProject(targetProjectId);
     const ids = imported.map((c) => c.id);
@@ -1554,13 +1554,13 @@ function BatchOutreachDrawer({
   onClose,
   onComplete,
 }: {
-  creators: Creator[];
+  creators: LibraryCreatorRow[];
   onClose: () => void;
   onComplete: (ids: string[]) => void;
 }) {
   const { openCreatorProfile } = useCreatorProfile();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [list, setList] = useState<Creator[]>(creators);
+  const [list, setList] = useState<LibraryCreatorRow[]>(creators);
   const [selTemplate, setSelTemplate] = useState<number | null>(null);
   const [previewIdx, setPreviewIdx] = useState(0);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -2020,7 +2020,7 @@ function ImportModal({
   onComplete,
 }: {
   onClose: () => void;
-  onComplete: (imported: Creator[], targetProjectId: string) => void;
+  onComplete: (imported: LibraryCreatorRow[], targetProjectId: string) => void;
 }) {
   const { projects, currentProjectId, openCreateProject, resolveProjectName } =
     useWorkspaceProject();
@@ -2111,7 +2111,7 @@ function ImportModal({
   const handleConfirmImport = () => {
     const today = new Date().toISOString().slice(0, 10);
     const targetProjectName = resolveProjectName(targetProject);
-    const imported: Creator[] = validRows.map((r) => {
+    const imported: LibraryCreatorRow[] = validRows.map((r) => {
       const idRaw = r.handle.replace(/^@/, "");
       return {
         id: idRaw,

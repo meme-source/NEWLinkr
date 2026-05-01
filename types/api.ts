@@ -25,6 +25,15 @@ export type Creator = {
 };
 
 // ===== 项目 =====
+// API-layer Project (thin, what /api/projects will eventually return).
+//
+// NOTE: The UI currently uses `WorkspaceProject` from
+// `features/project/components/project-context.tsx`, which is a richer
+// shape (budget, brand, dates, currency) persisted in localStorage.
+// When the real API ships in Phase 1, reconcile these two — likely by
+// expanding `Project` to match `WorkspaceProject` and importing it here.
+// Do not silently rename `WorkspaceProject` to `Project` until both
+// match field-for-field.
 export type Project = {
   id: string;
   name: string;

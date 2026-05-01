@@ -459,7 +459,7 @@ function YouTubeGlyph() {
 }
 
 // ── Project data ───────────────────────────────────────────────────────────────
-interface Project {
+interface SettingsProjectCard {
   name: string;
   creatorCount: number;
   dateRange: string;
@@ -469,7 +469,7 @@ interface Project {
   platforms: string[];
 }
 
-const INIT_PROJECTS: Project[] = [
+const INIT_SETTINGS_PROJECT_CARDS: SettingsProjectCard[] = [
   {
     name: "Q2夏季 Campaign",
     creatorCount: 96,
@@ -705,10 +705,10 @@ function ConfigDrawer({
   onClose,
   onSave,
 }: {
-  project: Project;
+  project: SettingsProjectCard;
   mode: "create" | "edit";
   onClose: () => void;
-  onSave: (nextProject: Project) => boolean;
+  onSave: (nextProject: SettingsProjectCard) => boolean;
 }) {
   const [projectName, setProjectName] = useState(project.name);
   const [name, setName] = useState(project.product.name);

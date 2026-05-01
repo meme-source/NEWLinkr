@@ -14,7 +14,9 @@
     "jsx": "react-jsx",
     "incremental": true,
     "noImplicitReturns": true,
-    "_deferred_noUncheckedIndexedAccess": "Enable after stage 8/9 splits god components — currently 21 violations across plugin-path-demo, similar-card-carousel, similar-search-module, project-context.",
+    // TODO: enable noUncheckedIndexedAccess after stage 8/9 splits god components
+    // (currently ~21 violations across plugin-path-demo, similar-card-carousel,
+    // similar-search-module, project-context).
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "plugins": [{ "name": "next" }],
