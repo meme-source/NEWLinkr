@@ -1,10 +1,14 @@
-// 数据库客户端（Prisma）
-// Phase 0 完成 prisma init 后会替换成真实的 PrismaClient
-// 现在先留占位，避免引入未安装的依赖。
+// Database client (Prisma).
+// Phase 0 placeholder: the real PrismaClient will live here once @prisma/client is installed.
+//
+// Any access to `db.<anything>` throws at runtime so callers cannot silently
+// receive `undefined` and continue. Replace with a real PrismaClient in Phase 0.
 
-export const db = {
-  // TODO: 安装 prisma 后，改为：
-  // import { PrismaClient } from "@prisma/client";
-  // export const db = new PrismaClient();
-  _placeholder: true,
+const stubError = () => {
+  throw new Error("[stub] db not implemented — install @prisma/client and replace lib/data/db.ts in Phase 0");
 };
+
+export const db: never = new Proxy({} as never, {
+  get: stubError,
+  apply: stubError,
+});
