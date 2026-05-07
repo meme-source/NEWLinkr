@@ -1,12 +1,16 @@
-/* Plugin design tokens — edit freely without touching workspace styles */
+/* Plugin design tokens — values mapped onto the Linkr 3 palette per
+ * docs/DESIGN.md. Legacy variable names (--plugin-*) are kept so consumers
+ * don't need to be touched. The shadow token is set to `none` because §6
+ * forbids drop-shadow elevation; if a consumer still references it, the
+ * resulting value is a no-op. */
 :root {
-  --plugin-bg: #ffffff;
-  --plugin-surface: #f9f9f9;
-  --plugin-text: #1a1a1a;
-  --plugin-text-muted: #6b6b6b;
-  --plugin-accent: #f25c3a;
-  --plugin-accent-hover: #d94f2f;
-  --plugin-border: rgba(0, 0, 0, 0.08);
-  --plugin-radius: 0.75rem;
-  --plugin-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --plugin-bg: #fffefb;
+  --plugin-surface: #fffdf9;
+  --plugin-text: #201515;
+  --plugin-text-muted: #939084;
+  --plugin-accent: #ff4f00;
+  --plugin-accent-hover: #ff4f00;
+  --plugin-border: #c5c0b1;
+  --plugin-radius: 0.5rem;
+  --plugin-shadow: none;
 }

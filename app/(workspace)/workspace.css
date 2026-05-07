@@ -1,16 +1,19 @@
-/* Workspace design tokens — edit freely without touching plugin styles */
+/* Workspace design tokens — values mapped onto the Linkr 3 palette per
+ * docs/DESIGN.md. Legacy variable names (--ws-*) are kept so consumers don't
+ * need to be touched. */
 :root {
-  --ws-bg: #f5f4ed;
-  --ws-surface: #faf9f5;
-  --ws-surface-hover: #f0ece4;
-  --ws-surface-active: #f5ede8;
-  --ws-text: #141413;
-  --ws-text-muted: #87867f;
-  --ws-text-secondary: #4d4c48;
-  --ws-accent: #c96442;
-  --ws-accent-light: #f5ede8;
-  --ws-border: #e8e6dc;
-  --ws-radius: 0.75rem;
+  --ws-bg: #fffdf9;
+  --ws-sidebar-bg: #f5f3eb;
+  --ws-surface: #fffdf9;
+  --ws-surface-hover: #eceae3;
+  --ws-surface-active: #fff7f4;
+  --ws-text: #201515;
+  --ws-text-muted: #939084;
+  --ws-text-secondary: #36342e;
+  --ws-accent: #ff4f00;
+  --ws-accent-light: #fff7f4;
+  --ws-border: #c5c0b1;
+  --ws-radius: 0.5rem;
   --ws-sidebar-width: 14rem;
   --ws-sidebar-collapsed: 3.5rem;
 }

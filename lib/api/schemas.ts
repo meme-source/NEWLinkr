@@ -13,13 +13,25 @@ import { z } from "zod";
 import type {
   CompetitorDiscoveryRequest,
   CreateProjectInput,
+  LibraryListRequest,
   OutreachSendRequest,
   ScenarioMatchRequest,
   ScenarioParseRequest,
   TrendingDiscoveryRequest,
+  UpdateCollaborationStatusRequest,
 } from "@/types/api";
 
 const PlatformSchema = z.enum(["tiktok", "instagram", "youtube"]);
+
+const CollaborationStatusSchema = z.enum([
+  "pending",
+  "queued",
+  "sent",
+  "collaborating",
+  "completed",
+  "paused",
+  "rejected",
+]);
 
 // /api/discovery/competitor
 export const CompetitorDiscoveryRequestSchema = z.object({
@@ -75,9 +87,55 @@ export const CreateProjectInputSchema = z.object({
 }) satisfies z.ZodType<CreateProjectInput>;
 
 // /api/outreach POST
-export const OutreachSendRequestSchema = z.object({
+const OutreachPersonalizedSegmentSchema = z.object({
+  text: z.string(),
+  personalized: z.boolean().optional(),
+});
+
+const OutreachSendMessageSchema = z.object({
   creatorId: z.string().min(1),
   subject: z.string().min(1),
   content: z.string().min(1),
+  subjectSegments: z.array(OutreachPersonalizedSegmentSchema).optional(),
+  contentSegments: z.array(OutreachPersonalizedSegmentSchema).optional(),
+  personalizedSegmentCount: z.number().int().nonnegative().optional(),
+});
+
+export const OutreachSendRequestSchema = z
+  .object({
+    creatorId: z.string().min(1).optional(),
+    subject: z.string().min(1).optional(),
+    content: z.string().min(1).optional(),
+    projectId: z.string().min(1).optional(),
+    templateKey: z.enum(["intro", "followup", "gifted", "custom"]).optional(),
+    senderAddress: z.string().email().optional(),
+    mode: z.enum(["now", "scheduled"]).optional(),
+    scheduledAt: z.string().min(1).optional(),
+    attachmentCount: z.number().int().nonnegative().optional(),
+    messages: z.array(OutreachSendMessageSchema).min(1).optional(),
+  })
+  .refine(
+    (input) =>
+      Boolean(input.messages?.length) || Boolean(input.creatorId && input.subject && input.content),
+    {
+      path: ["messages"],
+      message: "messages 或 creatorId/subject/content 至少提供一组",
+    },
+  )
+  .refine((input) => input.mode !== "scheduled" || Boolean(input.scheduledAt), {
+    path: ["scheduledAt"],
+    message: "定时发送必须提供 scheduledAt",
+  }) satisfies z.ZodType<OutreachSendRequest>;
+
+// /api/library — listCreators
+export const LibraryListRequestSchema = z.object({
+  scope: z.enum(["project", "all"]),
   projectId: z.string().min(1).optional(),
-}) satisfies z.ZodType<OutreachSendRequest>;
+}) satisfies z.ZodType<LibraryListRequest>;
+
+// /api/library/collaboration — updateCollaborationStatus
+export const UpdateCollaborationStatusRequestSchema = z.object({
+  creatorId: z.string().min(1),
+  projectId: z.string().min(1),
+  status: CollaborationStatusSchema,
+}) satisfies z.ZodType<UpdateCollaborationStatusRequest>;

@@ -64,11 +64,11 @@ export default function Home() {
           <Link href="/landing" className="landing-brand">
             <span className="landing-logo">
               <Image
-                src="/2linkr-logo.png"
+                src="/linkr-logo.png"
                 alt="Linkr"
                 fill
                 sizes="40px"
-                className="rounded-[14px] object-cover"
+                className="object-contain"
               />
             </span>
             Linkr
@@ -121,19 +121,19 @@ export default function Home() {
               </div>
               <div className="landing-screen-frame">
                 <div className="p-4">
-                  <div className="mb-3 flex items-center gap-4 text-[11px] text-[#8e8792]">
-                    <span className="font-semibold text-[#2d2a32]">相似创作者</span>
+                  <div className="mb-3 flex items-center gap-4 text-[11px] text-[#939084]">
+                    <span className="font-semibold text-[#201515]">相似创作者</span>
                     <span>我的列表</span>
                     <span>外联邮件</span>
                     <span>数据总览</span>
                   </div>
-                  <div className="rounded-full border border-[#2d2a3214] bg-[#fffaf3] px-3 py-2 text-xs text-[#a39dad]">
+                  <div className="rounded-full border border-[#20151514] bg-[#fffefb] px-3 py-2 text-xs text-[#939084]">
                     输入种子账号或关键词...
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2 text-[10px]">
-                    <span className="rounded-full bg-[#f5f0eb] px-2 py-1">美妆 · 32K</span>
-                    <span className="rounded-full bg-[#eff5ff] px-2 py-1">时尚 · 89K</span>
-                    <span className="rounded-full bg-[#eef9f1] px-2 py-1">生活 · 156K</span>
+                    <span className="rounded-full bg-[#eceae3] px-2 py-1">美妆 · 32K</span>
+                    <span className="rounded-full bg-[#eceae3] px-2 py-1">时尚 · 89K</span>
+                    <span className="rounded-full bg-[#eceae3] px-2 py-1">生活 · 156K</span>
                   </div>
                 </div>
               </div>
@@ -441,10 +441,10 @@ export default function Home() {
       <style jsx global>{`
         .landing-page {
           background:
-            radial-gradient(80% 60% at 10% 5%, #e86a581f, #0000),
-            radial-gradient(60% 50% at 90% 10%, #1e7a721a, #0000),
-            linear-gradient(#fff8f2 0%, #fff5ed 44%, #fff8f2 100%);
-          color: #2d2a32;
+            radial-gradient(80% 60% at 10% 5%, #ff4f001f, #0000),
+            radial-gradient(60% 50% at 90% 10%, #36342e1a, #0000),
+            linear-gradient(#fffefb 0%, #fff7f4 44%, #fffefb 100%);
+          color: #201515;
           overflow-x: clip;
         }
         .landing-container {
@@ -455,9 +455,9 @@ export default function Home() {
           position: sticky;
           top: 0;
           z-index: 40;
-          background: #fff8f2b8;
+          background: #fffefbb8;
           backdrop-filter: blur(20px);
-          border-bottom: 1px solid #2d2a320f;
+          border-bottom: 1px solid #2015150f;
         }
         .landing-nav-inner {
           display: flex;
@@ -475,9 +475,6 @@ export default function Home() {
           position: relative;
           width: 40px;
           height: 40px;
-          border-radius: 14px;
-          overflow: hidden;
-          box-shadow: 0 8px 16px #2d2a321f;
         }
         .landing-nav-cta,
         .landing-primary-btn {
@@ -485,12 +482,12 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: linear-gradient(135deg, #e86a58, #d45a49);
+          background: linear-gradient(135deg, #ff4f00, #ff4f00);
           color: #fff;
           border-radius: 14px;
           padding: 12px 18px;
           font-weight: 700;
-          box-shadow: 0 14px 30px #e86a5838;
+          box-shadow: 0 14px 30px #ff4f0038;
           transition:
             0.25s transform,
             0.25s box-shadow;
@@ -498,7 +495,7 @@ export default function Home() {
         .landing-nav-cta:hover,
         .landing-primary-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 18px 38px #e86a5852;
+          box-shadow: 0 18px 38px #ff4f0052;
         }
         .landing-secondary-btn,
         .landing-cta-link,
@@ -507,8 +504,8 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: #ffffffcc;
-          border: 1px solid #2d2a321f;
+          background: #fffefbcc;
+          border: 1px solid #2015151f;
           border-radius: 14px;
           padding: 12px 18px;
         }
@@ -527,11 +524,11 @@ export default function Home() {
           display: inline-flex;
           padding: 8px 14px;
           border-radius: 999px;
-          border: 1px solid #2d2a3214;
-          background: #ffffffb3;
+          border: 1px solid #20151514;
+          background: #fffefbb3;
           font-size: 0.88rem;
           font-weight: 700;
-          color: #1e7a72;
+          color: #36342e;
         }
         .landing-title {
           margin: 0;
@@ -541,7 +538,7 @@ export default function Home() {
         }
         .landing-subtitle {
           margin-top: 20px;
-          color: #6b6573;
+          color: #36342e;
           font-size: 1.08rem;
           line-height: 1.85;
           max-width: 650px;
@@ -557,7 +554,7 @@ export default function Home() {
           flex-wrap: wrap;
           gap: 18px;
           margin-top: 22px;
-          color: #6b6573;
+          color: #36342e;
         }
         .landing-stage {
           position: relative;
@@ -565,18 +562,18 @@ export default function Home() {
         }
         .landing-screen {
           position: relative;
-          background: #ffffffcc;
+          background: #fffefbcc;
           backdrop-filter: blur(14px);
-          border: 1px solid #2d2a3214;
+          border: 1px solid #20151514;
           border-radius: 30px;
           padding: 18px;
           width: min(100%, 560px);
           margin: 48px auto 0;
-          box-shadow: 0 24px 70px #2d2a321f;
+          box-shadow: 0 24px 70px #2015151f;
           animation: landing-breathe 6s ease-in-out infinite;
         }
         .landing-screen-frame {
-          border: 1px solid #2d2a3214;
+          border: 1px solid #20151514;
           border-radius: 20px;
           overflow: hidden;
           background: #fff;
@@ -590,7 +587,7 @@ export default function Home() {
           width: 10px;
           height: 10px;
           border-radius: 999px;
-          background: #2d2a322e;
+          background: #2015152e;
         }
         .landing-screen-foot {
           display: flex;
@@ -600,25 +597,25 @@ export default function Home() {
           gap: 14px;
         }
         .landing-screen-foot span {
-          color: #6b6573;
+          color: #36342e;
         }
         .landing-screen-pill,
         .landing-price-badge {
           border-radius: 999px;
-          background: #e86a581f;
+          background: #ff4f001f;
           padding: 8px 12px;
-          color: #d45a49;
+          color: #ff4f00;
           font-weight: 700;
         }
         .landing-stage-card {
           position: absolute;
           max-width: 240px;
-          background: #fff8f2d4;
+          background: #fffefbd4;
           backdrop-filter: blur(16px);
-          border: 1px solid #2d2a3214;
+          border: 1px solid #20151514;
           border-radius: 20px;
           padding: 16px;
-          box-shadow: 0 22px 38px #2d2a321a;
+          box-shadow: 0 22px 38px #2015151a;
         }
         .landing-stage-card-top {
           top: 10px;
@@ -638,7 +635,7 @@ export default function Home() {
         .landing-stage-kicker {
           margin: 0 0 8px;
           font-size: 0.78rem;
-          color: #8c8692;
+          color: #939084;
         }
         .landing-stage-card strong {
           display: block;
@@ -647,14 +644,14 @@ export default function Home() {
         .landing-stage-card span {
           display: block;
           margin-top: 8px;
-          color: #6b6573;
+          color: #36342e;
           font-size: 0.9rem;
         }
         .landing-section {
           padding: 88px 0;
         }
         .landing-section-contrast {
-          background: #ffffff73;
+          background: #fffefb73;
         }
         .landing-section-head {
           max-width: 860px;
@@ -671,7 +668,7 @@ export default function Home() {
         }
         .landing-section-head span,
         .landing-cta-panel span {
-          color: #6b6573;
+          color: #36342e;
           line-height: 1.9;
         }
         .landing-pain-grid,
@@ -694,9 +691,9 @@ export default function Home() {
         .landing-fit-card,
         .landing-price-card,
         .landing-faq-item {
-          background: #ffffffb8;
+          background: #fffefbb8;
           backdrop-filter: blur(12px);
-          border: 1px solid #2d2a3214;
+          border: 1px solid #20151514;
           border-radius: 24px;
           padding: 22px;
           transition:
@@ -708,7 +705,7 @@ export default function Home() {
         .landing-fit-card:hover,
         .landing-price-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 24px 48px #2d2a321a;
+          box-shadow: 0 24px 48px #2015151a;
         }
         .landing-pain-index {
           display: inline-flex;
@@ -717,30 +714,30 @@ export default function Home() {
           width: 44px;
           height: 44px;
           border-radius: 14px;
-          background: #e86a581a;
-          color: #d45a49;
+          background: #ff4f001a;
+          color: #ff4f00;
           font-weight: 700;
         }
         .landing-compare-table {
-          border: 1px solid #2d2a3214;
+          border: 1px solid #20151514;
           border-radius: 28px;
           overflow: hidden;
-          background: #ffffffc7;
+          background: #fffefbc7;
         }
         .landing-compare-row {
           display: grid;
           grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 1fr);
           gap: 16px;
           padding: 16px 20px;
-          border-top: 1px solid #2d2a3214;
+          border-top: 1px solid #20151514;
         }
         .landing-compare-row:first-child {
           border-top: none;
         }
         .landing-compare-head {
-          background: #2d2a320a;
+          background: #2015150a;
           font-weight: 700;
-          color: #6b6573;
+          color: #36342e;
         }
         .landing-compare-cell {
           border-radius: 16px;
@@ -748,12 +745,12 @@ export default function Home() {
           line-height: 1.7;
         }
         .landing-compare-cell.is-highlight {
-          background: #e86a581a;
-          color: #d45a49;
+          background: #ff4f001a;
+          color: #ff4f00;
         }
         .landing-compare-cell.is-highlight-secondary {
-          background: #1e7a721a;
-          color: #1e7a72;
+          background: #36342e1a;
+          color: #36342e;
         }
         .landing-workflow-icon {
           display: inline-flex;
@@ -762,11 +759,11 @@ export default function Home() {
           width: 52px;
           height: 52px;
           border-radius: 16px;
-          background: linear-gradient(135deg, #1e7a7226, #e86a5814);
+          background: linear-gradient(135deg, #36342e26, #ff4f0014);
         }
         .landing-price-card.is-accent {
-          background: linear-gradient(145deg, #fffffff5, #e86a5814);
-          border-color: #e86a5847;
+          background: linear-gradient(145deg, #fffefbf5, #ff4f0014);
+          border-color: #ff4f0047;
         }
         .landing-price-head {
           display: flex;
@@ -801,10 +798,10 @@ export default function Home() {
           margin-top: 20px;
         }
         .landing-price-cta.is-accent {
-          background: linear-gradient(135deg, #e86a58, #d45a49);
+          background: linear-gradient(135deg, #ff4f00, #ff4f00);
           color: #fff;
           border: none;
-          box-shadow: 0 10px 28px #e86a5838;
+          box-shadow: 0 10px 28px #ff4f0038;
         }
         .landing-faq-list {
           display: grid;
@@ -824,7 +821,7 @@ export default function Home() {
         .landing-faq-answer {
           margin: 0;
           padding: 0 22px 22px;
-          color: #6b6573;
+          color: #36342e;
           line-height: 1.85;
         }
         .landing-cta-section {
@@ -835,7 +832,7 @@ export default function Home() {
           justify-content: space-between;
           align-items: center;
           gap: 24px;
-          background: linear-gradient(135deg, #2d2a32f5, #3c3842f2);
+          background: linear-gradient(135deg, #201515f5, #201515f2);
           color: #fff;
           border-radius: 32px;
           padding: 38px;
@@ -846,7 +843,7 @@ export default function Home() {
           content: "";
           position: absolute;
           inset: -40%;
-          background: radial-gradient(circle, #e86a5838 0, #0000 60%);
+          background: radial-gradient(circle, #ff4f0038 0, #0000 60%);
           animation: landing-aurora 16s linear infinite;
         }
         .landing-cta-actions {
@@ -863,8 +860,8 @@ export default function Home() {
           flex-wrap: wrap;
           gap: 16px;
           padding-top: 16px;
-          border-top: 1px solid #2d2a3214;
-          color: #6b6573;
+          border-top: 1px solid #20151514;
+          color: #36342e;
         }
         .landing-footer-links {
           display: flex;

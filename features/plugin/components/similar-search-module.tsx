@@ -34,12 +34,12 @@ const MODES: ModeDef[] = [
   },
 ];
 
-const STACK_UPPER_SURFACE = "#f6f2e9";
-const STACK_UPPER_BORDER = "#ece5db";
-const STACK_LOWER_BORDER = "#f1ece4";
-const STACK_ACTIVE_SURFACE = "#ffffff";
+// Per docs/DESIGN.md §6: outermost plugin cards use #fffefb cream surface with sand border.
+const SIDEBAR_CARD_CLASSES =
+  "relative overflow-hidden rounded-[20px] border border-[#c5c0b1] bg-[#fffefb]";
+// Per docs/DESIGN.md §4 Primary Orange button: flat #ff4f00, no gradient, no shadow.
 const PRIMARY_ACTION_BUTTON_CLASSES =
-  "inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#d38a67] bg-[linear-gradient(180deg,#db7a56_0%,#c96442_100%)] px-5 text-[12.5px] font-semibold tracking-[-0.01em] text-[#fff8f1] shadow-[0_14px_26px_-18px_rgba(164,87,55,0.68),inset_0_1px_0_rgba(255,243,232,0.3)] transition-all hover:border-[#cc7a56] hover:bg-[linear-gradient(180deg,#e18460_0%,#cf6d49_100%)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c96442]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf9f5]";
+  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-[13px] font-semibold tracking-[-0.01em] text-[#fffefb] transition-colors hover:bg-[#ff4f00] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4f00]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffefb]";
 
 const REGION_OPTIONS = [
   "全球",
@@ -73,6 +73,7 @@ type Props = {
   onRunSearch: () => void;
   isSearching: boolean;
   onOpenSeedFinder?: () => void;
+  onOpenAnalysis?: () => void;
   header?: ReactNode;
   actionSubject?: ReactNode;
   actionSubjectLabel?: string;
@@ -84,6 +85,7 @@ export function SimilarSearchModule({
   onRunSearch,
   isSearching,
   onOpenSeedFinder,
+  onOpenAnalysis,
   header,
   actionSubject,
   actionSubjectLabel = "当前博主",
@@ -97,44 +99,35 @@ export function SimilarSearchModule({
   const isSeed = active.key === "seed";
 
   return (
-    <div className="space-y-2">
-      <div className="relative overflow-hidden rounded-[26px] border border-[#e8e6dc] bg-[#faf9f5] p-1.5 shadow-[0_1px_0_rgba(20,20,19,0.02)]">
-        {/* Header slot — blogger info is the upper surface in the stacked card.
-            Inactive tabs inherit that same surface, while the active tab drops into the white panel below. */}
-        {header ? (
-          <>
-            <div
-              className="relative z-[2] rounded-t-[20px] border border-b-0 shadow-[0_6px_14px_-10px_rgba(20,20,19,0.18)]"
-              style={{
-                borderColor: STACK_UPPER_BORDER,
-                backgroundColor: STACK_UPPER_SURFACE,
-              }}
-            >
-              {header}
+    <div className="space-y-3">
+      {/* Card 1 — blogger profile + view-detail link. Standalone card per docs/DESIGN.md §6. */}
+      {header ? (
+        <div className={SIDEBAR_CARD_CLASSES}>
+          {header}
+          {onOpenAnalysis ? (
+            <div className="flex justify-center px-3.5 pb-3">
+              <button
+                type="button"
+                onClick={onOpenAnalysis}
+                className="inline-flex items-center gap-0.5 rounded-md px-2 py-0.5 text-[13px] font-medium text-[#ff4f00] transition-colors hover:bg-[#eceae3]"
+                style={{ letterSpacing: "-0.146px", lineHeight: "19.5px" }}
+              >
+                查看完整档案 →
+              </button>
             </div>
-          </>
-        ) : null}
+          ) : null}
+        </div>
+      ) : null}
 
-        {/* Mode / filter card — sits flush under the upper card so inactive tabs
-            visually stay on the same surface and the active tab drops into white. */}
-        <div
-          className={[
-            "relative",
-            header
-              ? "rounded-b-[20px] border border-t-0 border-[#ece9dd]"
-              : "rounded-[20px] border border-[#ece9dd]",
-          ].join(" ")}
-          style={{ backgroundColor: STACK_ACTIVE_SURFACE }}
-        >
-          {/* Tab row — active state slides with a subtle upward bump. */}
+      {/* Card 2 — mode tabs + filters. Independent cream card with sand border. */}
+      <div className={SIDEBAR_CARD_CLASSES}>
+        <div className="relative">
+          {/* Segmented control — soft pill behind the active tab, no underline. */}
           <div
             role="tablist"
             aria-label="相似搜索模式"
-            className="grid grid-cols-3 border-b"
-            style={{
-              borderColor: header ? STACK_ACTIVE_SURFACE : STACK_LOWER_BORDER,
-              backgroundColor: header ? STACK_UPPER_SURFACE : "#faf9f5",
-            }}
+            className="relative mx-3 mt-3 grid grid-cols-3 rounded-full p-1"
+            style={{ backgroundColor: "#eceae3" }}
           >
             {MODES.map((mode) => {
               const isActive = mode.key === active.key;
@@ -153,8 +146,8 @@ export function SimilarSearchModule({
                     onSelectMode(mode.key);
                   }}
                   className={[
-                    "relative isolate inline-flex min-h-[36px] items-center justify-center gap-1 overflow-hidden px-2 py-0 text-[11.5px] font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#c96442]/30 focus-visible:outline-none focus-visible:ring-inset",
-                    isActive ? "z-10 text-[#2a2927]" : "text-[#87867f] hover:text-[#2a2927]",
+                    "relative isolate inline-flex min-h-[28px] items-center justify-center gap-0.5 rounded-full px-1.5 text-[11.5px] font-semibold whitespace-nowrap transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#ff4f00]/30 focus-visible:outline-none focus-visible:ring-inset",
+                    isActive ? "z-10 text-[#201515]" : "text-[#939084] hover:text-[#201515]",
                   ].join(" ")}
                 >
                   {isActive ? (
@@ -162,31 +155,25 @@ export function SimilarSearchModule({
                       layoutId="similar-search-active-tab"
                       aria-hidden="true"
                       transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.7 }}
-                      className="absolute inset-x-0 top-0 bottom-[-1px] rounded-t-[14px]"
-                      style={{ backgroundColor: STACK_ACTIVE_SURFACE }}
+                      className="absolute inset-0 rounded-full border border-[#c5c0b1] bg-[#fffefb]"
                     />
                   ) : null}
-                  <span
-                    className={[
-                      "relative z-10 transition-[font-size] duration-200",
-                      isActive ? "text-[12.5px]" : "text-[11.5px]",
-                    ].join(" ")}
-                  >
-                    {mode.label}
-                  </span>
-                  {isSeedTab ? <ArrowUpRight className="relative z-10 h-3 w-3 opacity-70" /> : null}
+                  <span className="relative z-10 whitespace-nowrap">{mode.label}</span>
+                  {isSeedTab ? (
+                    <ArrowUpRight className="relative z-10 h-2.5 w-2.5 shrink-0 opacity-70" />
+                  ) : null}
                 </button>
               );
             })}
           </div>
 
-          {/* Header strip */}
-          <div className="px-4 pt-3 pb-2">
-            <div className="text-[11px] leading-snug text-[#87867f]">{active.summary}</div>
+          {/* Summary strip */}
+          <div className="px-4 pt-3 pb-1">
+            <div className="text-[11px] leading-snug text-[#939084]">{active.summary}</div>
           </div>
 
           {isSeed ? (
-            <div className="px-4 pb-4">
+            <div className="px-4 pt-2 pb-4">
               <button
                 type="button"
                 onClick={() => onOpenSeedFinder?.()}
@@ -195,13 +182,13 @@ export function SimilarSearchModule({
                 打开博主发现
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </button>
-              <div className="mt-2 text-center text-[10px] text-[#a8a69c]">
+              <div className="mt-2 text-center text-[10px] text-[#939084]">
                 将在后台打开并基于当前达人自动筛选
               </div>
             </div>
           ) : (
-            <div className="space-y-2.5 px-4 pb-4">
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-4 px-4 pt-2 pb-4">
+              <div className="grid grid-cols-2 gap-3">
                 <SelectField
                   label="地区"
                   value={region}
@@ -240,38 +227,32 @@ export function SimilarSearchModule({
         </div>
       </div>
 
-      {!isSeed ? (
-        <div className="flex flex-col items-center gap-1.5 text-center">
-          <button
-            type="button"
-            onClick={onRunSearch}
-            disabled={isSearching}
-            aria-label={`根据 ${actionSubjectLabel} ${isSearching ? "搜索中" : active.label}`}
-            className={PRIMARY_ACTION_BUTTON_CLASSES}
+      <button
+        type="button"
+        onClick={isSeed ? () => onOpenSeedFinder?.() : onRunSearch}
+        disabled={isSearching}
+        aria-label={`根据 ${actionSubjectLabel} ${isSearching ? "搜索中" : active.label}，消耗 3 点`}
+        className={PRIMARY_ACTION_BUTTON_CLASSES}
+      >
+        <span>根据</span>
+        {actionSubject ? (
+          <span
+            aria-hidden="true"
+            className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full"
           >
-            <span>根据</span>
-            {actionSubject ? (
-              <span
-                aria-hidden="true"
-                className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full"
-              >
-                {actionSubject}
-              </span>
-            ) : (
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/15 text-[9px] font-semibold text-[#fff1e6] shadow-[0_2px_7px_rgba(20,20,19,0.16)]">
-                博
-              </span>
-            )}
-            <span>{isSearching ? "搜索中..." : active.label}</span>
-          </button>
-
-          <div className="inline-flex items-center gap-1 text-[10px] font-medium text-[#b08a63]">
-            <span>此任务消耗</span>
-            <PointsIcon className="h-3 w-3 text-[#8f745a]" />
-            <span className="font-semibold tracking-[0.01em] text-[#9a7550]">3</span>
-          </div>
-        </div>
-      ) : null}
+            {actionSubject}
+          </span>
+        ) : (
+          <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[9px] font-semibold text-[#36342e]">
+            博
+          </span>
+        )}
+        <span>{isSearching ? "搜索中..." : active.label}</span>
+        <span aria-hidden="true" className="mx-1 h-3 w-px bg-[#fffefb]/35" />
+        <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#fffefb]/90">
+          <PointsIcon className="h-3 w-3" />3
+        </span>
+      </button>
     </div>
   );
 }
@@ -301,7 +282,7 @@ function SelectField({
   const id = useId();
   return (
     <label htmlFor={id} className="block">
-      <span className="mb-1 block text-[9.5px] font-semibold tracking-[0.12em] text-[#a8a69c] uppercase">
+      <span className="mb-1 block text-[9.5px] font-semibold tracking-[0.12em] text-[#939084] uppercase">
         {label}
       </span>
       <div className="relative">
@@ -309,7 +290,7 @@ function SelectField({
           id={id}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full cursor-pointer appearance-none rounded-[10px] border border-[#e8e6dc] bg-white px-2.5 py-1.5 pr-7 text-[12px] font-medium text-[#2a2927] transition-colors outline-none hover:border-[#c96442]/40 focus:border-[#c96442]/60"
+          className="w-full cursor-pointer appearance-none border-0 bg-transparent py-1 pr-5 pl-0 text-[13px] font-semibold text-[#201515] transition-colors outline-none hover:text-[#ff4f00] focus:text-[#ff4f00]"
         >
           {options.map((option) => (
             <option key={option} value={option}>
@@ -317,7 +298,7 @@ function SelectField({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-3 w-3 -translate-y-1/2 text-[#87867f]" />
+        <ChevronDown className="pointer-events-none absolute top-1/2 right-1 h-3 w-3 -translate-y-1/2 text-[#939084]" />
       </div>
     </label>
   );
@@ -348,11 +329,11 @@ function RangeField({
       <div className="mb-0.5 flex items-baseline justify-between">
         <label
           htmlFor={id}
-          className="text-[9.5px] font-semibold tracking-[0.12em] text-[#a8a69c] uppercase"
+          className="text-[9.5px] font-semibold tracking-[0.12em] text-[#939084] uppercase"
         >
           {label}
         </label>
-        <span className="text-[12px] leading-none font-bold text-[#2a2927]">
+        <span className="text-[12px] leading-none font-bold text-[#201515]">
           {formatter(value)}
         </span>
       </div>
@@ -364,30 +345,30 @@ function RangeField({
         step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="linkr-range h-1 w-full cursor-pointer appearance-none rounded-full outline-none"
+        className="linkr-range h-[3px] w-full cursor-pointer appearance-none rounded-full outline-none"
         style={{
-          background: `linear-gradient(to right, #c96442 0%, #c96442 ${pct}%, #e8e6dc ${pct}%, #e8e6dc 100%)`,
+          background: `linear-gradient(to right, #ff4f00 0%, #ff4f00 ${pct}%, #c5c0b1 ${pct}%, #c5c0b1 100%)`,
         }}
       />
       <style jsx>{`
         .linkr-range::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 14px;
-          height: 14px;
+          width: 12px;
+          height: 12px;
           border-radius: 9999px;
-          background: #ffffff;
-          border: 2px solid #c96442;
-          box-shadow: 0 1px 3px rgba(201, 100, 66, 0.35);
+          background: #ff4f00;
+          border: 2px solid #fffefb;
+          box-shadow: 0 1px 4px rgba(201, 100, 66, 0.28);
           cursor: pointer;
         }
         .linkr-range::-moz-range-thumb {
-          width: 14px;
-          height: 14px;
+          width: 12px;
+          height: 12px;
           border-radius: 9999px;
-          background: #ffffff;
-          border: 2px solid #c96442;
-          box-shadow: 0 1px 3px rgba(201, 100, 66, 0.35);
+          background: #ff4f00;
+          border: 2px solid #fffefb;
+          box-shadow: 0 1px 4px rgba(201, 100, 66, 0.28);
           cursor: pointer;
         }
       `}</style>

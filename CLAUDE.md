@@ -15,6 +15,13 @@ The backend is currently stubbed. API routes exist but return mock or `TODO` res
 
 ## Hard rules — do not violate
 
+### 0. Visual / interaction language has one source
+
+- The **only** authoritative visual + interaction spec for Linkr 3 is [`docs/DESIGN.md`](./docs/DESIGN.md). Cream `#fffefb` canvas, `#201515` warm near-black text, `#ff4f00` Linkr Orange accent, `#c5c0b1` sand borders, Degular Display + Inter + GT Alpina (or licensed substitutes recorded in `docs/DESIGN.md` §3).
+- This **supersedes** the previous Claude/Anthropic-inspired spec. Do not re-introduce the parchment palette (`#f5f4ed`, `#c96442`, `#d97757`) anywhere. The old spec is archived for reference at [`design-presets/claude.DESIGN.md`](./design-presets/claude.DESIGN.md).
+- Color, typography, radius, spacing, depth, button shape, tab indicator, pill vs icon-button rules — **all** come from `docs/DESIGN.md`. Do not invent new tokens or copy values from a different design system.
+- Logic, data flow, state, and API shapes are **out of scope** for this rule. The design system applies to visual + interaction only; existing behavior must be preserved when restyling.
+
 ### 1. Types come from one place
 
 - The single source of truth for shared types is **`types/api.ts`**.
@@ -130,14 +137,27 @@ If you cannot satisfy a checkbox, surface it to the user **before** committing.
 
 The 2026-05 refactor stopped at stage 7. The following files exceed the size budget and **must not be edited in place** for new features. Instead: extract the part you're touching into a new component under `features/<feature>/components/`, then wire it back in.
 
-| File | Lines | Suggested split direction |
-|---|---|---|
-| `features/plugin/components/plugin-path-demo.tsx` | ~6,979 | Per-panel: SidebarPanel, EmailModule, CreatorCard, SearchModule. Data already in `features/plugin/data/`. |
-| `app/(workspace)/workspace/discovery/page.tsx` | ~4,190 | Per discovery flow: CompetitorSearch, ScenarioSearch, TrendingSearch, SimilarSearch, plus a shared ResultsList + QuickFilters. |
-| `app/(workspace)/workspace/library/page.tsx` | ~2,774 | LibraryToolbar, LibraryTable, ImportFlow, BulkOutreachComposer. |
-| `app/(workspace)/workspace/outreach/page.tsx` | ~2,542 | OutreachInbox, MailTemplates, EmailSettings, OutreachDashboard (one per `?tab=` value). |
-| `app/(workspace)/workspace/settings/page.tsx` | ~2,274 | Per tab: ProjectsTab, BillingTab, IntegrationsTab, TeamTab. |
+| File                                              | Lines  | Suggested split direction                                                                                                      |
+| ------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `features/plugin/components/plugin-path-demo.tsx` | ~6,979 | Per-panel: SidebarPanel, EmailModule, CreatorCard, SearchModule. Data already in `features/plugin/data/`.                      |
+| `app/(workspace)/workspace/discovery/page.tsx`    | ~4,190 | Per discovery flow: CompetitorSearch, ScenarioSearch, TrendingSearch, SimilarSearch, plus a shared ResultsList + QuickFilters. |
+| `app/(workspace)/workspace/outreach/page.tsx`     | ~2,542 | OutreachInbox, MailTemplates, EmailSettings, OutreachDashboard (one per `?tab=` value).                                        |
+| `app/(workspace)/workspace/settings/page.tsx`     | ~2,274 | Per tab: ProjectsTab, BillingTab, IntegrationsTab, TeamTab.                                                                    |
+
+> The 2026-05-04 library/drawer rewrite split `app/(workspace)/workspace/library/page.tsx` (was ~2,774 lines) and `features/creator/components/creator-profile-drawer.tsx` (was ~1,210 lines) into `features/library/**` and `features/creator/components/drawer/**`. The page is now ≤ 200 lines and the drawer is a thin re-export.
 
 When you split, **keep DOM and classNames byte-identical** — these are refactors, not redesigns. Verify with the user that the page looks the same in `npm run dev` before merging.
 
-If a request would force you to add code inside one of these files, tell the user: *"this would extend a known oversized file — let me split the part I need first, then add the new behavior into the new file."* Don't just edit in place.
+If a request would force you to add code inside one of these files, tell the user: _"this would extend a known oversized file — let me split the part I need first, then add the new behavior into the new file."_ Don't just edit in place.
+
+## Mock 数据开关
+
+博主库 mock 数据通过 `features/creator/data/index.ts` 集中导出。所有 UI 与 service 层 (`lib/services/library.ts`) 都只通过该入口取数据。
+
+上线打包时设置环境变量：
+
+```
+NEXT_PUBLIC_USE_MOCK=false
+```
+
+当此变量为 `false` 时，`getCreators()` 返回 `[]`，由 service 层走真实 API；切换数据源不需要改任何 UI 组件。完全切到真实数据后，可直接删除 `features/creator/data/mock.ts`。

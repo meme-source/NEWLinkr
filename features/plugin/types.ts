@@ -20,6 +20,14 @@ export type EmailTemplateMeta = {
 };
 export type TagTone = "amber" | "blue" | "emerald" | "violet" | "rose";
 export type AudienceRegion = { pct: number; flag?: string; flags?: string[] };
+export type EmailRecipientMessage = {
+  creatorId: string;
+  subject: string;
+  content: string;
+  subjectSegments: EmailTemplateSegment[];
+  contentSegments: EmailTemplateSegment[];
+  personalizedSegmentCount: number;
+};
 export type EmailSendOptions = {
   subject: string;
   attachmentCount: number;
@@ -27,6 +35,8 @@ export type EmailSendOptions = {
   scheduledAt?: string;
   senderAddress?: string;
   recipientCreatorIds?: string[];
+  recipientMessages?: EmailRecipientMessage[];
+  templateKey?: Exclude<EmailTemplateKey, ""> | "custom";
 };
 export type ProjectSummary = {
   id: string;

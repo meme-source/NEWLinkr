@@ -1,347 +1,473 @@
-# Design System Inspiration of Claude (Anthropic)
+# Linkr 3 Design System (Zapier-inspired)
+
+> **This is the single authoritative visual / interaction specification for Linkr 3.** It supersedes the previous Claude-inspired spec (archived at [`design-presets/claude.DESIGN.md`](../design-presets/claude.DESIGN.md)). All surfaces — Landing Page, browser-extension plugin, and SaaS workspace — must follow this document. Logic / data flow / state are out of scope: only visual and interaction tokens (color, typography, spacing, radius, depth, motion, component shape) come from here.
 
 ## 1. Visual Theme & Atmosphere
 
-Claude's interface is a literary salon reimagined as a product page — warm, unhurried, and quietly intellectual. The entire experience is built on a parchment-toned canvas (`#f5f4ed`) that deliberately evokes the feeling of high-quality paper rather than a digital surface. Where most AI product pages lean into cold, futuristic aesthetics, Claude's design radiates human warmth, as if the AI itself has good taste in interior design.
+Zapier's website radiates warm, approachable professionalism. It rejects the cold monochrome minimalism of developer tools in favor of a cream-tinted canvas (`#fffefb`) that feels like unbleached paper -- the digital equivalent of a well-organized notebook. The near-black (`#201515`) text has a faint reddish-brown warmth, creating an atmosphere more human than mechanical. This is automation designed to feel effortless, not technical.
 
-The signature move is the custom Anthropic Serif typeface — a medium-weight serif with generous proportions that gives every headline the gravitas of a book title. Combined with organic, hand-drawn-feeling illustrations in terracotta (`#c96442`), black, and muted green, the visual language says "thoughtful companion" rather than "powerful tool." The serif headlines breathe at tight-but-comfortable line-heights (1.10–1.30), creating a cadence that feels more like reading an essay than scanning a product page.
+The typographic system is a deliberate interplay of two distinct personalities. **Degular Display** -- a geometric, wide-set display face -- handles hero-scale headlines at 56-80px with medium weight (500) and extraordinarily tight line-heights (0.90), creating headlines that compress vertically like stacked blocks. **Inter** serves as the workhorse for everything else, from section headings to body text and navigation, with fallbacks to Helvetica and Arial. **GT Alpina**, an elegant thin-weight serif with aggressive negative letter-spacing (-1.6px to -1.92px), makes occasional appearances for softer editorial moments. This three-font system gives Zapier the ability to shift register -- from bold and punchy (Degular) to clean and functional (Inter) to refined and literary (GT Alpina).
 
-What makes Claude's design truly distinctive is its warm neutral palette. Every gray has a yellow-brown undertone (`#5e5d59`, `#87867f`, `#4d4c48`) — there are no cool blue-grays anywhere. Borders are cream-tinted (`#f0eee6`, `#e8e6dc`), shadows use warm transparent blacks, and even the darkest surfaces (`#141413`, `#30302e`) carry a barely perceptible olive warmth. This chromatic consistency creates a space that feels lived-in and trustworthy.
+The brand's signature orange (`#ff4f00`) is unmistakable -- a vivid, saturated red-orange that sits precisely between traffic-cone urgency and sunset warmth. It's used sparingly but decisively: primary CTA buttons, active state underlines, and accent borders. Against the warm cream background, this orange creates a color relationship that feels energetic without being aggressive.
 
 **Key Characteristics:**
 
-- Warm parchment canvas (`#f5f4ed`) evoking premium paper, not screens
-- Custom Anthropic type family: Serif for headlines, Sans for UI, Mono for code
-- Terracotta brand accent (`#c96442`) — warm, earthy, deliberately un-tech
-- Exclusively warm-toned neutrals — every gray has a yellow-brown undertone
-- Organic, editorial illustrations replacing typical tech iconography
-- Ring-based shadow system (`0px 0px 0px 1px`) creating border-like depth without visible borders
-- Magazine-like pacing with generous section spacing and serif-driven hierarchy
+- Warm cream canvas (`#fffefb`) instead of pure white -- organic, paper-like warmth
+- Near-black with reddish undertone (`#201515`) -- text that breathes rather than dominates
+- Degular Display for hero headlines at 0.90 line-height -- compressed, impactful, modern
+- Inter as the universal UI font across all functional typography
+- GT Alpina for editorial accents -- thin-weight serif with extreme negative tracking
+- Linkr Orange (`#ff4f00`) as the single accent -- vivid, warm, sparingly applied
+- Warm neutral palette: borders (`#c5c0b1`), muted text (`#939084`), surface tints (`#eceae3`)
+- 8px base spacing system with generous padding on CTAs (20px 24px)
+- Border-forward design: `1px solid` borders in warm grays define structure over shadows
 
 ## 2. Color Palette & Roles
 
 ### Primary
 
-- **Anthropic Near Black** (`#141413`): The primary text color and dark-theme surface — not pure black but a warm, almost olive-tinted dark that's gentler on the eyes. The warmest "black" in any major tech brand.
-- **Terracotta Brand** (`#c96442`): The core brand color — a burnt orange-brown used for primary CTA buttons, brand moments, and the signature accent. Deliberately earthy and un-tech.
-- **Coral Accent** (`#d97757`): A lighter, warmer variant of the brand color used for text accents, links on dark surfaces, and secondary emphasis.
+- **Linkr Black** (`#201515`): Primary text, headings, dark button backgrounds. A warm near-black with reddish undertones -- never cold.
+- **Cream White** (`#fffefb`): Page background, card surfaces, light button fills. Not pure white; the yellowish warmth is intentional.
+- **Off-White** (`#fffdf9`): Secondary background surface, subtle alternate tint. Nearly indistinguishable from cream white but creates depth.
 
-### Secondary & Accent
+### Brand Accent
 
-- **Error Crimson** (`#b53333`): A deep, warm red for error states — serious without being alarming.
-- **Focus Blue** (`#3898ec`): Standard blue for input focus rings — the only cool color in the entire system, used purely for accessibility.
+- **Linkr Orange** (`#ff4f00`): Primary CTA buttons, active underline indicators, accent borders. The signature color -- vivid and warm.
 
-### Surface & Background
+### Neutral Scale
 
-- **Parchment** (`#f5f4ed`): The primary page background — a warm cream with a yellow-green tint that feels like aged paper. The emotional foundation of the entire design.
-- **Ivory** (`#faf9f5`): The lightest surface — used for cards and elevated containers on the Parchment background. Barely distinguishable but creates subtle layering.
-- **Pure White** (`#ffffff`): Reserved for specific button surfaces and maximum-contrast elements.
-- **Warm Sand** (`#e8e6dc`): Button backgrounds and prominent interactive surfaces — a noticeably warm light gray.
-- **Dark Surface** (`#30302e`): Dark-theme containers, nav borders, and elevated dark elements — warm charcoal.
-- **Deep Dark** (`#141413`): Dark-theme page background and primary dark surface.
+- **Dark Charcoal** (`#36342e`): Secondary text, footer text, border color for strong dividers. A warm dark gray-brown with 70% opacity variant.
+- **Warm Gray** (`#939084`): Tertiary text, muted labels, timestamp-style content. Mid-range with greenish-warm undertone.
+- **Sand** (`#c5c0b1`): Primary border color, hover state backgrounds, divider lines. The backbone of structural elements.
+- **Light Sand** (`#eceae3`): Secondary button backgrounds, light borders, subtle card surfaces.
+- **Mid Warm** (`#b5b2aa`): Alternate border tone, used on specific span elements.
 
-### Neutrals & Text
+### Interactive
 
-- **Charcoal Warm** (`#4d4c48`): Button text on light warm surfaces — the go-to dark-on-light text.
-- **Olive Gray** (`#5e5d59`): Secondary body text — a distinctly warm medium-dark gray.
-- **Stone Gray** (`#87867f`): Tertiary text, footnotes, and de-emphasized metadata.
-- **Dark Warm** (`#3d3d3a`): Dark text links and emphasized secondary text.
-- **Warm Silver** (`#b0aea5`): Text on dark surfaces — a warm, parchment-tinted light gray.
+- **Orange CTA** (`#ff4f00`): Primary action buttons and active tab underlines.
+- **Dark CTA** (`#201515`): Secondary dark buttons with sand hover state.
+- **Light CTA** (`#eceae3`): Tertiary/ghost buttons with sand hover.
+- **Link Default** (`#201515`): Standard link color, matching body text.
+- **Hover Underline**: Links remove `text-decoration: underline` on hover (inverse pattern).
 
-### Semantic & Accent
+### Overlay & Surface
 
-- **Border Cream** (`#f0eee6`): Standard light-theme border — barely visible warm cream, creating the gentlest possible containment.
-- **Border Warm** (`#e8e6dc`): Prominent borders, section dividers, and emphasized containment on light surfaces.
-- **Border Dark** (`#30302e`): Standard border on dark surfaces — maintains the warm tone.
-- **Ring Warm** (`#d1cfc5`): Shadow ring color for button hover/focus states.
-- **Ring Subtle** (`#dedc01`): Secondary ring variant for lighter interactive surfaces.
-- **Ring Deep** (`#c2c0b6`): Deeper ring for active/pressed states.
+- **Semi-transparent Dark** (`rgba(45, 45, 46, 0.5)`): Overlay button variant, backdrop-like elements.
+- **Pill Surface** (`#fffefb`): White pill buttons with sand borders.
 
-### Gradient System
+### Shadows & Depth
 
-- Claude's design is **gradient-free** in the traditional sense. Depth and visual richness come from the interplay of warm surface tones, organic illustrations, and light/dark section alternation. The warm palette itself creates a "gradient" effect as the eye moves through cream → sand → stone → charcoal → black sections.
+- **Inset Underline** (`rgb(255, 79, 0) 0px -4px 0px 0px inset`): Active tab indicator -- orange underline using inset box-shadow.
+- **Hover Underline** (`rgb(197, 192, 177) 0px -4px 0px 0px inset`): Inactive tab hover -- sand-colored underline.
 
 ## 3. Typography Rules
 
-### Font Family
+### Font Families
 
-- **Headline**: `Anthropic Serif`, with fallback: `Georgia`
-- **Body / UI**: `Anthropic Sans`, with fallback: `Arial`
-- **Code**: `Anthropic Mono`, with fallback: `Arial`
+- **Display**: `Degular Display` -- wide geometric display face for hero headlines
+- **Primary**: `Inter`, with fallbacks: `Helvetica, Arial`
+- **Editorial**: `GT Alpina` -- thin-weight serif for editorial moments
+- **System**: `Arial` -- fallback for form elements and system UI
 
-_Note: These are custom typefaces. For external implementations, Georgia serves as the serif substitute and system-ui/Inter as the sans substitute._
+> **Implementation note for Linkr 3:** Degular Display and GT Alpina are commercial faces. If we cannot license them, the agreed substitutes are: Display → `Geist` (or `Space Grotesk`) at the same weights/tracking; Editorial → `Source Serif 4` (or `Lora`) at thin weights with the same negative tracking. Inter remains as-is and ships via `next/font/google`. The substitution decision is recorded in [`CLAUDE.md`](../CLAUDE.md) once made.
 
 ### Hierarchy
 
-| Role              | Font            | Size                | Weight  | Line Height    | Letter Spacing | Notes                                |
-| ----------------- | --------------- | ------------------- | ------- | -------------- | -------------- | ------------------------------------ |
-| Display / Hero    | Anthropic Serif | 64px (4rem)         | 500     | 1.10 (tight)   | normal         | Maximum impact, book-title presence  |
-| Section Heading   | Anthropic Serif | 52px (3.25rem)      | 500     | 1.20 (tight)   | normal         | Feature section anchors              |
-| Sub-heading Large | Anthropic Serif | 36–36.8px (~2.3rem) | 500     | 1.30           | normal         | Secondary section markers            |
-| Sub-heading       | Anthropic Serif | 32px (2rem)         | 500     | 1.10 (tight)   | normal         | Card titles, feature names           |
-| Sub-heading Small | Anthropic Serif | 25–25.6px (~1.6rem) | 500     | 1.20           | normal         | Smaller section titles               |
-| Feature Title     | Anthropic Serif | 20.8px (1.3rem)     | 500     | 1.20           | normal         | Small feature headings               |
-| Body Serif        | Anthropic Serif | 17px (1.06rem)      | 400     | 1.60 (relaxed) | normal         | Serif body text (editorial passages) |
-| Body Large        | Anthropic Sans  | 20px (1.25rem)      | 400     | 1.60 (relaxed) | normal         | Intro paragraphs                     |
-| Body / Nav        | Anthropic Sans  | 17px (1.06rem)      | 400–500 | 1.00–1.60      | normal         | Navigation links, UI text            |
-| Body Standard     | Anthropic Sans  | 16px (1rem)         | 400–500 | 1.25–1.60      | normal         | Standard body, button text           |
-| Body Small        | Anthropic Sans  | 15px (0.94rem)      | 400–500 | 1.00–1.60      | normal         | Compact body text                    |
-| Caption           | Anthropic Sans  | 14px (0.88rem)      | 400     | 1.43           | normal         | Metadata, descriptions               |
-| Label             | Anthropic Sans  | 12px (0.75rem)      | 400–500 | 1.25–1.60      | 0.12px         | Badges, small labels                 |
-| Overline          | Anthropic Sans  | 10px (0.63rem)      | 400     | 1.60           | 0.5px          | Uppercase overline labels            |
-| Micro             | Anthropic Sans  | 9.6px (0.6rem)      | 400     | 1.60           | 0.096px        | Smallest text                        |
-| Code              | Anthropic Mono  | 15px (0.94rem)      | 400     | 1.60           | -0.32px        | Inline code, terminal                |
+| Role              | Font            | Size           | Weight  | Line Height       | Letter Spacing | Notes                            |
+| ----------------- | --------------- | -------------- | ------- | ----------------- | -------------- | -------------------------------- |
+| Display Hero XL   | Degular Display | 80px (5.00rem) | 500     | 0.90 (tight)      | normal         | Maximum impact, compressed block |
+| Display Hero      | Degular Display | 56px (3.50rem) | 500     | 0.90-1.10 (tight) | 0-1.12px       | Primary hero headlines           |
+| Display Hero SM   | Degular Display | 40px (2.50rem) | 500     | 0.90 (tight)      | normal         | Smaller hero variant             |
+| Display Button    | Degular Display | 24px (1.50rem) | 600     | 1.00 (tight)      | 1px            | Large CTA button text            |
+| Section Heading   | Inter           | 48px (3.00rem) | 500     | 1.04 (tight)      | normal         | Major section titles             |
+| Editorial Heading | GT Alpina       | 48px (3.00rem) | 250     | normal            | -1.92px        | Thin editorial headlines         |
+| Editorial Sub     | GT Alpina       | 40px (2.50rem) | 300     | 1.08 (tight)      | -1.6px         | Editorial subheadings            |
+| Sub-heading LG    | Inter           | 36px (2.25rem) | 500     | normal            | -1px           | Large sub-sections               |
+| Sub-heading       | Inter           | 32px (2.00rem) | 400     | 1.25 (tight)      | normal         | Standard sub-sections            |
+| Sub-heading MD    | Inter           | 28px (1.75rem) | 500     | normal            | normal         | Medium sub-headings              |
+| Card Title        | Inter           | 24px (1.50rem) | 600     | normal            | -0.48px        | Card headings                    |
+| Body Large        | Inter           | 20px (1.25rem) | 400-500 | 1.00-1.20 (tight) | -0.2px         | Feature descriptions             |
+| Body Emphasis     | Inter           | 18px (1.13rem) | 600     | 1.00 (tight)      | normal         | Emphasized body text             |
+| Body              | Inter           | 16px (1.00rem) | 400-500 | 1.20-1.25         | -0.16px        | Standard reading text            |
+| Body Semibold     | Inter           | 16px (1.00rem) | 600     | 1.16 (tight)      | normal         | Strong labels                    |
+| Button            | Inter           | 16px (1.00rem) | 600     | normal            | normal         | Standard buttons                 |
+| Button SM         | Inter           | 14px (0.88rem) | 600     | normal            | normal         | Small buttons                    |
+| Caption           | Inter           | 14px (0.88rem) | 500     | 1.25-1.43         | normal         | Labels, metadata                 |
+| Caption Upper     | Inter           | 14px (0.88rem) | 600     | normal            | 0.5px          | Uppercase section labels         |
+| Micro             | Inter           | 12px (0.75rem) | 600     | 0.90-1.33         | 0.5px          | Tiny labels, often uppercase     |
+| Micro SM          | Inter           | 13px (0.81rem) | 500     | 1.00-1.54         | normal         | Small metadata text              |
 
 ### Principles
 
-- **Serif for authority, sans for utility**: Anthropic Serif carries all headline content with medium weight (500), giving every heading the gravitas of a published title. Anthropic Sans handles all functional UI text — buttons, labels, navigation — with quiet efficiency.
-- **Single weight for serifs**: All Anthropic Serif headings use weight 500 — no bold, no light. This creates a consistent "voice" across all headline sizes, as if the same author wrote every heading.
-- **Relaxed body line-height**: Most body text uses 1.60 line-height — significantly more generous than typical tech sites (1.4–1.5). This creates a reading experience closer to a book than a dashboard.
-- **Tight-but-not-compressed headings**: Line-heights of 1.10–1.30 for headings are tight but never claustrophobic. The serif letterforms need breathing room that sans-serif fonts don't.
-- **Micro letter-spacing on labels**: Small sans text (12px and below) uses deliberate letter-spacing (0.12px–0.5px) to maintain readability at tiny sizes.
+- **Three-font system, clear roles**: Degular Display commands attention at hero scale only. Inter handles everything functional. GT Alpina adds editorial warmth sparingly.
+- **Compressed display**: Degular at 0.90 line-height creates vertically compressed headline blocks that feel modern and architectural.
+- **Weight as hierarchy signal**: Inter uses 400 (reading), 500 (navigation/emphasis), 600 (headings/CTAs). Degular uses 500 (display) and 600 (buttons).
+- **Uppercase for labels**: Section labels (like "01 / Colors") and small categorization use `text-transform: uppercase` with 0.5px letter-spacing.
+- **Negative tracking for elegance**: GT Alpina uses -1.6px to -1.92px letter-spacing for its thin-weight editorial headlines.
 
 ## 4. Component Stylings
 
 ### Buttons
 
-**Warm Sand (Secondary)**
+**Primary Orange**
 
-- Background: Warm Sand (`#e8e6dc`)
-- Text: Charcoal Warm (`#4d4c48`)
-- Padding: 0px 12px 0px 8px (asymmetric — icon-first layout)
-- Radius: comfortably rounded (8px)
-- Shadow: ring-based (`#e8e6dc 0px 0px 0px 0px, #d1cfc5 0px 0px 0px 1px`)
-- The workhorse button — warm, unassuming, clearly interactive
+- Background: `#ff4f00`
+- Text: `#fffefb`
+- Padding: 8px 16px
+- Radius: 4px
+- Border: `1px solid #ff4f00`
+- Use: Primary CTA ("Start free with email", "Sign up free")
 
-**White Surface**
+**Primary Dark**
 
-- Background: Pure White (`#ffffff`)
-- Text: Anthropic Near Black (`#141413`)
-- Padding: 8px 16px 8px 12px
-- Radius: generously rounded (12px)
-- Hover: shifts to secondary background color
-- Clean, elevated button for light surfaces
+- Background: `#201515`
+- Text: `#fffefb`
+- Padding: 20px 24px
+- Radius: 8px
+- Border: `1px solid #201515`
+- Hover: background shifts to `#c5c0b1`, text to `#201515`
+- Use: Large secondary CTA buttons
 
-**Dark Charcoal**
+**Light / Ghost**
 
-- Background: Dark Surface (`#30302e`)
-- Text: Ivory (`#faf9f5`)
-- Padding: 0px 12px 0px 8px
-- Radius: comfortably rounded (8px)
-- Shadow: ring-based (`#30302e 0px 0px 0px 0px, ring 0px 0px 0px 1px`)
-- The inverted variant for dark-on-light emphasis
+- Background: `#eceae3`
+- Text: `#36342e`
+- Padding: 20px 24px
+- Radius: 8px
+- Border: `1px solid #c5c0b1`
+- Hover: background shifts to `#c5c0b1`, text to `#201515`
+- Use: Tertiary actions, filter buttons
 
-**Brand Terracotta**
+**Pill Button**
 
-- Background: Terracotta Brand (`#c96442`)
-- Text: Ivory (`#faf9f5`)
-- Radius: 8–12px
-- Shadow: ring-based (`#c96442 0px 0px 0px 0px, #c96442 0px 0px 0px 1px`)
-- The primary CTA — the only button with chromatic color
+- Background: `#fffefb`
+- Text: `#36342e`
+- Padding: 0px 16px
+- Radius: 20px
+- Border: `1px solid #c5c0b1`
+- Use: Tag-like selections, filter pills
 
-**Dark Primary**
+**Overlay Semi-transparent**
 
-- Background: Anthropic Near Black (`#141413`)
-- Text: Warm Silver (`#b0aea5`)
-- Padding: 9.6px 16.8px
-- Radius: generously rounded (12px)
-- Border: thin solid Dark Surface (`1px solid #30302e`)
-- Used on dark theme surfaces
+- Background: `rgba(45, 45, 46, 0.5)`
+- Text: `#fffefb`
+- Radius: 20px
+- Hover: background becomes fully opaque `#2d2d2e`
+- Use: Video play buttons, floating actions
+
+**Tab / Navigation (Inset Shadow)**
+
+- Background: transparent
+- Text: `#201515`
+- Padding: 12px 16px
+- Shadow: `rgb(255, 79, 0) 0px -4px 0px 0px inset` (active orange underline)
+- Hover shadow: `rgb(197, 192, 177) 0px -4px 0px 0px inset` (sand underline)
+- Use: Horizontal tab navigation
 
 ### Cards & Containers
 
-- Background: Ivory (`#faf9f5`) or Pure White (`#ffffff`) on light surfaces; Dark Surface (`#30302e`) on dark
-- Border: thin solid Border Cream (`1px solid #f0eee6`) on light; `1px solid #30302e` on dark
-- Radius: comfortably rounded (8px) for standard cards; generously rounded (16px) for featured; very rounded (32px) for hero containers and embedded media
-- Shadow: whisper-soft (`rgba(0,0,0,0.05) 0px 4px 24px`) for elevated content
-- Ring shadow: `0px 0px 0px 1px` patterns for interactive card states
-- Section borders: `1px 0px 0px` (top-only) for list item separators
+- Background: `#fffefb`
+- Border: `1px solid #c5c0b1` (warm sand border)
+- Radius: 5px (standard), 8px (featured)
+- No shadow elevation by default -- borders define containment
+- Hover: subtle border color intensification
 
 ### Inputs & Forms
 
-- Text: Anthropic Near Black (`#141413`)
-- Padding: 1.6px 12px (very compact vertical)
-- Border: standard warm borders
-- Focus: ring with Focus Blue (`#3898ec`) border-color — the only cool color moment
-- Radius: generously rounded (12px)
+- Background: `#fffefb`
+- Text: `#201515`
+- Border: `1px solid #c5c0b1`
+- Radius: 5px
+- Focus: border color shifts to `#ff4f00` (orange)
+- Placeholder: `#939084`
 
 ### Navigation
 
-- Sticky top nav with warm background
-- Logo: Claude wordmark in Anthropic Near Black
-- Links: mix of Near Black (`#141413`), Olive Gray (`#5e5d59`), and Dark Warm (`#3d3d3a`)
-- Nav border: `1px solid #30302e` (dark) or `1px solid #f0eee6` (light)
-- CTA: Terracotta Brand button or White Surface button
-- Hover: text shifts to foreground-primary, no decoration
+- Clean horizontal nav on cream background
+- Linkr logotype left-aligned
+- Links: Inter 16px weight 500, `#201515` text
+- CTA: Orange button
+- Tab navigation uses inset box-shadow underline technique
+- Mobile: hamburger collapse
 
 ### Image Treatment
 
-- Product screenshots showing the Claude chat interface
-- Generous border-radius on media (16–32px)
-- Embedded video players with rounded corners
-- Dark UI screenshots provide contrast against warm light canvas
-- Organic, hand-drawn illustrations for conceptual sections
+- Product screenshots with `1px solid #c5c0b1` border
+- Rounded corners: 5-8px
+- Dashboard/workflow screenshots prominent in feature sections
+- Light gradient backgrounds behind hero content
 
 ### Distinctive Components
 
-**Model Comparison Cards**
+**Workflow Integration Cards**
 
-- Opus 4.5, Sonnet 4.5, Haiku 4.5 presented in a clean card grid
-- Each model gets a bordered card with name, description, and capability badges
-- Border Warm (`#e8e6dc`) separation between items
+- Display connected app icons in pairs
+- Arrow or connection indicator between apps
+- Sand border containment
+- Inter weight 500 for app names
 
-**Organic Illustrations**
+**Stat Counter**
 
-- Hand-drawn-feeling vector illustrations in terracotta, black, and muted green
-- Abstract, conceptual rather than literal product diagrams
-- The primary visual personality — no other AI company uses this style
+- Large display number using Inter 48px weight 500
+- Muted description below in `#36342e`
+- Used for social proof metrics
 
-**Dark/Light Section Alternation**
+**Social Proof Icons**
 
-- The page alternates between Parchment light and Near Black dark sections
-- Creates a reading rhythm like chapters in a book
-- Each section feels like a distinct environment
+- Circular icon buttons: 14px radius
+- Sand border: `1px solid #c5c0b1`
+- Used for social media follow links in footer
 
 ## 5. Layout Principles
 
 ### Spacing System
 
 - Base unit: 8px
-- Scale: 3px, 4px, 6px, 8px, 10px, 12px, 16px, 20px, 24px, 30px
-- Button padding: asymmetric (0px 12px 0px 8px) or balanced (8px 16px)
-- Card internal padding: approximately 24–32px
-- Section vertical spacing: generous (estimated 80–120px between major sections)
+- Scale: 1px, 4px, 6px, 8px, 10px, 12px, 16px, 20px, 24px, 32px, 40px, 48px, 56px, 64px, 72px
+- CTA buttons use generous padding: 20px 24px for large, 8px 16px for standard
+- Section padding: 64px-80px vertical
 
 ### Grid & Container
 
-- Max container width: approximately 1200px, centered
-- Hero: centered with editorial layout
-- Feature sections: single-column or 2–3 column card grids
-- Model comparison: clean 3-column grid
-- Full-width dark sections breaking the container for emphasis
+- Max content width: approximately 1200px
+- Hero: centered single-column with large top padding
+- Feature sections: 2-3 column grids for integration cards
+- Full-width sand-bordered dividers between sections
+- Footer: multi-column dark background (`#201515`)
 
 ### Whitespace Philosophy
 
-- **Editorial pacing**: Each section breathes like a magazine spread — generous top/bottom margins create natural reading pauses.
-- **Serif-driven rhythm**: The serif headings establish a literary cadence that demands more whitespace than sans-serif designs.
-- **Content island approach**: Sections alternate between light and dark environments, creating distinct "rooms" for each message.
+- **Warm breathing room**: Generous vertical spacing between sections (64px-80px), but content areas are relatively dense -- pack information efficiently within the cream canvas.
+- **Architectural compression**: Degular Display headlines at 0.90 line-height compress vertically, contrasting with the open spacing around them.
+- **Section rhythm**: Cream background throughout, with sections separated by sand-colored borders rather than background color changes.
 
 ### Border Radius Scale
 
-- Sharp (4px): Minimal inline elements
-- Subtly rounded (6–7.5px): Small buttons, secondary interactive elements
-- Comfortably rounded (8–8.5px): Standard buttons, cards, containers
-- Generously rounded (12px): Primary buttons, input fields, nav elements
-- Very rounded (16px): Featured containers, video players, tab lists
-- Highly rounded (24px): Tag-like elements, highlighted containers
-- Maximum rounded (32px): Hero containers, embedded media, large cards
+- Tight (3px): Small inline spans
+- Standard (4px): Buttons (orange CTA), tags, small elements
+- Content (5px): Cards, links, general containers
+- Comfortable (8px): Featured cards, large buttons, tabs
+- Social (14px): Social icon buttons, pill-like elements
+- Pill (20px): Play buttons, large pill buttons, floating actions
 
 ## 6. Depth & Elevation
 
-| Level               | Treatment                                                 | Use                                         |
-| ------------------- | --------------------------------------------------------- | ------------------------------------------- |
-| Flat (Level 0)      | No shadow, no border                                      | Parchment background, inline text           |
-| Contained (Level 1) | `1px solid #f0eee6` (light) or `1px solid #30302e` (dark) | Standard cards, sections                    |
-| Ring (Level 2)      | `0px 0px 0px 1px` ring shadows using warm grays           | Interactive cards, buttons, hover states    |
-| Whisper (Level 3)   | `rgba(0,0,0,0.05) 0px 4px 24px`                           | Elevated feature cards, product screenshots |
-| Inset (Level 4)     | `inset 0px 0px 0px 1px` at 15% opacity                    | Active/pressed button states                |
+| Level                    | Treatment                                   | Use                                |
+| ------------------------ | ------------------------------------------- | ---------------------------------- |
+| Flat (Level 0)           | No shadow                                   | Page background, text blocks       |
+| Bordered (Level 1)       | `1px solid #c5c0b1`                         | Standard cards, containers, inputs |
+| Strong Border (Level 1b) | `1px solid #36342e`                         | Dark dividers, emphasized sections |
+| Active Tab (Level 2)     | `rgb(255, 79, 0) 0px -4px 0px 0px inset`    | Active tab underline (orange)      |
+| Hover Tab (Level 2b)     | `rgb(197, 192, 177) 0px -4px 0px 0px inset` | Hover tab underline (sand)         |
+| Focus (Accessibility)    | `1px solid #ff4f00` outline                 | Focus ring on interactive elements |
 
-**Shadow Philosophy**: Claude communicates depth through **warm-toned ring shadows** rather than traditional drop shadows. The signature `0px 0px 0px 1px` pattern creates a border-like halo that's softer than an actual border — it's a shadow pretending to be a border, or a border that's technically a shadow. When drop shadows do appear, they're extremely soft (0.05 opacity, 24px blur) — barely visible lifts that suggest floating rather than casting.
+**Shadow Philosophy**: Deliberately avoid traditional shadow-based elevation. Structure is defined almost entirely through borders -- warm sand (`#c5c0b1`) borders for standard containment, dark charcoal (`#36342e`) borders for emphasis. The only shadow-like technique is the inset box-shadow used for tab underlines, where a `0px -4px 0px 0px inset` shadow creates a bottom-bar indicator. This border-first approach keeps the design grounded and tangible rather than floating.
 
 ### Decorative Depth
 
-- **Light/Dark alternation**: The most dramatic depth effect comes from alternating between Parchment (`#f5f4ed`) and Near Black (`#141413`) sections — entire sections shift elevation by changing the ambient light level.
-- **Warm ring halos**: Button and card interactions use ring shadows that match the warm palette — never cool-toned or generic gray.
+- Orange inset underline on active tabs creates visual "weight" at the bottom of elements
+- Sand hover underlines provide preview states without layout shifts
+- No background gradients in main content -- the cream canvas is consistent
+- Footer uses full dark background (`#201515`) for contrast reversal
+
+## 6.5 Plugin Surface Conventions (Linkr 3 — extends Zapier base)
+
+These rules govern the browser-extension floating panel and the workspace side rail. They tighten the base Zapier system to fit a dense, narrow surface. **Authoritative for `features/plugin/` and any side-rail panel.** When a rule below conflicts with a more general rule above, this section wins for plugin/side-rail surfaces.
+
+### 6.5.1 Pill vs Icon Action Button — Strict Separation
+
+Two visually-similar small elements must never share a row without explicit grouping:
+
+- **Info Pill** (identity / attribute label — country, creator type, source platform)
+  - Shape: `rounded-full`
+  - Background / border / text: per the two variants below
+  - Padding: `px-2 py-0.5`
+  - Font: Inter 12px weight 500, color follows variant
+  - May contain a leading emoji or 12px icon; geometry stays identical
+
+  **Variant A — Neutral Info Pill** (default, e.g. country):
+  - Background: `#fffefb`
+  - Border: `1px solid #c5c0b1`
+  - Text: `#36342e`
+
+  **Variant B — Category Info Pill** (semantic categorization, e.g. creator type):
+  - Background: `#eceae3` (Light Sand)
+  - Border: `1px solid #c5c0b1`
+  - Text: `#36342e`
+  - **Never** use orange text (`#ff4f00`) for category pills — orange is reserved for CTAs and active state indicators.
+
+- **Icon Action Button** (clickable operation — favorite, share, copy, dark-mode toggle, external link)
+  - Shape: square with `rounded-md` (5px radius)
+  - Size: must match the [Icon Button Size Tiers](#653-icon-button-size-tiers-and-variants) on the same surface
+  - Border / background: per its variant (ghost, outlined, filled — see button rules in §4)
+
+**Row-composition rule**:
+
+- A row may contain only Info Pills, or only Icon Action Buttons. Mixed rows are forbidden.
+- If both kinds must appear in the same horizontal region, separate them into two flex containers with at least `gap-3` (12px) between groups.
+- Within a group: pill ↔ pill spacing is `gap-1.5` (6px); icon button ↔ icon button spacing is `gap-1` (4px) for SM, `gap-2` (8px) for MD/LG.
+
+### 6.5.2 Soft Surface — Card-Internal Sub-Panel
+
+Used for secondary data partitions _inside_ a bordered card. Replaces hard `1px solid #c5c0b1` for internal subdivisions, which feel too heavy in a dense panel. Two variants depending on the layout pattern:
+
+**Variant 1 — Soft Outline** (used for grouped/divided sub-panels, e.g. a single block with internal dividers):
+
+- Background: `#fffdf9` (Off-White)
+- Box-shadow:
+  ```css
+  box-shadow:
+    0 1px 2px rgba(32, 21, 21, 0.04),
+    0 0 0 1px rgba(197, 192, 177, 0.35);
+  ```
+- Radius: `8px`
+- Internal cell dividers: `1px solid rgba(197, 192, 177, 0.4)` (never solid `#c5c0b1`)
+
+**Variant 2 — Solid Tile** (used for independent data tiles in a grid, e.g. the 4-cell metric grid in the floating influencer card):
+
+- Background: `#eceae3` (Light Sand — one shade darker than card background)
+- No border, no shadow — color contrast alone defines the tile
+- Radius: `12px`
+- Internal padding: `12-14px`
+- Tile-to-tile gap: `8px`
+- Label: 12px Inter weight 500, color `#939084` (top of tile)
+- Value: 22-24px Inter weight 600, color `#201515` (below label, vertically stacked)
+- Use when each datum should feel **independent** (no implied table structure). Use Variant 1 when the data items belong to a single bordered group.
+
+**Usage constraint**: Both variants are for **inside** a card. The outermost card container still uses solid `1px solid #c5c0b1` — preserving an "outer-hard, inner-soft" hierarchy that prevents the nested-frame overload seen in earlier iterations.
+
+### 6.5.3 Icon Button Size Tiers and Variants
+
+All icon-only buttons on the **same surface** must use the **same tier and variant**. Mixing them in a single row is the most common visual-inconsistency bug in this codebase.
+
+#### Size Tiers
+
+| Tier | Button | Icon | Use                                                             |
+| ---- | ------ | ---- | --------------------------------------------------------------- |
+| SM   | 24×24  | 14px | Compact in-card actions (e.g. inline copy, inline link)         |
+| MD   | 32×32  | 16px | Standard toolbars, content-level actions (e.g. favorite, share) |
+| LG   | 40×40  | 20px | Prominent standalone actions (e.g. card-header favorite, FAB)   |
+
+#### Variants
+
+**Outlined** — for content-level actions (favorite, share, save, copy, etc.):
+
+- Border: `1px solid #c5c0b1`
+- Background: `#fffefb`
+- Icon color: `#939084`
+- Radius: `rounded-lg` (8px) for LG, `rounded-md` (5px) for SM/MD
+- Hover: background → `#eceae3`, icon → `#36342e`
+- Active state (e.g. saved/favorited): background → `#fff7f4`, icon → `#ff4f00`, border stays `#c5c0b1`
+- Focus: outline `1px solid #ff4f00`, no offset
+
+**Ghost — Window-level** — for window/panel-frame controls (close, minimize, theme toggle, external link to web app, settings gear, etc.):
+
+- No border, no background
+- Icon color: `#939084`
+- Radius: `rounded-md` (5px)
+- Hover: background → `#eceae3`, icon → `#36342e`
+- Use when the button is part of the panel chrome itself, not the content. **Window-level controls must visually recede behind content actions.**
+- A row of window-level controls (e.g. ExternalLink + Moon + Close at the top of the floating card) must all use this variant — never mix outlined and ghost in the same row.
+
+#### Plugin Floating-Card Defaults
+
+- **Window chrome row** (top bar with ExternalLink / Moon / Close): **Ghost — Window-level**, Tier SM (24×24, 14px icon)
+- **Content-level favorite button** (next to creator identity): **Outlined**, Tier LG (40×40, 18-20px icon, 8px radius)
+- **In-row inline actions** inside dense lists: **Outlined**, Tier SM (24×24)
 
 ## 7. Do's and Don'ts
 
 ### Do
 
-- Use Parchment (`#f5f4ed`) as the primary light background — the warm cream tone IS the Claude personality
-- Use Anthropic Serif at weight 500 for all headlines — the single-weight consistency is intentional
-- Use Terracotta Brand (`#c96442`) only for primary CTAs and the highest-signal brand moments
-- Keep all neutrals warm-toned — every gray should have a yellow-brown undertone
-- Use ring shadows (`0px 0px 0px 1px`) for interactive element states instead of drop shadows
-- Maintain the editorial serif/sans hierarchy — serif for content headlines, sans for UI
-- Use generous body line-height (1.60) for a literary reading experience
-- Alternate between light and dark sections to create chapter-like page rhythm
-- Apply generous border-radius (12–32px) for a soft, approachable feel
+- Use Degular Display exclusively for hero-scale headlines (40px+) with 0.90 line-height for compressed impact
+- Use Inter for all functional UI -- navigation, body text, buttons, labels
+- Apply warm cream (`#fffefb`) as the background, never pure white
+- Use `#201515` for text, never pure black -- the reddish warmth matters
+- Keep Linkr Orange (`#ff4f00`) reserved for primary CTAs and active state indicators
+- Use sand (`#c5c0b1`) borders as the primary structural element instead of shadows
+- Apply generous button padding (20px 24px) for large CTAs to match the spacious button style
+- Use inset box-shadow underlines for tab navigation rather than border-bottom
+- Apply uppercase with 0.5px letter-spacing for section labels and micro-categorization
 
 ### Don't
 
-- Don't use cool blue-grays anywhere — the palette is exclusively warm-toned
-- Don't use bold (700+) weight on Anthropic Serif — weight 500 is the ceiling for serifs
-- Don't introduce saturated colors beyond Terracotta — the palette is deliberately muted
-- Don't use sharp corners (< 6px radius) on buttons or cards — softness is core to the identity
-- Don't apply heavy drop shadows — depth comes from ring shadows and background color shifts
-- Don't use pure white (`#ffffff`) as a page background — Parchment (`#f5f4ed`) or Ivory (`#faf9f5`) are always warmer
-- Don't use geometric/tech-style illustrations — Claude's illustrations are organic and hand-drawn-feeling
-- Don't reduce body line-height below 1.40 — the generous spacing supports the editorial personality
-- Don't use monospace fonts for non-code content — Anthropic Mono is strictly for code
-- Don't mix in sans-serif for headlines — the serif/sans split is the typographic identity
+- Don't use Degular Display for body text or UI elements -- it's display-only
+- Don't use pure white (`#ffffff`) or pure black (`#000000`) -- the palette is warm-shifted
+- Don't apply box-shadow elevation to cards -- use borders instead
+- Don't scatter Linkr Orange across the UI -- it's reserved for CTAs and active states
+- Don't use tight padding on large CTA buttons -- buttons are deliberately spacious
+- Don't ignore the warm neutral system -- borders should be `#c5c0b1`, not gray
+- Don't use GT Alpina for functional UI -- it's an editorial accent at thin weights only
+- Don't apply positive letter-spacing to GT Alpina -- it uses aggressive negative tracking (-1.6px to -1.92px)
+- Don't use rounded pill shapes (9999px) for primary buttons -- pills are for tags and social icons
 
 ## 8. Responsive Behavior
 
 ### Breakpoints
 
-| Name         | Width     | Key Changes                                                            |
-| ------------ | --------- | ---------------------------------------------------------------------- |
-| Small Mobile | <479px    | Minimum layout, stacked everything, compact typography                 |
-| Mobile       | 479–640px | Single column, hamburger nav, reduced heading sizes                    |
-| Large Mobile | 640–767px | Slightly wider content area                                            |
-| Tablet       | 768–991px | 2-column grids begin, condensed nav                                    |
-| Desktop      | 992px+    | Full multi-column layout, expanded nav, maximum hero typography (64px) |
+| Name          | Width       | Key Changes                            |
+| ------------- | ----------- | -------------------------------------- |
+| Mobile Small  | <450px      | Tight single column, reduced hero text |
+| Mobile        | 450-600px   | Standard mobile, stacked layout        |
+| Mobile Large  | 600-640px   | Slight horizontal breathing room       |
+| Tablet Small  | 640-680px   | 2-column grids begin                   |
+| Tablet        | 680-768px   | Card grids expand                      |
+| Tablet Large  | 768-991px   | Full card grids, expanded padding      |
+| Desktop Small | 991-1024px  | Desktop layout initiates               |
+| Desktop       | 1024-1280px | Full layout, maximum content width     |
+| Large Desktop | >1280px     | Centered with generous margins         |
 
 ### Touch Targets
 
-- Buttons use generous padding (8–16px vertical minimum)
-- Navigation links adequately spaced for thumb navigation
-- Card surfaces serve as large touch targets
-- Minimum recommended: 44x44px
+- Large CTA buttons: 20px 24px padding (comfortable 60px+ height)
+- Standard buttons: 8px 16px padding
+- Navigation links: 16px weight 500 with adequate spacing
+- Social icons: 14px radius circular buttons
+- Tab items: 12px 16px padding
 
 ### Collapsing Strategy
 
-- **Navigation**: Full horizontal nav collapses to hamburger on mobile
-- **Feature sections**: Multi-column → stacked single column
-- **Hero text**: 64px → 36px → ~25px progressive scaling
-- **Model cards**: 3-column → stacked vertical
-- **Section padding**: Reduces proportionally but maintains editorial rhythm
-- **Illustrations**: Scale proportionally, maintain aspect ratios
+- Hero: Degular 80px display scales to 40-56px on smaller screens
+- Navigation: horizontal links + CTA collapse to hamburger menu
+- Feature cards: 3-column grid to 2-column to single-column stacked
+- Integration workflow illustrations: maintain aspect ratio, may simplify
+- Footer: multi-column dark section collapses to stacked
+- Section spacing: 64-80px reduces to 40-48px on mobile
 
 ### Image Behavior
 
-- Product screenshots scale proportionally within rounded containers
-- Illustrations maintain quality at all sizes
-- Video embeds maintain 16:9 aspect ratio with rounded corners
-- No art direction changes between breakpoints
+- Product screenshots maintain sand border treatment at all sizes
+- Integration app icons maintain fixed sizes within responsive containers
+- Hero illustrations scale proportionally
+- Full-width sections maintain edge-to-edge treatment
 
 ## 9. Agent Prompt Guide
 
 ### Quick Color Reference
 
-- Brand CTA: "Terracotta Brand (#c96442)"
-- Page Background: "Parchment (#f5f4ed)"
-- Card Surface: "Ivory (#faf9f5)"
-- Primary Text: "Anthropic Near Black (#141413)"
-- Secondary Text: "Olive Gray (#5e5d59)"
-- Tertiary Text: "Stone Gray (#87867f)"
-- Borders (light): "Border Cream (#f0eee6)"
-- Dark Surface: "Dark Surface (#30302e)"
+- Primary CTA: Linkr Orange (`#ff4f00`)
+- Background: Cream White (`#fffefb`)
+- Heading text: Linkr Black (`#201515`)
+- Body text: Dark Charcoal (`#36342e`)
+- Border: Sand (`#c5c0b1`)
+- Secondary surface: Light Sand (`#eceae3`)
+- Muted text: Warm Gray (`#939084`)
 
 ### Example Component Prompts
 
-- "Create a hero section on Parchment (#f5f4ed) with a headline at 64px Anthropic Serif weight 500, line-height 1.10. Use Anthropic Near Black (#141413) text. Add a subtitle in Olive Gray (#5e5d59) at 20px Anthropic Sans with 1.60 line-height. Place a Terracotta Brand (#c96442) CTA button with Ivory text, 12px radius."
-- "Design a feature card on Ivory (#faf9f5) with a 1px solid Border Cream (#f0eee6) border and comfortably rounded corners (8px). Title in Anthropic Serif at 25px weight 500, description in Olive Gray (#5e5d59) at 16px Anthropic Sans. Add a whisper shadow (rgba(0,0,0,0.05) 0px 4px 24px)."
-- "Build a dark section on Anthropic Near Black (#141413) with Ivory (#faf9f5) headline text in Anthropic Serif at 52px weight 500. Use Warm Silver (#b0aea5) for body text. Borders in Dark Surface (#30302e)."
-- "Create a button in Warm Sand (#e8e6dc) with Charcoal Warm (#4d4c48) text, 8px radius, and a ring shadow (0px 0px 0px 1px #d1cfc5). Padding: 0px 12px 0px 8px."
-- "Design a model comparison grid with three cards on Ivory surfaces. Each card gets a Border Warm (#e8e6dc) top border, model name in Anthropic Serif at 25px, and description in Olive Gray at 15px Anthropic Sans."
+- "Create a hero section on cream background (`#fffefb`). Headline at 56px Degular Display weight 500, line-height 0.90, color `#201515`. Subtitle at 20px Inter weight 400, line-height 1.20, color `#36342e`. Orange CTA button (`#ff4f00`, 4px radius, 8px 16px padding, white text) and dark button (`#201515`, 8px radius, 20px 24px padding, white text)."
+- "Design a card: cream background (`#fffefb`), `1px solid #c5c0b1` border, 5px radius. Title at 24px Inter weight 600, letter-spacing -0.48px, `#201515`. Body at 16px weight 400, `#36342e`. No box-shadow."
+- "Build a tab navigation: transparent background. Inter 16px weight 500, `#201515` text. Active tab: `box-shadow: rgb(255, 79, 0) 0px -4px 0px 0px inset`. Hover: `box-shadow: rgb(197, 192, 177) 0px -4px 0px 0px inset`. Padding 12px 16px."
+- "Create navigation: cream sticky header (`#fffefb`). Inter 16px weight 500 for links, `#201515` text. Orange pill CTA right-aligned (`#ff4f00`, 4px radius, 8px 16px padding)."
+- "Design a footer with dark background (`#201515`). Text `#fffefb`. Links in `#c5c0b1` with hover to `#fffefb`. Multi-column layout. Social icons as 14px-radius circles with sand borders."
 
 ### Iteration Guide
 
-1. Focus on ONE component at a time
-2. Reference specific color names — "use Olive Gray (#5e5d59)" not "make it gray"
-3. Always specify warm-toned variants — no cool grays
-4. Describe serif vs sans usage explicitly — "Anthropic Serif for the heading, Anthropic Sans for the label"
-5. For shadows, use "ring shadow (0px 0px 0px 1px)" or "whisper shadow" — never generic "drop shadow"
-6. Specify the warm background — "on Parchment (#f5f4ed)" or "on Near Black (#141413)"
-7. Keep illustrations organic and conceptual — describe "hand-drawn-feeling" style
+1. Always use warm cream (`#fffefb`) background, never pure white -- the warmth defines the brand
+2. Borders (`1px solid #c5c0b1`) are the structural backbone -- avoid shadow elevation
+3. Linkr Orange (`#ff4f00`) is the only accent color; everything else is warm neutrals
+4. Three fonts, strict roles: Degular Display (hero), Inter (UI), GT Alpina (editorial)
+5. Large CTA buttons need generous padding (20px 24px) -- buttons feel spacious
+6. Tab navigation uses inset box-shadow underlines, not border-bottom
+7. Text is always warm: `#201515` for dark, `#36342e` for body, `#939084` for muted
+8. Uppercase labels at 12-14px with 0.5px letter-spacing for section categorization

@@ -1,13 +1,16 @@
-// Design tokens used throughout the discovery surface.
+// Design tokens used throughout the discovery surface — values mapped onto the
+// Linkr 3 palette per docs/DESIGN.md. Legacy keys (terracotta/parchment/etc.)
+// are kept for consumer back-compat; values point at the warm-cream + sand +
+// Linkr Orange palette.
 export const T = {
-  ivory: "#faf9f5",
-  parchment: "#f5f4ed",
-  nearBlack: "#141413",
-  charcoal: "#4d4c48",
-  stone: "#87867f",
-  terracotta: "#c96442",
-  border: "#e8e6dc",
-  borderLight: "#f0ece4",
+  ivory: "#fffdf9",
+  parchment: "#eceae3",
+  nearBlack: "#201515",
+  charcoal: "#36342e",
+  stone: "#939084",
+  terracotta: "#ff4f00",
+  border: "#c5c0b1",
+  borderLight: "#eceae3",
 };
 
 export const FIND_SIMILAR_REMINDER_STORAGE_KEY =

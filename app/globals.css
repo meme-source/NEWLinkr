@@ -1,29 +1,70 @@
 @import "tailwindcss";
 
+/* ----------------------------------------------------------------------------
+ * Linkr 3 design tokens — see docs/DESIGN.md for the authoritative spec.
+ * Cream canvas, warm near-black text, Linkr Orange accent, sand borders.
+ * --------------------------------------------------------------------------*/
+
 :root {
-  --background: #fcfcfd;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #f25c3a;
-  --primary-foreground: #ffffff;
-  --secondary: #fff3ee;
-  --secondary-foreground: #8e3a22;
-  --muted: #f5f5f5;
-  --muted-foreground: #6b7280;
-  --accent: #fff8f5;
-  --accent-foreground: #171717;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: rgba(23, 23, 23, 0.08);
-  --input: rgba(23, 23, 23, 0.1);
-  --ring: #f25c3a;
-  --radius: 1rem;
+  /* Surfaces */
+  --background: #fffdf9; /* Off-White — page canvas */
+  --surface-2: #fffdf9; /* Off-White — soft sub-panels (plugin §6.5.2 Variant 1) */
+  --surface-3: #eceae3; /* Light Sand — solid tiles, ghost button bg */
+
+  /* Foreground */
+  --foreground: #201515; /* Linkr Black — primary text + headings */
+  --foreground-secondary: #36342e; /* Dark Charcoal — body text, footer text */
+  --muted-foreground: #939084; /* Warm Gray — captions, timestamps */
+
+  /* Card / popover (cards sit on the cream canvas) */
+  --card: #fffefb;
+  --card-foreground: #201515;
+  --popover: #fffefb;
+  --popover-foreground: #201515;
+
+  /* Brand accent */
+  --primary: #ff4f00; /* Linkr Orange — CTAs + active indicators */
+  --primary-foreground: #fffefb;
+
+  /* Secondary surface (ghost / light buttons) */
+  --secondary: #eceae3; /* Light Sand */
+  --secondary-foreground: #36342e;
+
+  /* Muted */
+  --muted: #eceae3;
+
+  /* Active / hover-warm tint (e.g. saved-favorite button per §6.5.3) */
+  --accent: #fff7f4;
+  --accent-foreground: #ff4f00;
+
+  /* Status (TODO: refine when status palette is defined) */
+  --destructive: #b00020;
+  --destructive-foreground: #fffefb;
+
+  /* Borders */
+  --border: #c5c0b1; /* Sand — primary border */
+  --border-strong: #36342e; /* Dark Charcoal — emphasized dividers */
+  --border-soft: rgba(197, 192, 177, 0.4); /* Inner-cell dividers (§6.5.2) */
+  --input: #c5c0b1;
+  --ring: #ff4f00;
+
+  /* Radius scale — Zapier uses 4 / 5 / 8 / 14 / 20px (see §5 Border Radius Scale) */
+  --radius: 0.5rem; /* 8px — comfortable default */
+  --radius-sm: 0.25rem; /* 4px — orange CTA, tags */
+  --radius-md: 0.3125rem; /* 5px — standard cards, inputs, links */
+  --radius-lg: 0.5rem; /* 8px — featured cards, large buttons */
+  --radius-xl: 1.25rem; /* 20px — pill buttons, play buttons */
+  --radius-pill: 9999px; /* full pill — info pills only (§6.5.1) */
+
+  /* Font fallbacks. The CSS variables --font-* are injected by next/font in
+   * app/layout.tsx; these stacks are the fallback if next/font is unavailable. */
+  --font-sans-fallback: "Inter", "Helvetica", "Arial", system-ui, sans-serif;
+  --font-display-fallback: "Geist", "Space Grotesk", "Inter", sans-serif;
+  --font-editorial-fallback: "Source Serif 4", "Lora", Georgia, serif;
 }
 
 @theme inline {
+  /* Color tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -43,10 +84,23 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Custom Linkr-only color tokens (use as bg-surface-2, text-foreground-secondary, border-border-strong) */
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-border-strong: var(--border-strong);
+
+  /* Radius tokens — bypass Tailwind's default calc() chain so each step matches the spec exactly */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  /* Font family tokens — picked up as font-sans, font-display, font-editorial Tailwind classes */
+  --font-sans: var(--font-inter), var(--font-sans-fallback);
+  --font-display: var(--font-geist), var(--font-display-fallback);
+  --font-editorial: var(--font-source-serif), var(--font-editorial-fallback);
 }
 
 * {
@@ -62,20 +116,11 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family:
-    "Outfit",
-    "Avenir Next",
-    "Segoe UI",
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(242, 92, 58, 0.08), transparent 24%),
-    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.08), transparent 22%),
-    var(--background);
+  font-family: var(--font-sans);
+  background: var(--background);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
