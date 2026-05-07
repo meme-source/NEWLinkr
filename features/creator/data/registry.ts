@@ -24,10 +24,26 @@ import { OUTREACH_CREATORS } from "@/features/outreach/data/outreach-creators";
 import { getCreators } from "./index";
 
 // ── 解析入参 ─────────────────────────────────────────────────────────────────
+// 第 3 项额外接受 linkr-discovery-bundle 里 discovery 列表传过来的"宽对象"
+// （name / avatarUrl / region / followers / er / platform / tags 都是 optional），
+// 让 TS 通过 excess-property check；运行时 resolveCreator 仍然只看 handle，
+// 走 destination 的"未入库 → null"规则，不会因为这些 hint 字段而强行弹卡。
 export type CreatorResolverInput =
   | Creator
   | { id: string }
-  | { handle: string; fallback?: CreatorFallback };
+  | {
+      handle: string;
+      fallback?: CreatorFallback;
+      name?: string;
+      avatarUrl?: string;
+      region?: string;
+      // Bundle's discovery passes pre-formatted display strings here ("1.2M", "5.2%"),
+      // so the permissive form accepts either a raw number or the display string.
+      followers?: number | string;
+      er?: number | string;
+      platform?: Platform;
+      tags?: string[];
+    };
 
 export interface CreatorFallback {
   name?: string;

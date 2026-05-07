@@ -3,80 +3,59 @@
 /* ----------------------------------------------------------------------------
  * Linkr 3 design tokens — see docs/DESIGN.md for the authoritative spec.
  * Cream canvas, warm near-black text, Linkr Orange accent, sand borders.
- *
- * 2026-05-07 merge: bundle (linkr-discovery-bundle) values win on conflicting
- * tokens (--background, --accent, --destructive, --radius*); destination-only
- * tokens (--surface-2, --surface-3, --foreground-secondary, --border-strong,
- * --border-soft) preserved additively.
  * --------------------------------------------------------------------------*/
 
 :root {
-  /* Surface */
-  --background: #fffefb;
-  --background-alt: #fffdf9;
-  --foreground: #201515;
+  /* Surfaces */
+  --background: #fffdf9; /* Off-White — page canvas */
+  --surface-2: #fffdf9; /* Off-White — soft sub-panels (plugin §6.5.2 Variant 1) */
+  --surface-3: #eceae3; /* Light Sand — solid tiles, ghost button bg */
+
+  /* Foreground */
+  --foreground: #201515; /* Linkr Black — primary text + headings */
+  --foreground-secondary: #36342e; /* Dark Charcoal — body text, footer text */
+  --muted-foreground: #939084; /* Warm Gray — captions, timestamps */
+
+  /* Card / popover (cards sit on the cream canvas) */
   --card: #fffefb;
   --card-foreground: #201515;
   --popover: #fffefb;
   --popover-foreground: #201515;
 
-  /* Destination-unique surface variants (used by plugin sub-panels and library cells). */
-  --surface-2: #fffdf9;
-  --surface-3: #eceae3;
-  --foreground-secondary: #36342e;
-
-  /* Brand accent — Zapier Orange */
-  --primary: #ff4f00;
+  /* Brand accent */
+  --primary: #ff4f00; /* Linkr Orange — CTAs + active indicators */
   --primary-foreground: #fffefb;
 
-  /* Secondary / surfaces */
-  --secondary: #eceae3;
+  /* Secondary surface (ghost / light buttons) */
+  --secondary: #eceae3; /* Light Sand */
   --secondary-foreground: #36342e;
-  --muted: #eceae3;
-  --muted-foreground: #939084;
-  --accent: #eceae3;
-  --accent-foreground: #201515;
 
-  --destructive: #c63a1c;
+  /* Muted */
+  --muted: #eceae3;
+
+  /* Active / hover-warm tint (e.g. saved-favorite button per §6.5.3) */
+  --accent: #fff7f4;
+  --accent-foreground: #ff4f00;
+
+  /* Status (TODO: refine when status palette is defined) */
+  --destructive: #b00020;
   --destructive-foreground: #fffefb;
 
-  /* Warm neutral scale */
-  --sand: #c5c0b1;
-  --sand-mid: #b5b2aa;
-  --sand-light: #eceae3;
-  --warm-gray: #939084;
-  --dark-charcoal: #36342e;
-
-  /* Borders & inputs */
-  --border: #c5c0b1;
-  --border-tertiary: #eceae3;
-  --border-strong: #36342e;
-  --border-soft: rgba(197, 192, 177, 0.4);
+  /* Borders */
+  --border: #c5c0b1; /* Sand — primary border */
+  --border-strong: #36342e; /* Dark Charcoal — emphasized dividers */
+  --border-soft: rgba(197, 192, 177, 0.4); /* Inner-cell dividers (§6.5.2) */
+  --border-tertiary: #eceae3; /* Light Sand — sub-divider used by discovery's project-switcher (linkr-discovery-bundle). */
   --input: #c5c0b1;
   --ring: #ff4f00;
 
-  /* Project status semantic colors — dot + soft background pairs.
-     Zapier's palette doesn't define these, so we fold the existing
-     project tokens into named slots so badges can reference them. */
-  --status-running: #7faa6c;
-  --status-running-soft: rgba(127, 170, 108, 0.14);
-  --status-draft: #c7c4b8;
-  --status-draft-soft: rgba(199, 196, 184, 0.28);
-  --status-paused: #d4a843;
-  --status-paused-soft: rgba(212, 168, 67, 0.16);
-  --status-completed: #5a5854;
-  --status-completed-soft: rgba(90, 88, 84, 0.12);
-
-  /* Radius — Zapier multi-step scale */
-  --radius-tight: 3px;
-  --radius: 5px;
-  --radius-tab: 8px;
-  --radius-social: 14px;
-  --radius-pill: 20px;
-
-  /* Tab inset underline shadows */
-  --shadow-tab-active: rgb(255, 79, 0) 0px -4px 0px 0px inset;
-  --shadow-tab-hover: rgb(197, 192, 177) 0px -4px 0px 0px inset;
+  /* Radius scale — Zapier uses 4 / 5 / 8 / 14 / 20px (see §5 Border Radius Scale) */
+  --radius: 0.5rem; /* 8px — comfortable default */
+  --radius-sm: 0.25rem; /* 4px — orange CTA, tags */
+  --radius-md: 0.3125rem; /* 5px — standard cards, inputs, links */
+  --radius-lg: 0.5rem; /* 8px — featured cards, large buttons */
+  --radius-xl: 1.25rem; /* 20px — pill buttons, play buttons */
+  --radius-pill: 9999px; /* full pill — info pills only (§6.5.1) */
 
   /* Font fallbacks. The CSS variables --font-* are injected by next/font in
    * app/layout.tsx; these stacks are the fallback if next/font is unavailable. */
@@ -86,8 +65,8 @@
 }
 
 @theme inline {
+  /* Color tokens */
   --color-background: var(--background);
-  --color-background-alt: var(--background-alt);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -107,39 +86,19 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-sand: var(--sand);
-  --color-sand-mid: var(--sand-mid);
-  --color-sand-light: var(--sand-light);
-  --color-warm-gray: var(--warm-gray);
-  --color-dark-charcoal: var(--dark-charcoal);
-  --color-border-tertiary: var(--border-tertiary);
-
-  /* Destination-unique color tokens */
+  /* Custom Linkr-only color tokens (use as bg-surface-2, text-foreground-secondary, border-border-strong) */
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
   --color-foreground-secondary: var(--foreground-secondary);
   --color-border-strong: var(--border-strong);
 
-  --color-status-running: var(--status-running);
-  --color-status-running-soft: var(--status-running-soft);
-  --color-status-draft: var(--status-draft);
-  --color-status-draft-soft: var(--status-draft-soft);
-  --color-status-paused: var(--status-paused);
-  --color-status-paused-soft: var(--status-paused-soft);
-  --color-status-completed: var(--status-completed);
-  --color-status-completed-soft: var(--status-completed-soft);
+  /* Radius tokens — bypass Tailwind's default calc() chain so each step matches the spec exactly */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 
-  --radius-xs: var(--radius-tight);
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius-tab);
-  --radius-lg: var(--radius-tab);
-  --radius-xl: var(--radius-social);
-  --radius-2xl: var(--radius-pill);
-  --radius-pill: var(--radius-pill);
-
-  /* Font family tokens — destination's next/font wiring (Inter / Geist / Source Serif).
-     Bundle's Archivo/Fraunces stack is intentionally NOT used; per spec, only colour
-     and radius win from bundle, fonts stay on destination's existing pipeline. */
+  /* Font family tokens — picked up as font-sans, font-display, font-editorial Tailwind classes */
   --font-sans: var(--font-inter), var(--font-sans-fallback);
   --font-display: var(--font-geist), var(--font-display-fallback);
   --font-editorial: var(--font-source-serif), var(--font-editorial-fallback);
@@ -161,53 +120,13 @@ body {
   font-family: var(--font-sans);
   background: var(--background);
   color: var(--foreground);
-  letter-spacing: -0.16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Display headlines — Zapier compresses Degular at 0.90 line-height */
-.font-display {
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
-}
-
-/* Editorial accents — thin serif with aggressive negative tracking */
-.font-editorial {
-  font-family: var(--font-editorial);
-  font-weight: 300;
-  letter-spacing: -0.04em;
-}
-
-/* Section / micro labels — uppercase with positive tracking */
-.label-micro {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 12px;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--warm-gray);
 }
 
 a {
   color: inherit;
   text-decoration: none;
-}
-
-/* Tab navigation — Zapier inset box-shadow underline */
-.tab-link {
-  box-shadow: none;
-  transition: box-shadow 150ms ease;
-}
-.tab-link:hover {
-  box-shadow: var(--shadow-tab-hover);
-}
-.tab-link[data-active="true"],
-.tab-link.is-active {
-  box-shadow: var(--shadow-tab-active);
 }
 
 .hide-scrollbar {

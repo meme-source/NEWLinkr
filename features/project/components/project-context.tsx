@@ -5,8 +5,6 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { ProjectSheet } from "@/features/project/components/project-sheet";
 
 export type ProjectDrawerMode = "create" | "edit";
-// Bundle-introduced (linkr-discovery-bundle 2026-05-07): variant toggle for project sheet.
-export type ProjectDrawerVariant = "quick" | "detailed";
 export type ProjectCurrency = "USD" | "EUR" | "GBP" | "CNY";
 
 export type WorkspaceProjectStatus = "draft" | "running" | "paused" | "completed";
@@ -58,12 +56,11 @@ interface WorkspaceProjectContextValue {
   isAllProjects: boolean;
   selectProject: (projectId: string) => void;
   selectAllProjects: () => void;
-  openCreateProject: (variant?: ProjectDrawerVariant) => void;
+  openCreateProject: () => void;
   openEditProject: (projectId?: string) => void;
   closeProjectDrawer: () => void;
-  // Bundle-introduced (linkr-discovery-bundle 2026-05-07): consumed by
-  // discovery's project switcher. Inline-rename a project; quick-create a new
-  // project synchronously and return it so callers can immediately select it.
+  // Consumed by discovery's project-switcher (linkr-discovery-bundle): inline-rename
+  // a project, and synchronously quick-create + select a fresh draft project.
   renameProject: (projectId: string, name: string) => void;
   quickCreateProject: () => WorkspaceProject;
   resolveProjectName: (projectId: string) => string;
@@ -251,49 +248,6 @@ const STATUS_LABEL: Record<WorkspaceProjectStatus, string> = {
   completed: "已结束",
 };
 
-// Bundle-introduced (linkr-discovery-bundle 2026-05-07): badge tuple shape +
-// status badge resolver used by bundle's project-bar pill UI. Maps to existing
-// status tokens declared in app/globals.css (status-running/draft/paused/completed).
-export type ProjectStatusBadge = {
-  dot: string;
-  background: string;
-  label: string;
-};
-
-const STATUS_BADGE: Record<WorkspaceProjectStatus, ProjectStatusBadge> = {
-  draft: { dot: "bg-status-draft", background: "bg-status-draft-soft", label: "草稿" },
-  running: { dot: "bg-status-running", background: "bg-status-running-soft", label: "进行中" },
-  paused: { dot: "bg-status-paused", background: "bg-status-paused-soft", label: "暂停中" },
-  completed: {
-    dot: "bg-status-completed",
-    background: "bg-status-completed-soft",
-    label: "已结束",
-  },
-};
-
-export function getProjectStatusBadge(status: WorkspaceProjectStatus): ProjectStatusBadge {
-  return STATUS_BADGE[status];
-}
-
-// Returns days remaining + raw endDate for callers that want to format
-// the meta row themselves with emphasis on the numbers.
-export function getProjectDeadlineParts(project: WorkspaceProject): {
-  endDate: string | null;
-  daysRemaining: number | null;
-} {
-  if (!project.endDate) {
-    return { endDate: null, daysRemaining: null };
-  }
-  const end = new Date(project.endDate);
-  if (Number.isNaN(end.getTime())) {
-    return { endDate: project.endDate, daysRemaining: null };
-  }
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffMs = end.getTime() - today.getTime();
-  return { endDate: project.endDate, daysRemaining: Math.ceil(diffMs / 86_400_000) };
-}
-
 export function getProjectStatusDotClass(status: WorkspaceProjectStatus) {
   return STATUS_STYLE[status].dot;
 }
@@ -333,10 +287,6 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     open: false,
     mode: "create",
   });
-  // Bundle-introduced (linkr-discovery-bundle 2026-05-07): variant lives outside
-  // DrawerState so the drawer's Quick / Detailed toggle can change without
-  // forcing a full open/close cycle.
-  const [drawerVariant, setDrawerVariant] = useState<ProjectDrawerVariant>("quick");
 
   // SSR-safe hydration from localStorage. This is one of the few legitimate
   // places to call setState in an effect: localStorage is only available after
@@ -409,14 +359,25 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     }));
   }, []);
 
-  const openCreateProject = useCallback((variant: ProjectDrawerVariant = "quick") => {
-    setDrawerVariant(variant);
+  const openCreateProject = useCallback(() => {
     setDrawerState({
       open: true,
       mode: "create",
     });
   }, []);
 
+  const openEditProject = useCallback(
+    (projectId?: string) => {
+      setDrawerState({
+        open: true,
+        mode: "edit",
+        projectId: projectId ?? currentProject.id,
+      });
+    },
+    [currentProject.id],
+  );
+
+  // Consumed by discovery's project-switcher.
   const renameProject = useCallback((projectId: string, name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -453,17 +414,6 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     setIsAllProjects(false);
     return next;
   }, []);
-
-  const openEditProject = useCallback(
-    (projectId?: string) => {
-      setDrawerState({
-        open: true,
-        mode: "edit",
-        projectId: projectId ?? currentProject.id,
-      });
-    },
-    [currentProject.id],
-  );
 
   const handleSaveProject = useCallback(
     (draft: WorkspaceProjectDraft) => {
@@ -582,8 +532,6 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
         key={drawerState.open ? (drawerState.projectId ?? "new") : "_closed"}
         open={drawerState.open}
         mode={drawerState.mode}
-        variant={drawerVariant}
-        onVariantChange={setDrawerVariant}
         project={editingProject}
         existingProjects={stableProjects}
         onClose={closeProjectDrawer}
