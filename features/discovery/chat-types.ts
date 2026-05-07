@@ -7,7 +7,8 @@ import type { PlatformId } from "./types";
 export type ChatIntent = "competitor" | "scenario" | "trending";
 
 export type FollowerBucket = "any" | "nano" | "micro" | "mid" | "macro" | "mega";
-export type CountryCode = "any" | "us" | "gb" | "ca" | "au" | "sea" | "me" | "global";
+// Multi-select country codes. Empty array = 全球 (no country constraint).
+export type CountryCode = "us" | "gb" | "ca" | "au" | "sea" | "me";
 
 // Views slider: 0 = 不限, otherwise a step index 1..6 mapping to thresholds
 // (1k, 10k, 50k, 100k, 500k, 1m). The slider lives in the bottom chip strip.
@@ -15,8 +16,10 @@ export type ViewsStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface ChatChips {
   platform: PlatformId;
-  country: CountryCode;
-  language: string; // "any" sentinel or a language label
+  // Empty array = 全球 (未指定); otherwise final filter is the union over selected countries.
+  countries: CountryCode[];
+  // Empty array = 任意语言; otherwise final filter is the union over selected languages.
+  languages: string[];
   follower: FollowerBucket;
   viewsStep: ViewsStep;
 }

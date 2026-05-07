@@ -1,5 +1,5 @@
-import { DiscoveryShell } from "@/features/discovery/components/discovery-shell";
+import { DiscoverySplitView } from "@/features/discovery/v2/discovery-split-view";
 
 export default function DiscoveryPage() {
-  return <DiscoveryShell />;
+  return <DiscoverySplitView />;
 }

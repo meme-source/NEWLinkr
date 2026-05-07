@@ -1,54 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronDown, MoreHorizontal, Pencil } from "lucide-react";
+import { Archive, ChevronDown, Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import {
   formatProjectBudget,
-  getProjectStatusDotClass,
-  getProjectStatusLabel,
-  getProjectStatusPillClass,
+  getProjectDeadlineParts,
+  getProjectStatusBadge,
   useWorkspaceProject,
-  type WorkspaceProject,
 } from "@/features/project/components/project-context";
+import { resolveWorkspaceBreadcrumb } from "@/features/workspace-shell/lib/breadcrumb";
+import { cn } from "@/lib/utils";
 
 // §2.3.1 visibility rules. Returns null when the bar must hide entirely.
 function shouldShowProjectBar(pathname: string, searchParams: URLSearchParams) {
-  if (pathname === "/workspace") return false;
   if (pathname === "/workspace/discovery") return false;
   if (pathname.startsWith("/workspace/library")) return true;
   if (pathname.startsWith("/workspace/settings")) return false;
   if (pathname.startsWith("/workspace/outreach")) {
     const tab = searchParams.get("tab") ?? "board";
     if (tab === "inbox" || tab === "templates") return false;
-    return true;
+    if (tab === "board") {
+      const view = searchParams.get("view") ?? "overview";
+      const scope = searchParams.get("scope") ?? "current";
+      // 全部项目视图: hide bar; the view itself renders an inline notice instead.
+      if (view === "overview" && scope === "all") return false;
+      return true;
+    }
   }
   return true;
 }
 
-// 状态 pill 样式来自 project-context 的全局 STATUS_STYLE（getProjectStatusPillClass /
-// getProjectStatusDotClass）。本地不再维护映射，避免和概览卡片 / 抽屉头部漂移。
-
-// 把 endDate 拆成"截止 YYYY-MM-DD"和"剩 N 天"两段，方便用 · 分隔。
-function describeDeadline(project: WorkspaceProject) {
-  if (!project.endDate) {
-    return { dateLabel: "未设置截止日期", daysLabel: null as string | null };
-  }
-  const end = new Date(project.endDate);
-  if (Number.isNaN(end.getTime())) {
-    return { dateLabel: `截止 ${project.endDate}`, daysLabel: null as string | null };
-  }
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffMs = end.getTime() - today.getTime();
-  const days = Math.ceil(diffMs / 86_400_000);
-  const dateLabel = `截止 ${project.endDate}`;
-  let daysLabel: string | null = null;
-  if (days > 0) daysLabel = `剩 ${days} 天`;
-  else if (days === 0) daysLabel = "今日到期";
-  else daysLabel = `已逾期 ${Math.abs(days)} 天`;
-  return { dateLabel, daysLabel };
+// Time progress is derived from project dates when available; budget burn
+// is still a static placeholder until the spend signal is wired up.
+function getTimeProgress(start: string | null, end: string | null): number | null {
+  if (!start || !end) return null;
+  const startMs = new Date(start).getTime();
+  const endMs = new Date(end).getTime();
+  if (Number.isNaN(startMs) || Number.isNaN(endMs) || endMs <= startMs) return null;
+  const now = Date.now();
+  if (now <= startMs) return 0;
+  if (now >= endMs) return 100;
+  return Math.round(((now - startMs) / (endMs - startMs)) * 100);
 }
 
 export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
@@ -57,172 +69,236 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
     projects,
     currentProject,
     currentProjectId,
-    isAllProjects,
     selectProject,
-    selectAllProjects,
     openCreateProject,
     openEditProject,
   } = useWorkspaceProject();
 
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!pickerOpen) return;
-    function handleClick(event: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setPickerOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [pickerOpen]);
+  const segments = useMemo(
+    () => resolveWorkspaceBreadcrumb(pathname, searchParams),
+    [pathname, searchParams],
+  );
 
   if (!shouldShowProjectBar(pathname, searchParams)) {
     return null;
   }
 
-  const statusPill = getProjectStatusPillClass(currentProject.status);
-  const statusDot = getProjectStatusDotClass(currentProject.status);
-  const statusLabel = getProjectStatusLabel(currentProject.status);
-  const { dateLabel, daysLabel } = describeDeadline(currentProject);
-  const budgetLabel = formatProjectBudget(currentProject);
+  const badge = getProjectStatusBadge(currentProject.status);
+  const { endDate, daysRemaining } = getProjectDeadlineParts(currentProject);
+  const budget = formatProjectBudget(currentProject);
+  const hasBudget = budget !== "未设置预算";
+  const timeProgress = getTimeProgress(currentProject.startDate, currentProject.endDate);
+  // Budget burn placeholder — surfaces a real signal once spend is tracked.
+  const budgetBurn = hasBudget ? 51 : null;
 
   return (
-    <div className="mb-6">
+    <header className="mb-4 space-y-3">
+      {segments.length > 0 ? (
+        <Breadcrumb>
+          <BreadcrumbList className="text-warm-gray text-xs">
+            {segments.map((seg, idx) => {
+              const isLast = idx === segments.length - 1;
+              return (
+                <span key={`${seg.label}-${idx}`} className="contents">
+                  <BreadcrumbItem>
+                    {isLast || !seg.href ? (
+                      <BreadcrumbPage className="text-warm-gray">{seg.label}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink href={seg.href} className="hover:text-foreground">
+                        {seg.label}
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  {!isLast ? <BreadcrumbSeparator /> : null}
+                </span>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
+      ) : null}
+
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="relative" ref={pickerRef}>
+        <div className="flex min-w-0 items-center gap-3">
+          {/* §3 H1 + dropdown trigger combined — clicking the project name
+              opens the picker. Pencil icon removed; edit lives on the right. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                onClick={() => setPickerOpen((prev) => !prev)}
-                className="flex min-w-0 items-center gap-1.5 rounded-md text-left transition-colors hover:opacity-80"
+                className="group focus-visible:ring-ring/40 flex min-w-0 items-center gap-2 rounded-md text-left outline-none focus-visible:ring-2"
               >
-                <span className="min-w-0 truncate text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] text-[#201515] sm:text-[28px]">
-                  {isAllProjects ? "全部项目" : currentProject.name}
-                </span>
-                <ChevronDown className="h-4 w-4 shrink-0 text-[#939084]" />
+                <h1 className="font-display text-foreground min-w-0 truncate text-2xl leading-tight font-semibold tracking-[-0.02em] sm:text-3xl">
+                  {currentProject.name}
+                </h1>
+                <ChevronDown
+                  className="text-warm-gray h-4 w-4 shrink-0 transition-transform group-data-[state=open]:rotate-180"
+                  aria-hidden
+                />
               </button>
-
-              {pickerOpen ? (
-                <div className="absolute top-full left-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
-                  <div className="max-h-80 overflow-y-auto py-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        selectAllProjects();
-                        setPickerOpen(false);
-                      }}
-                      className={`flex w-full items-start gap-2.5 px-3 py-2 text-left transition-colors ${
-                        isAllProjects ? "bg-[#fffdf9]" : "hover:bg-[#eceae3]"
-                      }`}
-                    >
-                      <span
-                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#c5c0b1]"
-                        aria-hidden
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[13px] font-semibold text-[#201515]">
-                          全部项目
-                        </span>
-                        <span className="block truncate text-[11px] text-[#939084]">
-                          跨项目总览
-                        </span>
-                      </span>
-                    </button>
-                    <div className="mx-3 my-1 border-t border-[#eceae3]" aria-hidden />
-                    {projects.map((project) => {
-                      const dot = getProjectStatusDotClass(project.status);
-                      const isCurrent = !isAllProjects && project.id === currentProjectId;
-                      const deadline = project.endDate ? `截止 ${project.endDate}` : "未设截止";
-                      const budget = formatProjectBudget(project);
-                      return (
-                        <button
-                          type="button"
-                          key={project.id}
-                          onClick={() => {
-                            selectProject(project.id);
-                            setPickerOpen(false);
-                          }}
-                          className={`flex w-full items-start gap-2.5 px-3 py-2 text-left transition-colors ${
-                            isCurrent ? "bg-[#fffdf9]" : "hover:bg-[#eceae3]"
-                          }`}
-                        >
-                          <span
-                            className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dot}`}
-                            aria-hidden
-                          />
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[13px] font-semibold text-[#201515]">
-                              {project.name}
-                            </span>
-                            <span className="block truncate text-[11px] text-[#939084]">
-                              {deadline} · {budget}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPickerOpen(false);
-                      openCreateProject();
-                    }}
-                    className="flex w-full items-center gap-1.5 border-t border-[#eceae3] px-3 py-2.5 text-[12px] font-medium text-[#ff4f00] hover:bg-[#fffdf9]"
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-72">
+              {projects.map((project) => {
+                const projBadge = getProjectStatusBadge(project.status);
+                const isCurrent = project.id === currentProjectId;
+                const deadline = project.endDate ? `截止 ${project.endDate}` : "未设截止";
+                const projBudget = formatProjectBudget(project);
+                return (
+                  <DropdownMenuItem
+                    key={project.id}
+                    onSelect={() => selectProject(project.id)}
+                    className={cn(
+                      "items-start gap-2.5",
+                      isCurrent && "bg-sand-light/60 focus:bg-sand-light",
+                    )}
                   >
-                    + 新建项目
-                  </button>
-                </div>
-              ) : null}
-            </div>
-
-            {!isAllProjects ? (
-              <span
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-medium ${statusPill}`}
+                    <span
+                      className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", projBadge.dot)}
+                      aria-hidden
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="text-foreground block truncate text-sm font-medium">
+                        {project.name}
+                      </span>
+                      <span className="text-warm-gray block truncate text-xs">
+                        {deadline} · {projBudget}
+                      </span>
+                    </span>
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => openCreateProject("quick")}
+                className="text-primary focus:text-primary font-medium"
               >
-                <span className={`h-1.5 w-1.5 rounded-full ${statusDot}`} aria-hidden />
-                {statusLabel}
-              </span>
-            ) : null}
-          </div>
+                + 新建项目
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {!isAllProjects ? (
-            <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] text-[#939084]">
-              <span>{dateLabel}</span>
-              {daysLabel ? (
-                <>
-                  <span aria-hidden>·</span>
-                  <span>{daysLabel}</span>
-                </>
-              ) : null}
-              <span aria-hidden>·</span>
-              <span>预算 {budgetLabel}</span>
-            </div>
-          ) : null}
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-dark-charcoal h-6 shrink-0 gap-1.5 border-transparent px-2 py-0 text-xs font-medium",
+              badge.background,
+            )}
+          >
+            <span className={cn("h-1.5 w-1.5 rounded-full", badge.dot)} aria-hidden />
+            {badge.label}
+          </Badge>
         </div>
 
-        {!isAllProjects ? (
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => openEditProject(currentProject.id)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5 text-[13px] font-medium text-[#201515] transition-colors hover:bg-[#fffdf9]"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              编辑
-            </button>
-            <button
-              type="button"
-              aria-label="更多操作"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:bg-[#fffdf9]"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-          </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => openEditProject(currentProject.id)}
+            className="gap-1.5"
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden />
+            <span className="hidden sm:inline">编辑</span>
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="更多操作"
+                className="h-8 w-8"
+              >
+                <MoreHorizontal className="h-4 w-4" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem disabled className="gap-2">
+                <Archive className="h-4 w-4" aria-hidden />
+                归档
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled className="gap-2">
+                <Copy className="h-4 w-4" aria-hidden />
+                复制
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem disabled className="text-destructive focus:text-destructive gap-2">
+                <Trash2 className="h-4 w-4" aria-hidden />
+                删除
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <p className="text-dark-charcoal flex flex-wrap items-baseline gap-x-1.5 text-sm">
+        {endDate ? (
+          <>
+            <span className="text-warm-gray">截止</span>
+            <span className="text-foreground font-medium">{endDate}</span>
+          </>
+        ) : (
+          <span className="text-warm-gray">未设置截止日期</span>
+        )}
+        {typeof daysRemaining === "number" ? (
+          <>
+            <span className="text-warm-gray">·</span>
+            <span className="text-warm-gray">{daysRemaining < 0 ? "已逾期" : "剩"}</span>
+            <span className="text-foreground font-medium">
+              {Math.abs(daysRemaining).toLocaleString()}
+            </span>
+            <span className="text-warm-gray">天</span>
+          </>
         ) : null}
+        {hasBudget ? (
+          <>
+            <span className="text-warm-gray">·</span>
+            <span className="text-warm-gray">预算</span>
+            <span className="text-foreground font-medium">{budget}</span>
+          </>
+        ) : null}
+      </p>
+
+      {timeProgress !== null || budgetBurn !== null ? (
+        <div className="grid grid-cols-2 gap-4 text-xs">
+          {timeProgress !== null ? (
+            <ProgressLine
+              label="时间进度"
+              value={timeProgress}
+              indicatorClassName="bg-status-running"
+            />
+          ) : null}
+          {budgetBurn !== null ? (
+            <ProgressLine label="预算燃烧" value={budgetBurn} indicatorClassName="bg-primary/70" />
+          ) : null}
+        </div>
+      ) : null}
+
+      <Separator className="bg-border-tertiary" />
+    </header>
+  );
+}
+
+function ProgressLine({
+  label,
+  value,
+  indicatorClassName,
+}: {
+  label: string;
+  value: number;
+  indicatorClassName: string;
+}) {
+  const clamped = Math.max(0, Math.min(100, value));
+  return (
+    <div>
+      <div className="text-warm-gray mb-1 flex items-center justify-between">
+        <span>{label}</span>
+        <span className="text-dark-charcoal font-medium">{clamped}%</span>
+      </div>
+      <div className="bg-sand-light h-1.5 overflow-hidden rounded-full">
+        <div
+          className={cn("h-full rounded-full", indicatorClassName)}
+          style={{ width: `${clamped}%` }}
+        />
       </div>
     </div>
   );

@@ -8,18 +8,15 @@ export const PLATFORM_OPTIONS: { id: PlatformId; label: string; available: boole
 ];
 
 export const COUNTRY_OPTIONS: { id: CountryCode; label: string; flag: string }[] = [
-  { id: "global", label: "全球", flag: "🌐" },
   { id: "us", label: "美国", flag: "🇺🇸" },
   { id: "gb", label: "英国", flag: "🇬🇧" },
   { id: "ca", label: "加拿大", flag: "🇨🇦" },
   { id: "au", label: "澳洲", flag: "🇦🇺" },
   { id: "sea", label: "东南亚", flag: "🌏" },
   { id: "me", label: "中东", flag: "🕌" },
-  { id: "any", label: "不限", flag: "·" },
 ];
 
 export const LANGUAGE_OPTIONS: string[] = [
-  "any",
   "英语",
   "中文（简体）",
   "中文（繁体）",
@@ -69,14 +66,12 @@ export const PLATFORM_LABEL: Record<PlatformId, string> = {
 };
 
 export const COUNTRY_LABEL: Record<CountryCode, string> = {
-  global: "全球",
   us: "美国",
   gb: "英国",
   ca: "加拿大",
   au: "澳洲",
   sea: "东南亚",
   me: "中东",
-  any: "不限",
 };
 
 export const FOLLOWER_LABEL: Record<FollowerBucket, string> = {
@@ -93,8 +88,21 @@ export function viewsLabel(step: ViewsStep): string {
   return found?.short ?? "不限";
 }
 
-export function geoLabel(country: CountryCode, language: string): string {
-  const c = COUNTRY_OPTIONS.find((x) => x.id === country)?.label ?? "全球";
-  const l = language === "any" ? "任意语言" : language;
-  return `${c} · ${l}`;
+// chip 关闭态文案：≤2 列出、>2 折叠为「首项 +N」。
+export function summarizeCountries(countries: CountryCode[]): string {
+  if (countries.length === 0) return "全球";
+  const labels = countries.map((id) => COUNTRY_LABEL[id]);
+  if (labels.length <= 2) return labels.join(", ");
+  return `${labels[0]} +${labels.length - 1}`;
+}
+
+export function summarizeLanguages(languages: string[]): string {
+  if (languages.length === 0) return "任意语言";
+  const labels = languages.map((l) => l.replace(/（[^）]+）/, ""));
+  if (labels.length <= 2) return labels.join(", ");
+  return `${labels[0]} +${labels.length - 1}`;
+}
+
+export function geoLabel(countries: CountryCode[], languages: string[]): string {
+  return `${summarizeCountries(countries)} · ${summarizeLanguages(languages)}`;
 }

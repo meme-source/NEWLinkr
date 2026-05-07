@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronDown, Globe2, TrendingUp, UsersRound } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { ChatChips, ViewsStep } from "../chat-types";
+import { Check, ChevronDown, Globe2, TrendingUp, UsersRound } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import type { ChatChips, CountryCode, ViewsStep } from "../chat-types";
 import {
   COUNTRY_OPTIONS,
   FOLLOWER_OPTIONS,
@@ -38,18 +39,31 @@ function PlatformSegment({ chips, onChange }: ChipBarProps) {
               if (disabled) return;
               onChange({ ...chips, platform: p.id });
             }}
-            disabled={disabled}
-            title={disabled ? `${p.label}（v2 上线）` : p.label}
-            aria-label={p.label}
+            aria-disabled={disabled}
+            title={disabled ? undefined : p.label}
+            aria-label={disabled ? `${p.label}：即将开放，敬请期待` : p.label}
             aria-pressed={selected}
-            className="relative inline-flex h-7 w-9 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className={`group relative inline-flex h-7 w-9 items-center justify-center rounded-full transition-colors ${
+              disabled ? "cursor-default" : ""
+            }`}
             style={{
               backgroundColor: selected ? "white" : "transparent",
               boxShadow: selected ? "0 1px 2px rgba(20,20,19,0.08)" : undefined,
               color: selected ? T.terracotta : T.stone,
             }}
           >
-            <PlatformIcon id={p.id} colored={selected} size={15} />
+            <span className={disabled ? "opacity-50" : undefined}>
+              <PlatformIcon id={p.id} colored={selected} size={15} />
+            </span>
+            {disabled ? (
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-40 -translate-x-1/2 rounded-full px-2 py-1 text-[11px] font-medium whitespace-nowrap text-white opacity-0 shadow-[0_10px_24px_-14px_rgba(20,20,19,0.52)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+                style={{ backgroundColor: T.nearBlack }}
+              >
+                即将开放，敬请期待
+              </span>
+            ) : null}
           </button>
         );
       })}
@@ -63,27 +77,92 @@ interface ChipShellProps {
   label: string;
   active: boolean;
   icon: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
+  // Use renderContent when the popover content needs to imperatively close
+  // itself (e.g. a two-step Apply flow).
+  renderContent?: (close: () => void) => ReactNode;
   width?: number;
 }
 
-function ChipShell({ prefix, label, active, icon, children, width = 240 }: ChipShellProps) {
+function ChipShell({
+  prefix,
+  label,
+  active,
+  icon,
+  children,
+  renderContent,
+  width = 240,
+}: ChipShellProps) {
   const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
+  // Close on outside click — must check both the trigger and the portaled
+  // popover (the popover lives outside the trigger's DOM subtree).
   useEffect(() => {
     if (!open) return;
     function handle(event: MouseEvent) {
-      if (!wrapperRef.current) return;
-      if (!wrapperRef.current.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (triggerRef.current?.contains(target)) return;
+      if (popRef.current?.contains(target)) return;
+      setOpen(false);
     }
     window.addEventListener("mousedown", handle);
     return () => window.removeEventListener("mousedown", handle);
   }, [open]);
 
+  // Position the popover above the trigger, constrained to the chip-bar's
+  // bounding container (so it can't escape the agent console aside or any
+  // other host with a fixed width). Re-runs on scroll/resize while open.
+  const [popSize, setPopSize] = useState<{ width: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!open) return;
+    function place() {
+      const trigger = triggerRef.current;
+      const pop = popRef.current;
+      if (!trigger || !pop) return;
+      const triggerRect = trigger.getBoundingClientRect();
+      const margin = 8;
+
+      // Find the nearest host that defines our horizontal bounds. Falls back
+      // to the viewport if no marker is set.
+      const host = trigger.closest("[data-chip-bounds]") as HTMLElement | null;
+      const hostRect = host
+        ? host.getBoundingClientRect()
+        : { left: margin, right: window.innerWidth - margin };
+      const hostLeft = hostRect.left + margin;
+      const hostRight = hostRect.right - margin;
+      const hostWidth = Math.max(220, hostRight - hostLeft);
+      const finalWidth = Math.min(width, hostWidth);
+
+      let left = triggerRect.left;
+      if (left + finalWidth > hostRight) left = hostRight - finalWidth;
+      if (left < hostLeft) left = hostLeft;
+
+      const popH = pop.offsetHeight || 320;
+      const top = triggerRect.top - popH - margin;
+      setPopSize({ width: finalWidth });
+      setPos({ left, top: Math.max(margin, top) });
+    }
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [open, width]);
+
+  // SSR guard — portal target only exists in the browser. The popover is only
+  // mounted when `open` is true, and `open` flips via a click handler, so by
+  // then we are guaranteed to be in the browser.
+  const portalTarget = typeof document !== "undefined" ? document.body : null;
+
   return (
-    <div ref={wrapperRef} className="relative">
+    <div className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
@@ -101,74 +180,263 @@ function ChipShell({ prefix, label, active, icon, children, width = 240 }: ChipS
         <span style={{ color: active ? T.nearBlack : T.charcoal, fontWeight: 500 }}>{label}</span>
         <ChevronDown size={12} style={{ color: T.stone }} aria-hidden />
       </button>
-      {open ? (
-        <div
-          className="absolute bottom-[calc(100%+8px)] left-0 z-30 overflow-hidden rounded-[14px] border bg-[#fffefb]"
-          style={{ borderColor: T.border, width }}
-        >
-          {children}
-        </div>
-      ) : null}
+      {open && portalTarget
+        ? createPortal(
+            <div
+              ref={popRef}
+              className="bg-background fixed z-50 overflow-hidden rounded-[14px] border shadow-[0_18px_44px_-26px_rgba(20,20,19,0.32)]"
+              style={{
+                borderColor: T.border,
+                width: popSize?.width ?? width,
+                left: pos?.left ?? -9999,
+                top: pos?.top ?? -9999,
+                visibility: pos ? "visible" : "hidden",
+              }}
+            >
+              {renderContent ? renderContent(() => setOpen(false)) : children}
+            </div>,
+            portalTarget,
+          )
+        : null}
     </div>
   );
 }
 
-// ── Geo popover (country + language) ─────────────────────────────────────────
-function GeoPopover({ chips, onChange }: ChipBarProps) {
+// ── Geo popover (country ∩ language, both multi-select, two-step apply) ──────
+function GeoPopover({ chips, onChange, onApply }: ChipBarProps & { onApply: () => void }) {
+  // Draft state — edits stay local until 「应用」commits them. Closing the
+  // popover without applying drops the draft.
+  const [draftCountries, setDraftCountries] = useState<CountryCode[]>(chips.countries);
+  const [draftLanguages, setDraftLanguages] = useState<string[]>(chips.languages);
+
+  const toggleCountry = (id: CountryCode) => {
+    setDraftCountries((prev) => {
+      const set = new Set(prev);
+      if (set.has(id)) set.delete(id);
+      else set.add(id);
+      return [...set];
+    });
+  };
+  const toggleLanguage = (label: string) => {
+    setDraftLanguages((prev) => {
+      const set = new Set(prev);
+      if (set.has(label)) set.delete(label);
+      else set.add(label);
+      return [...set];
+    });
+  };
+  const clearCountries = () => setDraftCountries([]);
+  const clearLanguages = () => setDraftLanguages([]);
+
+  const allCountriesSelected = draftCountries.length === COUNTRY_OPTIONS.length;
+  const allLanguagesSelected = draftLanguages.length === LANGUAGE_OPTIONS.length;
+
+  const apply = () => {
+    onChange({ ...chips, countries: draftCountries, languages: draftLanguages });
+    onApply();
+  };
+
+  // Cap the language scroll area to the country column's natural height so the
+  // popover collapses to the shorter of the two lists. (7 rows × 28px ≈ 196px.)
+  const LIST_MAX = 196;
+
   return (
-    <div className="grid grid-cols-2 divide-x" style={{ borderColor: T.borderLight }}>
-      <div className="max-h-64 overflow-y-auto py-1">
-        <p
-          className="px-3 pt-2 pb-1 text-[10.5px] font-semibold tracking-[0.06em] uppercase"
-          style={{ color: T.stone }}
-        >
-          国家
-        </p>
-        {COUNTRY_OPTIONS.map((c) => {
-          const active = c.id === chips.country;
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => onChange({ ...chips, country: c.id })}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12.5px]"
-              style={{
-                backgroundColor: active ? T.ivory : "transparent",
-                color: active ? T.terracotta : T.nearBlack,
-              }}
-            >
-              <span>{c.flag}</span>
-              <span>{c.label}</span>
-            </button>
-          );
-        })}
+    <div>
+      <div className="flex items-stretch divide-x" style={{ borderColor: T.borderLight }}>
+        <div className="flex w-1/2 flex-col">
+          <ColHeader
+            title="国家"
+            actionLabel={allCountriesSelected ? "清空" : "全选"}
+            onAction={
+              allCountriesSelected
+                ? clearCountries
+                : () => setDraftCountries(COUNTRY_OPTIONS.map((c) => c.id))
+            }
+          />
+          <div className="hide-scrollbar overflow-y-auto py-1" style={{ maxHeight: LIST_MAX }}>
+            <AnyRow
+              icon="🌐"
+              label="全球"
+              hint="未指定"
+              active={draftCountries.length === 0}
+              onClick={clearCountries}
+            />
+            {COUNTRY_OPTIONS.map((c) => {
+              const selected = draftCountries.includes(c.id);
+              return (
+                <CheckRow
+                  key={c.id}
+                  selected={selected}
+                  onClick={() => toggleCountry(c.id)}
+                  leading={<span>{c.flag}</span>}
+                  label={c.label}
+                />
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex w-1/2 flex-col">
+          <ColHeader
+            title="语言"
+            actionLabel={allLanguagesSelected ? "清空" : "全选"}
+            onAction={
+              allLanguagesSelected ? clearLanguages : () => setDraftLanguages([...LANGUAGE_OPTIONS])
+            }
+          />
+          <div className="hide-scrollbar overflow-y-auto py-1" style={{ maxHeight: LIST_MAX }}>
+            <AnyRow
+              icon="·"
+              label="任意语言"
+              hint="未指定"
+              active={draftLanguages.length === 0}
+              onClick={clearLanguages}
+            />
+            {LANGUAGE_OPTIONS.map((l) => {
+              const selected = draftLanguages.includes(l);
+              return (
+                <CheckRow key={l} selected={selected} onClick={() => toggleLanguage(l)} label={l} />
+              );
+            })}
+          </div>
+        </div>
       </div>
-      <div className="max-h-64 overflow-y-auto py-1" style={{ borderColor: T.borderLight }}>
-        <p
-          className="px-3 pt-2 pb-1 text-[10.5px] font-semibold tracking-[0.06em] uppercase"
-          style={{ color: T.stone }}
+
+      <div
+        className="flex items-center justify-between gap-3 border-t px-3 py-2 text-[11.5px]"
+        style={{ borderColor: T.borderLight, color: T.charcoal }}
+      >
+        <span>
+          将筛选 ·{" "}
+          <span style={{ color: T.nearBlack, fontWeight: 500 }}>
+            {comboSummary(draftCountries, draftLanguages)}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={apply}
+          className="rounded-full px-3.5 py-1 text-[12px] font-medium text-white transition-[filter] hover:brightness-110 active:scale-[0.98]"
+          style={{ backgroundColor: T.terracotta }}
         >
-          语言
-        </p>
-        {LANGUAGE_OPTIONS.map((l) => {
-          const active = l === chips.language;
-          return (
-            <button
-              key={l}
-              type="button"
-              onClick={() => onChange({ ...chips, language: l })}
-              className="flex w-full items-center px-3 py-1.5 text-left text-[12.5px]"
-              style={{
-                backgroundColor: active ? T.ivory : "transparent",
-                color: active ? T.terracotta : T.nearBlack,
-              }}
-            >
-              {l === "any" ? "任意语言" : l}
-            </button>
-          );
-        })}
+          应用
+        </button>
       </div>
     </div>
+  );
+}
+
+function comboSummary(countries: CountryCode[], languages: string[]): string {
+  const c = countries.length === 0 ? "全球" : `${countries.length} 国`;
+  const l = languages.length === 0 ? "任意语言" : `${languages.length} 语`;
+  return `${c} ∩ ${l}`;
+}
+
+function ColHeader({
+  title,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  actionLabel: string;
+  onAction: () => void;
+}) {
+  return (
+    <div
+      className="flex items-center justify-between border-b px-3 py-1.5"
+      style={{ borderColor: T.borderLight }}
+    >
+      <span
+        className="text-[10.5px] font-semibold tracking-[0.06em] uppercase"
+        style={{ color: T.stone }}
+      >
+        {title}
+      </span>
+      <button
+        type="button"
+        onClick={onAction}
+        className="text-[11px] underline-offset-2 hover:underline"
+        style={{ color: T.stone }}
+      >
+        {actionLabel}
+      </button>
+    </div>
+  );
+}
+
+function CheckRow({
+  selected,
+  onClick,
+  leading,
+  label,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  leading?: ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      role="checkbox"
+      aria-checked={selected}
+      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12.5px] transition-colors hover:bg-[--hover]"
+      style={{
+        ["--hover" as string]: T.parchment,
+        color: selected ? T.terracotta : T.nearBlack,
+      }}
+    >
+      <span
+        aria-hidden
+        className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border"
+        style={{
+          backgroundColor: selected ? T.terracotta : "transparent",
+          borderColor: selected ? T.terracotta : T.border,
+          color: "white",
+        }}
+      >
+        {selected ? <Check size={11} strokeWidth={3} /> : null}
+      </span>
+      {leading ? <span className="shrink-0">{leading}</span> : null}
+      <span className="truncate">{label}</span>
+    </button>
+  );
+}
+
+function AnyRow({
+  icon,
+  label,
+  hint,
+  active,
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  hint: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-2 border-b px-3 py-1.5 text-left text-[12.5px]"
+      style={{
+        backgroundColor: active ? T.ivory : "transparent",
+        borderColor: T.borderLight,
+        color: active ? T.terracotta : T.nearBlack,
+      }}
+    >
+      <span
+        aria-hidden
+        className="inline-block h-2 w-2 rounded-full"
+        style={{ backgroundColor: active ? T.terracotta : T.border }}
+      />
+      <span>{icon}</span>
+      <span className="flex-1">{label}</span>
+      <span className="text-[10.5px]" style={{ color: T.stone }}>
+        {hint}
+      </span>
+    </button>
   );
 }
 
@@ -270,7 +538,8 @@ function ViewsPopover({ chips, onChange }: ChipBarProps) {
 
 // ── Bar ──────────────────────────────────────────────────────────────────────
 export function ChipBar({ chips, onChange }: ChipBarProps) {
-  const geo = geoLabel(chips.country, chips.language);
+  const geo = geoLabel(chips.countries, chips.languages);
+  const geoActive = chips.countries.length > 0 || chips.languages.length > 0;
   const followerActive = chips.follower !== "any";
   const followerLabelText = followerActive
     ? (FOLLOWER_OPTIONS.find((f) => f.id === chips.follower)?.label ?? "不限")
@@ -278,17 +547,16 @@ export function ChipBar({ chips, onChange }: ChipBarProps) {
   const viewsActive = chips.viewsStep !== 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div data-chip-bounds className="flex flex-wrap items-center gap-2">
       <PlatformSegment chips={chips} onChange={onChange} />
       <ChipShell
         prefix="国/语"
         label={geo}
-        active={chips.country !== "global" || chips.language !== "any"}
+        active={geoActive}
         icon={<Globe2 size={13} />}
-        width={360}
-      >
-        <GeoPopover chips={chips} onChange={onChange} />
-      </ChipShell>
+        width={400}
+        renderContent={(close) => <GeoPopover chips={chips} onChange={onChange} onApply={close} />}
+      />
       <ChipShell
         prefix="粉丝"
         label={followerLabelText}
