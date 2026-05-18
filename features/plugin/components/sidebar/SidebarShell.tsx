@@ -98,6 +98,8 @@ export function SimilarSidebar({
   onRecordQuickSettingsChange,
   enabledBadgeCategories,
   onToggleBadgeCategory,
+  isSinglePostUnlocked,
+  onLockedSinglePostClick,
 }: SimilarSidebarProps) {
   const [reseedAnchorLabel, setReseedAnchorLabel] = useState<string | null>(null);
 
@@ -567,6 +569,8 @@ export function SimilarSidebar({
         onToggleCollapse={onToggleCollapse}
         activeSidebarTab={activeSidebarTab}
         onSelectSidebarTab={onSelectSidebarTab}
+        isSinglePostUnlocked={isSinglePostUnlocked}
+        onLockedSinglePostClick={onLockedSinglePostClick}
       />
     </aside>
   );
@@ -629,4 +633,7 @@ type SimilarSidebarProps = {
   onRecordQuickSettingsChange: (message: string) => void;
   enabledBadgeCategories: ReadonlySet<TiktokVideoCategory>;
   onToggleBadgeCategory: (category: TiktokVideoCategory) => void;
+  // 浏览器里是否已打开某个帖子 —— 决定单帖 AI 分析入口是否解锁。
+  isSinglePostUnlocked: boolean;
+  onLockedSinglePostClick: () => void;
 };

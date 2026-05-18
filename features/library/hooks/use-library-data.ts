@@ -5,6 +5,7 @@ import type { Creator } from "@/types/api";
 import { dominantStatus, getActiveCollaboration } from "@/lib/creator";
 import { getCreators } from "@/features/creator/data";
 import { useCreatorOverrides } from "@/features/creator/components/creator-overrides-context";
+import { useOutreachState } from "@/features/outreach/components/outreach-state-context";
 import type { LibraryScope, LibraryViewRow, StatusTab } from "@/features/library/types";
 
 // scope=project：只看包含 projectId 的博主
@@ -12,14 +13,18 @@ import type { LibraryScope, LibraryViewRow, StatusTab } from "@/features/library
 //
 // 应用 creator-overrides：抽屉里点「更新」后写入的评级 / 备注会通过 applyOverrides
 // 透传到表格行；deleteCreators() 软删除的博主在这里被过滤掉，不会出现在表格里。
+//
+// addedCreators：用户在「投放追踪」弹窗里录入的候选 / 合作博主，与 mock 博主
+// 合并展示（候选博主同步进博主库），排在最前。
 export function useLibraryRows(scope: LibraryScope, projectId: string): LibraryViewRow[] {
   const { applyOverrides, isDeleted } = useCreatorOverrides();
+  const { addedCreators } = useOutreachState();
   return useMemo(() => {
-    const merged = getCreators()
+    const merged = [...addedCreators, ...getCreators()]
       .filter((c) => !isDeleted(c.id))
       .map(applyOverrides);
     return buildRows(merged, scope, projectId);
-  }, [scope, projectId, applyOverrides, isDeleted]);
+  }, [scope, projectId, applyOverrides, isDeleted, addedCreators]);
 }
 
 export function buildRows(

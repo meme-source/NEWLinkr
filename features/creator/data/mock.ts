@@ -1,6 +1,7 @@
 // 仅开发/演示阶段使用。生产通过 NEXT_PUBLIC_USE_MOCK=false 关闭，可整文件删除。
 // 所有 import 必须经过 features/creator/data/index.ts。
 import { pickCredibilitySummaries } from "@/features/creator/components/drawer/audience/credibility-summary";
+import { deriveFavorited } from "@/lib/creator";
 import type {
   AudienceProfile,
   Collaboration,
@@ -889,6 +890,7 @@ function buildRateCard(seed: MockCreatorSeed): Creator["rateCard"] {
 }
 
 function buildCreatorFromSeed(seed: MockCreatorSeed): Creator {
+  const collaborations = buildCollaborations(seed);
   return {
     id: seed.id,
     handle: seed.handle,
@@ -924,11 +926,11 @@ function buildCreatorFromSeed(seed: MockCreatorSeed): Creator {
     paymentTerms: null,
     usageRights: null,
     manager: seed.manager ?? null,
-    collaborations: buildCollaborations(seed),
+    collaborations,
     recentPosts: buildRecentPosts(seed),
     audienceAnalysis: buildAudienceAnalysis(seed),
-    // 博主库里的人都是用户「收藏」过的 —— 红心默认亮起。
-    favorited: true,
+    // 收藏 = 被「筛选过」：合作状态不是「候选」即点亮红心。规则见 lib/creator.ts。
+    favorited: deriveFavorited(collaborations),
     lastRefreshedAt: seed.recentActiveAt ? `${seed.recentActiveAt}T08:30:00Z` : null,
   };
 }

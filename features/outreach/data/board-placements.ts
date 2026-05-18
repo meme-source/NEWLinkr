@@ -31,6 +31,13 @@ export type PlacementPlatform = "TikTok" | "Instagram" | "Xiaohongshu";
 // 徽章覆盖显示。删除同理：通过 setPlacementDeleted 软删除，不会改 mock 源。
 export type PlacementStatus = "增长中" | "稳定中" | "下降中";
 
+// §3.3 投放卡片的「合作生命周期」—— 与上面的自动识别 status（趋势）正交：
+//   candidate     候选：从社媒提取链接、仅观察、尚未决定合作
+//   collaborating 合作中：已确认与达人合作并录入合作信息
+//   completed     已完成：合作结束（用户在卡片 ⋯ 菜单手动标记）
+// 投放卡片不再局限于「合作中」——候选卡片同样进网格，只是徽章不同。
+export type PlacementCollabPhase = "candidate" | "collaborating" | "completed";
+
 export interface Placement {
   id: string;
   projectId: string;
@@ -50,9 +57,19 @@ export interface Placement {
   // 投放本身
   postedAt: string;
   status: PlacementStatus;
+  // 合作生命周期阶段（候选 / 合作中 / 已完成）。
+  collabPhase: PlacementCollabPhase;
   spendUsd: number;
   // 原帖（投放视频）链接，"原帖" 按钮跳转用。
   postUrl: string;
+
+  // 追踪 / 合作信息（「投放追踪」弹窗录入）：
+  //   trackingPeriodDays 追踪周期（天），候选 / 合作均可设。
+  //   publishAt          约定发布时间（仅合作时有意义）。
+  //   trackingEndsAt     追踪截止日期（候选 = 周期推算；合作 = 用户填）。
+  trackingPeriodDays?: number;
+  publishAt?: string;
+  trackingEndsAt?: string;
 
   // 实测数据
   views: number;
@@ -80,7 +97,9 @@ function expand30(seed: number[], targetEnd: number): number[] {
   return out;
 }
 
-export const PLACEMENTS: Placement[] = [
+// 现存 mock 投放都是「已确认合作」的内容，统一种子里省略 collabPhase，
+// 在导出时补成 "collaborating"，避免在 12 条字面量里逐条重复。
+const PLACEMENT_SEED: Omit<Placement, "collabPhase">[] = [
   {
     id: "p-skincare-sam-01",
     projectId: "q2-summer",
@@ -370,3 +389,8 @@ export const PLACEMENTS: Placement[] = [
     viewsTrend30d: expand30([24_000], 12_400),
   },
 ];
+
+export const PLACEMENTS: Placement[] = PLACEMENT_SEED.map((p) => ({
+  ...p,
+  collabPhase: "collaborating",
+}));

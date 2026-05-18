@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 import type { CollaborationStatus, Creator, Rating } from "@/types/api";
+import { deriveFavorited } from "@/lib/creator";
 
 // 博主"用户编辑后的覆盖值"内存存储。
 // 覆盖优先级高于 mock 数据：博主库表格 + 抽屉同时订阅本 store，
@@ -120,6 +121,8 @@ export function CreatorOverridesProvider({ children }: { children: React.ReactNo
         ...creator,
         rating: o.rating ?? creator.rating,
         collaborations,
+        // 改了合作状态后，收藏（红心）跟着重新判定 —— 与 lib/creator.ts 同一规则。
+        favorited: deriveFavorited(collaborations),
       };
     },
     [overrides],

@@ -3,9 +3,11 @@
 import type { ChatIntent } from "../../chat-types";
 import { T } from "../../data/tokens";
 import { BrandChip } from "./brand-chip";
+import { CategoryChip } from "./category-chip";
+import { FollowerCapChip } from "./follower-cap-chip";
 import { ProductInput } from "./product-input";
 import { TimeChip } from "./time-chip";
-import { DEFAULT_TIME_DAYS, type StructuredEditorState } from "./types";
+import { DEFAULT_FOLLOWER_CAP, DEFAULT_TIME_DAYS, type StructuredEditorState } from "./types";
 
 interface StructuredEditorProps {
   intent: ChatIntent;
@@ -18,15 +20,15 @@ interface StructuredEditorProps {
 const LABEL_PREFIX = "我的产品：";
 
 /**
- * Replaces the legacy multi-line textarea with a structured per-mode editor.
- * v3 §4.3 把尾句统一收束到"可直接建联 / 立刻触达"的输出层语义；时间 / 品牌
- * 仍用 chip 让用户改，但不再说"找投过 X 的达人"这种锚定式问句。
- *  - mode1 (competitor): 我的产品 [chip] / 对标投过 [brand] 的合作款，[time] 内
- *                         可直接建联的同品类达人
- *  - mode2 (scenario):   我的产品 [chip] / 系统会从产品反推内容场景，直接给出
- *                         可建联的达人池
- *  - mode3 (trending):   我的产品 [chip] / 与 [time] 内品类爆款组合相似、可立刻
- *                         触达的同类达人
+ * 结构化输入编辑器 —— 每个维度按自己的「锚点」收字段(见 v2/dimensions.ts)。
+ *
+ * 每个字段是一个独立区块(FieldRow,行间有分隔线)—— 不用整句解释性文字,
+ * 让用户一眼看到「这里有好几个字段可以填」,而不是「填完产品就结束了」。
+ *
+ *  - competitor → 对标竞品[必填] · 我的产品[选填] · 时间窗
+ *  - scenario   → 我的产品[必填,锚点]
+ *  - trending   → 对标品类[必填,可由产品推] · 我的产品[选填] · 时间窗
+ *  - lowFollower→ 对标品类[必填] · 我的产品[选填] · 时间窗 · 粉丝量上限
  */
 export function StructuredEditor({
   intent,
@@ -47,17 +49,16 @@ export function StructuredEditor({
   };
 
   const updateTimeDays = (days: number) => {
-    onChange({
-      ...state,
-      timeDays: { ...state.timeDays, [intent]: days },
-    });
+    onChange({ ...state, timeDays: { ...state.timeDays, [intent]: days } });
   };
 
-  const productLine = (
-    <div className="flex flex-wrap items-baseline gap-y-1">
-      <span className="text-[14.5px] leading-[1.5] font-medium" style={{ color: T.charcoal }}>
-        {LABEL_PREFIX}
-      </span>
+  const updateCategory = (category: string) => onChange({ ...state, category });
+  const updateFollowerCap = (followerCap: number) => onChange({ ...state, followerCap });
+
+  const hasProduct = state.productChip !== null || state.productNote.trim().length > 0;
+
+  const productRow = (anchor: boolean) => (
+    <FieldRow label="我的产品" optional={!anchor}>
       <ProductInput
         chip={state.productChip}
         note={state.productNote}
@@ -65,61 +66,107 @@ export function StructuredEditor({
         onSubmit={onSubmit}
         disabled={disabled}
       />
-    </div>
+    </FieldRow>
   );
 
   return (
-    <div data-editor-bounds className="space-y-1">
-      {productLine}
-
+    <div data-editor-bounds className="divide-y divide-[#f1efe9]">
       {intent === "competitor" ? (
-        <SentenceLine>
-          <span style={{ color: T.charcoal }}>对标投过</span>
-          <BrandChip brandMode={state.brandMode} brands={state.brands} onChange={updateBrand} />
-          <span style={{ color: T.charcoal }}>的合作款，</span>
-          <TimeChip
-            value={state.timeDays.competitor ?? 90}
-            defaultDays={DEFAULT_TIME_DAYS.competitor ?? 90}
-            onChange={updateTimeDays}
-          />
-          <span style={{ color: T.charcoal }}>内可直接建联的同品类达人</span>
-        </SentenceLine>
+        <>
+          <FieldRow label="对标竞品">
+            <BrandChip brandMode={state.brandMode} brands={state.brands} onChange={updateBrand} />
+          </FieldRow>
+          {productRow(false)}
+          <FieldRow label="时间窗">
+            <TimeChip
+              value={state.timeDays.competitor ?? 90}
+              defaultDays={DEFAULT_TIME_DAYS.competitor ?? 90}
+              onChange={updateTimeDays}
+            />
+          </FieldRow>
+        </>
       ) : null}
 
-      {intent === "scenario" ? (
-        <div className="px-1 text-[13.5px] leading-[1.6]" style={{ color: T.stone }}>
-          系统会从产品反推内容场景，直接给出可建联的达人池
-        </div>
+      {intent === "scenario" ? productRow(true) : null}
+
+      {intent === "trending" ? (
+        <>
+          <FieldRow label="对标品类">
+            <CategoryChip
+              value={state.category}
+              hasProductFallback={hasProduct}
+              onChange={updateCategory}
+            />
+          </FieldRow>
+          {productRow(false)}
+          <FieldRow label="时间窗">
+            <TimeChip
+              value={state.timeDays.trending ?? 14}
+              defaultDays={DEFAULT_TIME_DAYS.trending ?? 14}
+              onChange={updateTimeDays}
+            />
+          </FieldRow>
+        </>
       ) : null}
 
-      {intent === "trending" || intent === "lowFollower" ? (
-        <SentenceLine>
-          <span style={{ color: T.charcoal }}>与</span>
-          <TimeChip
-            value={state.timeDays.trending ?? 14}
-            defaultDays={DEFAULT_TIME_DAYS.trending ?? 14}
-            onChange={updateTimeDays}
-          />
-          <span style={{ color: T.charcoal }}>
-            内品类爆款组合相似、可立刻触达的{intent === "lowFollower" ? "低粉" : "同类"}达人
-          </span>
-        </SentenceLine>
+      {intent === "lowFollower" ? (
+        <>
+          <FieldRow label="对标品类">
+            <CategoryChip
+              value={state.category}
+              hasProductFallback={hasProduct}
+              onChange={updateCategory}
+            />
+          </FieldRow>
+          {productRow(false)}
+          <FieldRow label="时间窗">
+            <TimeChip
+              value={state.timeDays.lowFollower ?? 14}
+              defaultDays={DEFAULT_TIME_DAYS.lowFollower ?? 14}
+              onChange={updateTimeDays}
+            />
+          </FieldRow>
+          <FieldRow label="粉丝量上限">
+            <FollowerCapChip value={state.followerCap} onChange={updateFollowerCap} />
+          </FieldRow>
+        </>
       ) : null}
     </div>
   );
 }
 
-function SentenceLine({ children }: { children: React.ReactNode }) {
+// 单个字段区块 —— 左侧是固定宽度的字段名,右侧是控件。行间分隔线由父容器
+// 的 divide-y 提供,让多个字段读起来是「一组可填项」而非一句话。
+function FieldRow({
+  label,
+  optional,
+  children,
+}: {
+  label: string;
+  optional?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-wrap items-baseline gap-y-1 text-[14.5px] leading-[1.7]">
-      {children}
+    <div className="flex items-baseline gap-3 py-2.5">
+      <span className="flex w-[72px] shrink-0 items-baseline gap-1">
+        <span className="text-[12.5px] font-medium" style={{ color: T.charcoal }}>
+          {label}
+        </span>
+        {optional ? (
+          <span className="text-[10px]" style={{ color: T.stone }}>
+            选填
+          </span>
+        ) : null}
+      </span>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }
 
 /**
  * Submit-time serialization — collapses the structured state into the single
- * string the agent flow already understands. Mirrors mock §3.4 「提交时合并」.
+ * string the agent flow / brief parser already understand. Each dimension
+ * emits its anchor (竞品 / 产品 / 品类) plus the refinement fields it carries.
  */
 export function serializeEditorState(intent: ChatIntent, state: StructuredEditorState): string {
   const productUrl = state.productChip ? `https://${state.productChip.url}` : "";
@@ -127,9 +174,6 @@ export function serializeEditorState(intent: ChatIntent, state: StructuredEditor
   const product = [productUrl, productNote].filter(Boolean).join(" ").trim();
   const productLine = product ? `${LABEL_PREFIX}${product}` : "";
 
-  // v3 §4.3：序列化语句必须落到 brief-parser 能解析的形态。沿用 v2 关键词
-  //（投过 / brand / 起量 / 时间窗）让下游 parser 拿到结构化要素，但首句改写为
-  // v3 的"可建联输出"承诺，确保未来直接读到 prompt 的 LLM/审计也能拿到一致语义。
   if (intent === "competitor") {
     const brand =
       state.brandMode === "manual" && state.brands.length > 0
@@ -146,16 +190,31 @@ export function serializeEditorState(intent: ChatIntent, state: StructuredEditor
     return productLine;
   }
 
-  // trending / lowFollower —— 共用爆款锚点的序列化（lowFollower 仅在入口
-  // 卡片层差异化展示，下游 agent / brief-parser 都按 trending 处理）。
-  const days = state.timeDays.trending ?? 14;
+  // trending / lowFollower —— 品类锚点 + 时间窗(+ 粉丝量上限)。
+  const category = state.category.trim() || "产品所属品类";
+  const days = state.timeDays[intent] ?? 14;
   const time = days === 0 ? "不限时间" : `近 ${days} 天`;
-  const audience = intent === "lowFollower" ? "低粉" : "同类";
-  return [productLine, `与${time}内品类爆款组合相似、可立刻触达的${audience}达人`]
+
+  if (intent === "lowFollower") {
+    const cap = state.followerCap ?? DEFAULT_FOLLOWER_CAP;
+    const capText = `${Math.round(cap / 10_000)} 万`;
+    return [
+      productLine,
+      `对标品类「${category}」，找${time}内、粉丝量 ${capText}以下的低粉爆款达人`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  return [productLine, `对标品类「${category}」，找${time}内品类爆款组合相似、可立刻触达的达人`]
     .filter(Boolean)
     .join("\n");
 }
 
+/**
+ * @deprecated 提交门禁已改为按维度锚点判定 —— 用 `isAnchorSatisfied`
+ * (v2/dimensions.ts) 替代。保留此函数仅为兼容仍在引用它的旧入口。
+ */
 export function isEditorEmpty(state: StructuredEditorState): boolean {
   return state.productChip === null && state.productNote.trim().length === 0;
 }

@@ -4,8 +4,6 @@ import { ArrowUp, Loader2 } from "lucide-react";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { ChatChips } from "../chat-types";
-import { ChipBar } from "../components/chip-bar";
 import { ProjectSwitcher } from "./project-switcher";
 import { SeedSourcePanel } from "./seed-source-panel";
 import type { SeedDescriptor } from "./lib/seed-pool";
@@ -25,8 +23,6 @@ export interface AgentConsoleHandle {
   setSummary: (headline: string, sub: string) => void;
 }
 
-export type ConsoleChips = ChatChips;
-
 interface UserMessage {
   productUrl: string | null;
   productTitle: string | null;
@@ -39,8 +35,6 @@ interface Props {
   inputValue: string;
   onInputChange: (v: string) => void;
   onSubmit: () => void;
-  chips: ConsoleChips;
-  onChipsChange: (next: ConsoleChips) => void;
   /**
    * Surfaced as the leading exit-search button in the console header. Parent
    * decides whether to confirm via modal — we just emit the request.
@@ -67,8 +61,6 @@ export const AgentConsole = forwardRef<AgentConsoleHandle, Props>(function Agent
     inputValue,
     onInputChange,
     onSubmit,
-    chips,
-    onChipsChange,
     onRequestDiscard,
     onToast,
     seeds,
@@ -203,12 +195,12 @@ export const AgentConsole = forwardRef<AgentConsoleHandle, Props>(function Agent
         </div>
       </div>
 
-      {/* ─── Footer (chips + input) — sits in normal flow as a flex sibling
-          so the scroll area above it never gets covered, regardless of how
-          tall the chip bar wraps on narrow columns. */}
+      {/* ─── Footer (追问输入框) — sits in normal flow as a flex sibling so the
+          scroll area above it never gets covered. 进入分栏搜索后,intake 阶段
+          的条件筛选 chip 在这里不再展示 —— 那些预筛选条件对「已出结果、用追问
+          细化」的语境没有意义,改由追问输入承担细化。 */}
       <div className="flex-shrink-0 border-t border-[#eceae3] bg-[#fffefb] px-4 pt-3 pb-4">
-        <ChipBar chips={chips} onChange={onChipsChange} />
-        <div className="mt-2.5 flex items-center gap-2 rounded-lg border border-[#eceae3] bg-[#fafaf6] px-3 py-2 focus-within:border-[#c5c0b1] focus-within:bg-white">
+        <div className="flex items-center gap-2 rounded-lg border border-[#eceae3] bg-[#fafaf6] px-3 py-2 focus-within:border-[#c5c0b1] focus-within:bg-white">
           <input
             value={inputValue}
             onChange={(e) => onInputChange(e.target.value)}

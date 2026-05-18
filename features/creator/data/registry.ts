@@ -21,6 +21,7 @@ import type { Placement } from "@/features/outreach/data/board-placements";
 import type { OutreachCreator } from "@/features/outreach/data/outreach-types";
 import { PLACEMENTS } from "@/features/outreach/data/board-placements";
 import { OUTREACH_CREATORS } from "@/features/outreach/data/outreach-creators";
+import { deriveFavorited } from "@/lib/creator";
 import { getCreators } from "./index";
 
 // ── 解析入参 ─────────────────────────────────────────────────────────────────
@@ -159,7 +160,8 @@ function buildSyntheticCreator(input: {
     // 接通后端时由真实数据接口回填。
     recentPosts: [],
     audienceAnalysis: null,
-    favorited: false,
+    // 收藏 = 被「筛选过」：合作状态不是「候选」即点亮。规则见 lib/creator.ts。
+    favorited: deriveFavorited(collaborations),
     lastRefreshedAt: placement?.postedAt ? `${placement.postedAt}T08:30:00Z` : null,
   };
 }

@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import {
   CATEGORY_LABEL,
+  COLLAB_PHASE_BADGE,
+  COLLAB_PHASE_LABEL,
   cpeOf,
   cpmOf,
   dailyDelta,
@@ -64,10 +66,19 @@ const PROFILE_PLATFORM_MAP: Record<PlacementPlatform, "tiktok" | "instagram" | u
 
 export function PlacementCard({ placement: p, projectName, hideCreatorHeader }: Props) {
   const [trendRange, setTrendRange] = useState<"7d" | "30d">("7d");
-  const { isPlacementPaused, togglePlacementPaused, setPlacementDeleted } = useOutreachState();
+  const {
+    isPlacementPaused,
+    togglePlacementPaused,
+    isPlacementCompleted,
+    markPlacementCompleted,
+    setPlacementDeleted,
+  } = useOutreachState();
   const { openCreatorProfile } = useCreatorProfile();
 
   const paused = isPlacementPaused(p.id);
+  // 用户在 ⋯ 菜单标记「已完成」后覆盖卡片自身的 collabPhase。
+  const completed = isPlacementCompleted(p.id);
+  const phase = completed ? "completed" : p.collabPhase;
   const trend = trendRange === "7d" ? p.viewsTrend7d : p.viewsTrend30d;
   const delta = dailyDelta(trend);
   const PlatformIcon = PLATFORM_ICON_MAP[p.platform];
@@ -119,6 +130,7 @@ export function PlacementCard({ placement: p, projectName, hideCreatorHeader }: 
             <PlatformIcon className="h-3 w-3" aria-hidden />
             {p.platform}
           </span>
+          <PhaseChip phase={phase} />
           <StatusBadge status={p.status} paused={paused} />
         </div>
       ) : (
@@ -156,6 +168,7 @@ export function PlacementCard({ placement: p, projectName, hideCreatorHeader }: 
                 <PlatformIcon className="h-3 w-3" aria-hidden />
                 {p.platform}
               </span>
+              <PhaseChip phase={phase} />
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#939084] tabular-nums">
               <span>{fmtCount(p.creatorFollowers)} 粉丝</span>
@@ -204,16 +217,33 @@ export function PlacementCard({ placement: p, projectName, hideCreatorHeader }: 
 
       <div className="mt-3 flex items-center justify-between border-t border-[#eceae3] pt-2 text-[10px] text-[#939084]">
         <span>
-          发布 {p.postedAt} · 费用 {fmtMoney(p.spendUsd, 0)}
+          发布 {p.postedAt} ·{" "}
+          {phase === "candidate" ? "候选观察中" : `费用 ${fmtMoney(p.spendUsd, 0)}`}
         </span>
         <PlacementActionsMenu
           paused={paused}
           onTogglePaused={() => togglePlacementPaused(p.id)}
+          completed={completed}
+          onMarkCompleted={() => markPlacementCompleted(p.id)}
           postUrl={p.postUrl}
           onDelete={() => setPlacementDeleted(p.id)}
         />
       </div>
     </article>
+  );
+}
+
+// 合作生命周期标签 —— 候选 / 合作中 / 已完成。
+function PhaseChip({ phase }: { phase: Placement["collabPhase"] }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium",
+        COLLAB_PHASE_BADGE[phase],
+      )}
+    >
+      {COLLAB_PHASE_LABEL[phase]}
+    </span>
   );
 }
 

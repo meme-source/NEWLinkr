@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronDown, MoreHorizontal, Pencil } from "lucide-react";
+import { ChevronDown, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -219,14 +219,6 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
             >
               <Pencil className="h-3.5 w-3.5" />
               编辑
-            </Button>
-            <Button
-              unstyled
-              type="button"
-              aria-label="更多操作"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:bg-[#fffdf9]"
-            >
-              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </div>
         ) : null}

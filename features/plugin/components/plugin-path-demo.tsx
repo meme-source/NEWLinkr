@@ -26,6 +26,7 @@ import { CreatorAvatarWithHover } from "@/features/plugin/components/creator-ava
 import { CreatorProfileHeader } from "@/features/plugin/components/creator-profile-header";
 import { TiktokVideoTile } from "@/features/plugin/components/tiktok-video-tile";
 import type { TiktokVideoCategory } from "@/features/plugin/components/tiktok-video-tile/types";
+import { SinglePostPage } from "@/features/plugin/components/video-analysis-mock/SinglePostPage";
 import {
   CreateProjectModal,
   DEFAULT_ENABLED_BADGE_CATEGORIES,
@@ -301,6 +302,9 @@ export default function PluginPathDemo() {
   const [compactViewport, setCompactViewport] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(1440);
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("current");
+  // 浏览器里当前打开的帖子 id（synthetic video id）；null = 还停在博主个人主页，
+  // 此时「单帖 AI 分析」入口锁住。
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<EmailTemplateKey>("");
   const [emailDraft, setEmailDraft] = useState("");
   const cardCloseRef = useRef<HTMLButtonElement>(null);
@@ -1063,6 +1067,22 @@ export default function PluginPathDemo() {
     setDemoStage("floating");
   };
 
+  // 用户在博主主页点某条帖子 —— 主内容区切到抖音单帖详情页，侧边栏自动弹出
+  // 并定位到「单帖 AI 分析」。
+  const handleSelectPost = (postId: string) => {
+    setOpenPostId(postId);
+    setActiveSidebarTab("single-post");
+    setSidebarCollapsed(false);
+    setSidebarOpen(true);
+    setDemoStage("floating");
+  };
+
+  // 从单帖详情页「返回主页」—— 回到博主九宫格，单帖入口重新锁住。
+  const closePost = () => {
+    setOpenPostId(null);
+    setActiveSidebarTab((tab) => (tab === "single-post" ? "current" : tab));
+  };
+
   const handleDeleteResultPopup = () => {
     setResultPopupOpen(false);
     setHasSearched(false);
@@ -1187,13 +1207,19 @@ export default function PluginPathDemo() {
               </div>
             </div>
 
-            <FakeTiktokProfile
-              creator={activeCreator}
-              dataCheckOn={dataCheckOn}
-              scrapeCount={scrapeCount}
-              inlineDataKeys={inlineDataKeys}
-              enabledBadgeCategories={enabledBadgeCategories}
-            />
+            {openPostId !== null ? (
+              // 点开帖子后，主内容区从博主九宫格切到抖音单帖详情页。
+              <SinglePostPage onBack={closePost} />
+            ) : (
+              <FakeTiktokProfile
+                creator={activeCreator}
+                dataCheckOn={dataCheckOn}
+                scrapeCount={scrapeCount}
+                inlineDataKeys={inlineDataKeys}
+                enabledBadgeCategories={enabledBadgeCategories}
+                onOpenPost={handleSelectPost}
+              />
+            )}
           </div>
 
           {sidebarOpen ? (
@@ -1254,6 +1280,10 @@ export default function PluginPathDemo() {
               onRecordQuickSettingsChange={(message) => setFeedback(message)}
               enabledBadgeCategories={enabledBadgeCategories}
               onToggleBadgeCategory={toggleBadgeCategory}
+              isSinglePostUnlocked={openPostId !== null}
+              onLockedSinglePostClick={() =>
+                setFeedback("先在浏览器里打开任意一个帖子，再使用「单帖 AI 分析」")
+              }
             />
           ) : null}
 
@@ -1409,12 +1439,15 @@ function FakeTiktokProfile({
   scrapeCount,
   inlineDataKeys,
   enabledBadgeCategories,
+  onOpenPost,
 }: {
   creator: CreatorProfile;
   dataCheckOn: boolean;
   scrapeCount: number;
   inlineDataKeys: InlineDataKey[];
   enabledBadgeCategories: ReadonlySet<TiktokVideoCategory>;
+  // 点击任意一条帖子的回调 —— 主内容区切到抖音单帖详情页，侧边栏弹到「单帖 AI 分析」。
+  onOpenPost: (videoId: string) => void;
 }) {
   const viralThreshold = DEFAULT_VIRAL_RATIO_THRESHOLD;
   const flopThreshold = DEFAULT_FLOP_RATIO_THRESHOLD;
@@ -1501,9 +1534,13 @@ function FakeTiktokProfile({
               const rank = rankMap.get(video.id) ?? 0;
               const playMedianRatio = getPlayMedianRatio(video);
               return (
-                <div
+                <Button
+                  unstyled
+                  type="button"
                   key={video.id}
-                  className="relative aspect-[3/4] overflow-hidden rounded-[8px] bg-[linear-gradient(180deg,#939084_0%,#36342e_55%,#36342e_100%)] text-[#fffefb] transition-transform duration-150 hover:-translate-y-0.5"
+                  onClick={() => onOpenPost(video.id)}
+                  title="点击打开单帖 AI 分析"
+                  className="relative block aspect-[3/4] w-full overflow-hidden rounded-[8px] bg-[linear-gradient(180deg,#939084_0%,#36342e_55%,#36342e_100%)] text-left text-[#fffefb] transition-transform duration-150 hover:-translate-y-0.5"
                 >
                   {/* top row: speed + duration */}
                   <div className="absolute top-0 right-0 left-0 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
@@ -1555,7 +1592,7 @@ function FakeTiktokProfile({
                       ) : null}
                     </div>
                   </div>
-                </div>
+                </Button>
               );
             })}
           </div>
@@ -1575,21 +1612,29 @@ function FakeTiktokProfile({
                       ? "flop"
                       : "normal";
             return (
-              <TiktokVideoTile
+              <Button
+                unstyled
+                type="button"
                 key={video.id}
-                videoId={video.id}
-                category={autoCategory}
-                ratio={ratio}
-                durationSec={video.durationSec}
-                ageLabel={`${video.hoursAgo} hours`}
-                erPct={video.erPct}
-                plays={video.plays}
-                likes={video.likes}
-                comments={video.comments}
-                viralThreshold={viralThreshold}
-                flopThreshold={flopThreshold}
-                enabledCategories={enabledBadgeCategories}
-              />
+                onClick={() => onOpenPost(video.id)}
+                title="点击打开单帖 AI 分析"
+                className="relative block w-full rounded-[8px] text-left transition-transform"
+              >
+                <TiktokVideoTile
+                  videoId={video.id}
+                  category={autoCategory}
+                  ratio={ratio}
+                  durationSec={video.durationSec}
+                  ageLabel={`${video.hoursAgo} hours`}
+                  erPct={video.erPct}
+                  plays={video.plays}
+                  likes={video.likes}
+                  comments={video.comments}
+                  viralThreshold={viralThreshold}
+                  flopThreshold={flopThreshold}
+                  enabledCategories={enabledBadgeCategories}
+                />
+              </Button>
             );
           })}
         </div>

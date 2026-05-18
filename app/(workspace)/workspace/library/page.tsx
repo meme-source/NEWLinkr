@@ -21,6 +21,10 @@ import {
   type RowDialogState,
 } from "@/features/library/components/library-row-action-dialog";
 import { LibraryToast } from "@/features/library/components/library-toast";
+import {
+  AddPlacementDialog,
+  type AddPlacementCreatorPrefill,
+} from "@/features/outreach/components/add-placement-dialog";
 import type { RowAction } from "@/features/library/components/library-row";
 import {
   bucketCounts,
@@ -47,8 +51,10 @@ export default function LibraryPage() {
   const [bulkOutreachOpen, setBulkOutreachOpen] = useState(false);
   // 行级三点菜单的二级动作（移项目 / 删除）需要二次确认或选择，统一在 page 层持有状态。
   const [rowDialog, setRowDialog] = useState<RowDialogState>(null);
-  // toast 用于行级"投放追踪 / 移项目 / 删除"等需要轻量反馈的动作。
+  // toast 用于行级"移项目 / 删除"等需要轻量反馈的动作。
   const [toast, setToast] = useState<{ message: string; actionLabel?: string } | null>(null);
+  // 行级「投放追踪」打开 TrackingSetupDialog —— 博主信息 prefill，让用户填链接 / 周期 / 合作信息。
+  const [trackPrefill, setTrackPrefill] = useState<AddPlacementCreatorPrefill | null>(null);
 
   const filter = useLibraryFilter();
   const selection = useLibrarySelection();
@@ -138,12 +144,18 @@ export default function LibraryPage() {
       return;
     }
     if (action === "track") {
-      // mock 阶段：直接打日志 + 给一个带"查看看板"动作的 toast。
-      // Phase 1+ 改为 service 调用 tracking.add。
-      console.info("library row track", { creatorId: creator.id });
-      setToast({
-        message: `已将 ${creator.name} 加入追踪看板`,
-        actionLabel: "查看看板",
+      // 「投放追踪」打开 TrackingSetupDialog，博主信息 prefill；用户填链接 /
+      // 周期 / 合作信息后写入投放看板（candidate / collaborating）。
+      setTrackPrefill({
+        creatorHandle: creator.handle,
+        creatorName: creator.name,
+        creatorAvatarUrl:
+          creator.avatar ??
+          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(creator.handle)}`,
+        creatorFollowers: creator.followers,
+        creatorCategory: creator.category,
+        creatorProfileUrl:
+          creator.socialLinks[0]?.url ?? `https://www.tiktok.com/${creator.handle}`,
       });
       return;
     }
@@ -358,6 +370,12 @@ export default function LibraryPage() {
         actionLabel={toast?.actionLabel}
         onAction={handleToastAction}
         onDismiss={() => setToast(null)}
+      />
+
+      <AddPlacementDialog
+        open={trackPrefill !== null}
+        onClose={() => setTrackPrefill(null)}
+        prefill={trackPrefill ?? undefined}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Lock, Sparkles } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -219,8 +219,8 @@ function UnlockedShell({
             </>
           ) : (
             <>
-              <Sparkles className="h-3.5 w-3.5" />
-              {empty ? `发起深度分析（消耗 ${cost} 积分）` : `消耗 ${cost} 积分解锁`}
+              <Lock className="h-3.5 w-3.5" />
+              {`消耗 ${cost} 积分解锁`}
             </>
           )}
         </Button>

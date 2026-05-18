@@ -32,8 +32,10 @@ export interface MockPost {
     bookmark: string;
     share: string;
   };
-  // 投放维度的 tag（"重点投放" / "测试中" 等）— 给「投放效果监控」accordion 顶部用
+  // 投放维度的 tag（"重点投放" / "测试中" 等）— 给「单帖追踪」tab 顶部用
   placementTags: string[];
+  // 近 7 天播放量采样点 —— 「单帖追踪」tab 的趋势小图用（借鉴 Web 投放监控）。
+  viewsTrend7d: number[];
   // 视频画面占位文字（叠在 VideoStage 中央偏下）
   overlay: string;
   // 哪些功能本帖已解锁 —— 切换帖子时 sidebar 重新读取
@@ -71,8 +73,10 @@ export const MOCK_POSTS: MockPost[] = [
       share: "1,204",
     },
     placementTags: ["重点投放", "Q2 测试"],
+    viewsTrend7d: [21_400, 25_800, 29_100, 32_600, 34_900, 36_700, 38_200],
     overlay: "157cm / 5'2\" · 52kg / 115lbs · Korean",
-    unlocked: ["track", "audience", "fake-fans", "extract-video", "extract-audio"],
+    // 受众画像 / 粉丝真伪 一开始都锁住 —— 与「字幕」一样，要花积分才解锁。
+    unlocked: ["track", "extract-video", "extract-audio"],
     audience: {
       gender: { male: 52, female: 48 },
       age: [
@@ -111,8 +115,10 @@ export const MOCK_POSTS: MockPost[] = [
       share: "84K",
     },
     placementTags: ["万圣节合作", "已结案"],
+    viewsTrend7d: [980_000, 1_120_000, 1_240_000, 1_310_000, 1_360_000, 1_385_000, 1_400_000],
     overlay: "Halloween 2025 · Silent Hill Nurse",
-    unlocked: ["track", "audience", "extract-video", "extract-audio", "subtitle"],
+    // 受众画像 / 粉丝真伪 锁住；字幕此前已解锁，留作「已解锁」对照。
+    unlocked: ["track", "extract-video", "extract-audio", "subtitle"],
     audience: {
       gender: { male: 28, female: 72 },
       age: [
@@ -131,10 +137,10 @@ export const MOCK_POSTS: MockPost[] = [
   },
 ];
 
-// 每个功能消耗多少次 token —— UI 标签 + 解锁 modal 都从这里读。
-// "placement" 是免费的 — 是已有投放数据的汇总展示 + 后台跳转，没新增 AI 调用。
+// 每个功能消耗多少积分 —— UI 标签 + 解锁 modal 都从这里读。
+// "placement"（投放效果监控）需先填「投放追踪」卡片并扣费才解锁监控数据。
 export const FEATURE_COST: Record<MockFeatureId, number> = {
-  placement: 0,
+  placement: 0.5,
   track: 0,
   "extract-video": 0,
   "extract-audio": 0,
@@ -156,64 +162,5 @@ export const FEATURE_LABEL: Record<MockFeatureId, string> = {
 };
 
 export const TOTAL_TOKENS_PER_MONTH = 10;
-// 跟 INITIAL_HISTORY 的 cost 总和保持一致（0.5+0.5+0.5+0.3=1.8），让 banner
-// 上显示的"已用 1.8"和「历史记录」tab 的条目能互相印证。
-export const INITIAL_TOKENS_USED = 1.8;
-
-// ─── 解锁历史 ─────────────────────────────────────────────────────────
-//
-// 用户在本月每次点确认解锁就 push 一条。跨帖切走不丢，让用户能从「历史记录」
-// tab 看到自己的钱花在哪里 + 一键回到那帖看数据。
-
-export interface UnlockHistoryEntry {
-  id: string;
-  postId: string;
-  postHandle: string;
-  postCaption: string;
-  featureId: MockFeatureId;
-  cost: number;
-  /** ISO timestamp — 用来分组（今天 / 昨天 / N 天前）。 */
-  unlockedAt: string;
-}
-
-// 演示 fixture：今天 + 昨天各 2 条，让用户进 mock 就能看到"已经有历史"。
-// 注意：postId × featureId 必须跟 MOCK_POSTS.unlocked 字段对齐（否则视觉
-// 矛盾 — 历史里说"解锁过 X"但 X 在 post.unlocked 里又不在）。
-export const INITIAL_HISTORY: UnlockHistoryEntry[] = [
-  {
-    id: "hist-4",
-    postId: "career_noloss",
-    postHandle: "@career_noloss",
-    postCaption: "📍 5 个 AI 投资技巧，让你不靠运气也能稳定收益",
-    featureId: "audience",
-    cost: 0.5,
-    unlockedAt: "2026-05-15T14:00:00",
-  },
-  {
-    id: "hist-3",
-    postId: "career_noloss",
-    postHandle: "@career_noloss",
-    postCaption: "📍 5 个 AI 投资技巧，让你不靠运气也能稳定收益",
-    featureId: "fake-fans",
-    cost: 0.5,
-    unlockedAt: "2026-05-15T14:05:00",
-  },
-  {
-    id: "hist-2",
-    postId: "nataliireynoldss",
-    postHandle: "@nataliireynoldss",
-    postCaption: "IG: NatalieReynolds silent hill nurse pyramid head costume",
-    featureId: "audience",
-    cost: 0.5,
-    unlockedAt: "2026-05-14T20:15:00",
-  },
-  {
-    id: "hist-1",
-    postId: "nataliireynoldss",
-    postHandle: "@nataliireynoldss",
-    postCaption: "IG: NatalieReynolds silent hill nurse pyramid head costume",
-    featureId: "subtitle",
-    cost: 0.3,
-    unlockedAt: "2026-05-14T20:18:00",
-  },
-];
+// 演示 fixture：本月已用积分（让 banner 一进来就有数据感）。
+export const INITIAL_TOKENS_USED = 0.3;

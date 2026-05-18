@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, MoreHorizontal, Pause, Play, Trash2 } from "lucide-react";
+import { CheckCircle2, ExternalLink, MoreHorizontal, Pause, Play, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,21 @@ import { cn } from "@/lib/utils";
 interface Props {
   paused: boolean;
   onTogglePaused: () => void;
+  // 合作生命周期是否已是「已完成」—— 是则「已完成」项置灰禁用。
+  completed: boolean;
+  onMarkCompleted: () => void;
   postUrl: string;
   onDelete: () => void;
 }
 
-export function PlacementActionsMenu({ paused, onTogglePaused, postUrl, onDelete }: Props) {
+export function PlacementActionsMenu({
+  paused,
+  onTogglePaused,
+  completed,
+  onMarkCompleted,
+  postUrl,
+  onDelete,
+}: Props) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -49,6 +59,15 @@ export function PlacementActionsMenu({ paused, onTogglePaused, postUrl, onDelete
             role="menu"
             className="absolute right-0 bottom-full z-20 mb-1 min-w-[140px] overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] py-1 shadow-md"
           >
+            <MenuButton
+              onClick={() => {
+                close();
+                onMarkCompleted();
+              }}
+              icon={CheckCircle2}
+              label={completed ? "已完成" : "标记已完成"}
+              disabled={completed}
+            />
             <MenuButton
               onClick={() => {
                 close();
@@ -89,25 +108,33 @@ interface MenuButtonProps {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   tone?: "default" | "danger";
+  disabled?: boolean;
 }
 
-function MenuButton({ onClick, icon: Icon, label, tone = "default" }: MenuButtonProps) {
+function MenuButton({ onClick, icon: Icon, label, tone = "default", disabled }: MenuButtonProps) {
   return (
     <Button
       unstyled
       type="button"
       role="menuitem"
+      disabled={disabled}
       onClick={(event) => {
         event.stopPropagation();
+        if (disabled) return;
         onClick();
       }}
       className={cn(
-        "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[11px] hover:bg-[#fffdf9]",
-        tone === "danger" ? "text-[#ff4f00]" : "text-[#36342e]",
+        "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[11px]",
+        disabled
+          ? "cursor-not-allowed text-[#bdb9ad]"
+          : cn("hover:bg-[#fffdf9]", tone === "danger" ? "text-[#ff4f00]" : "text-[#36342e]"),
       )}
     >
       <Icon
-        className={cn("h-3.5 w-3.5", tone === "danger" ? "text-[#ff4f00]" : "text-[#939084]")}
+        className={cn(
+          "h-3.5 w-3.5",
+          disabled ? "text-[#bdb9ad]" : tone === "danger" ? "text-[#ff4f00]" : "text-[#939084]",
+        )}
         aria-hidden
       />
       <span className="flex-1">{label}</span>

@@ -3,8 +3,9 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 import type { OutreachCreator } from "@/features/outreach/data/outreach-types";
-import type { Placement } from "@/features/outreach/data/board-placements";
-import type { CollaborationStatus, CreatorCategory } from "@/types/api";
+import type { Placement, PlacementCollabPhase } from "@/features/outreach/data/board-placements";
+import { buildTrackedCreator } from "@/features/outreach/lib/tracked-creator";
+import type { CollaborationStatus, Creator, CreatorCategory } from "@/types/api";
 
 // §3.2 / §3.3 跨子组件共享的"建联看板状态覆盖"。
 // 建联看板和档期日历共用同一份 OUTREACH_CREATORS mock 数据；当用户在
@@ -34,6 +35,9 @@ interface OutreachStateValue {
   // 投放卡片：软删。命中的 id 会被父级 grid 与抽屉过滤掉。
   isPlacementDeleted: (placementId: string) => boolean;
   setPlacementDeleted: (placementId: string) => void;
+  // 投放卡片：用户在 ⋯ 菜单手动标记「已完成」（区别于自动识别的趋势 status）。
+  isPlacementCompleted: (placementId: string) => boolean;
+  markPlacementCompleted: (placementId: string) => void;
   // 投放卡片：刷新时间戳，未刷新过则为 null。卡片网格头部据此显示
   // "YYYY-MM-DD HH:mm 更新"。
   lastRefreshedAt: Date | null;
@@ -43,14 +47,25 @@ interface OutreachStateValue {
   // 网格按 addedPlacements 在前 / mock PLACEMENTS 在后的顺序合并展示。
   addedPlacements: Placement[];
   addPlacement: (input: AddPlacementInput) => void;
+  // 「投放追踪」弹窗录入的博主（候选 / 合作）同步进博主库 —— 博主库表格
+  // 把它们并到 getCreators() 之前展示。
+  addedCreators: Creator[];
 }
 
-// 添加追踪表单的入参。当前阶段只能从一条 TikTok 视频链接录入；
-// 链接里能解析到博主 handle，其余博主信息由调用方（drawer 已知 / grid 由 mock 解析）补齐。
+// 「投放追踪」表单的入参。从一条 TikTok 视频链接录入；链接里能解析到博主
+// handle，其余博主信息由调用方（drawer 已知 / grid 由 mock 解析）补齐。
 export interface AddPlacementInput {
   projectId: string;
   postUrl: string;
+  // 合作生命周期：candidate = 仅观察的候选；collaborating = 已确认合作。
+  collabPhase: PlacementCollabPhase;
+  // 合作费用（USD）；候选阶段为 0。
   spendUsd: number;
+  // 追踪周期（天）。
+  trackingPeriodDays?: number;
+  // 约定发布时间 / 追踪截止时间（仅合作阶段录入）。
+  publishAt?: string;
+  trackingEndsAt?: string;
   creatorHandle: string;
   creatorName: string;
   creatorAvatarUrl: string;
@@ -66,8 +81,10 @@ export function OutreachStateProvider({ children }: { children: React.ReactNode 
   const [publishOverrides, setPublishOverrides] = useState<Record<string, string | null>>({});
   const [pausedSet, setPausedSet] = useState<ReadonlySet<string>>(() => new Set());
   const [deletedSet, setDeletedSet] = useState<ReadonlySet<string>>(() => new Set());
+  const [completedSet, setCompletedSet] = useState<ReadonlySet<string>>(() => new Set());
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [addedPlacements, setAddedPlacements] = useState<readonly Placement[]>([]);
+  const [addedCreators, setAddedCreators] = useState<readonly Creator[]>([]);
 
   const resolveStatus = useCallback(
     (creator: OutreachCreator): CollaborationStatus => overrides[creator.id] ?? creator.status,
@@ -123,6 +140,21 @@ export function OutreachStateProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
+  const isPlacementCompleted = useCallback(
+    (placementId: string): boolean => completedSet.has(placementId),
+    [completedSet],
+  );
+
+  const markPlacementCompleted = useCallback((placementId: string) => {
+    setCompletedSet((prev) => {
+      if (prev.has(placementId)) return prev;
+      const next = new Set(prev);
+      next.add(placementId);
+      console.info("placement completed", { placementId });
+      return next;
+    });
+  }, []);
+
   const refreshPlacements = useCallback(() => {
     const now = new Date();
     setLastRefreshedAt(now);
@@ -150,8 +182,12 @@ export function OutreachStateProvider({ children }: { children: React.ReactNode 
       creatorProfileUrl: input.creatorProfileUrl,
       postedAt: `${yyyy}-${mm}-${dd}`,
       status: "稳定中",
+      collabPhase: input.collabPhase,
       spendUsd: input.spendUsd,
       postUrl: input.postUrl,
+      trackingPeriodDays: input.trackingPeriodDays,
+      publishAt: input.publishAt,
+      trackingEndsAt: input.trackingEndsAt,
       views: 0,
       er: 0,
       likes: 0,
@@ -162,11 +198,24 @@ export function OutreachStateProvider({ children }: { children: React.ReactNode 
       viewsTrend30d: Array.from({ length: 30 }, () => 0),
     };
     setAddedPlacements((prev) => [placeholder, ...prev]);
+    // 候选 / 合作博主同步进博主库。
+    const trackedCreator = buildTrackedCreator({
+      handle: input.creatorHandle,
+      name: input.creatorName,
+      avatar: input.creatorAvatarUrl,
+      followers: input.creatorFollowers,
+      category: input.creatorCategory,
+      projectId: input.projectId,
+      profileUrl: input.creatorProfileUrl,
+      phase: input.collabPhase,
+    });
+    setAddedCreators((prev) => [trackedCreator, ...prev]);
     setLastRefreshedAt(today);
     console.info("placement added", {
       id,
       postUrl: input.postUrl,
       creatorHandle: input.creatorHandle,
+      collabPhase: input.collabPhase,
     });
   }, []);
 
@@ -180,10 +229,13 @@ export function OutreachStateProvider({ children }: { children: React.ReactNode 
       togglePlacementPaused,
       isPlacementDeleted,
       setPlacementDeleted,
+      isPlacementCompleted,
+      markPlacementCompleted,
       lastRefreshedAt,
       refreshPlacements,
       addedPlacements: addedPlacements as Placement[],
       addPlacement,
+      addedCreators: addedCreators as Creator[],
     }),
     [
       resolveStatus,
@@ -194,10 +246,13 @@ export function OutreachStateProvider({ children }: { children: React.ReactNode 
       togglePlacementPaused,
       isPlacementDeleted,
       setPlacementDeleted,
+      isPlacementCompleted,
+      markPlacementCompleted,
       lastRefreshedAt,
       refreshPlacements,
       addedPlacements,
       addPlacement,
+      addedCreators,
     ],
   );
 
@@ -219,10 +274,13 @@ export function useOutreachState(): OutreachStateValue {
       togglePlacementPaused: () => {},
       isPlacementDeleted: () => false,
       setPlacementDeleted: () => {},
+      isPlacementCompleted: () => false,
+      markPlacementCompleted: () => {},
       lastRefreshedAt: null,
       refreshPlacements: () => {},
       addedPlacements: [],
       addPlacement: () => {},
+      addedCreators: [],
     };
   }
   return ctx;

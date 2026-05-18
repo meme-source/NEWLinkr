@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, Loader2, Lock, Sparkles } from "lucide-react";
+import { ExternalLink, Loader2, Lock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { CreatorProfile } from "@/features/plugin/types";
@@ -132,11 +132,8 @@ function AudienceGate({ analyzing, onUnlock }: { analyzing: boolean; onUnlock: (
             </>
           ) : (
             <>
-              <Sparkles className="h-3.5 w-3.5" />
-              继续深度分析
-              <span className="rounded-full bg-[#fffefb]/20 px-1.5 py-[1px] text-[10px] font-medium text-[#fffefb]/90">
-                消耗 {AUDIENCE_UNLOCK_COST} 积分
-              </span>
+              <Lock className="h-3.5 w-3.5" />
+              消耗 {AUDIENCE_UNLOCK_COST} 积分解锁
             </>
           )}
         </Button>

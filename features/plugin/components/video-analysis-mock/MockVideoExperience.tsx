@@ -6,12 +6,10 @@ import { MockOtherTabPlaceholder, MockSidebarShell, type SidebarTabId } from "./
 import {
   FEATURE_COST,
   FEATURE_LABEL,
-  INITIAL_HISTORY,
   INITIAL_TOKENS_USED,
   MOCK_POSTS,
   TOTAL_TOKENS_PER_MONTH,
   type MockFeatureId,
-  type UnlockHistoryEntry,
 } from "./mock-posts";
 import { PostSwitcher } from "./PostSwitcher";
 import { SinglePostAnalysisView, type AnalysisSubTab } from "./SinglePostAnalysisView";
@@ -19,33 +17,19 @@ import { UnlockConfirmModal } from "./UnlockConfirmModal";
 import { VideoStage } from "./VideoStage";
 
 /**
- * MockVideoExperience — 视频分析 sidebar mock 的根组件。
+ * MockVideoExperience — 视频分析 sidebar 的独立预览页（/mock-video）。
  *
- * 3 列布局：
- *  - 左：黑色页面背景（不放任何 Linkr UI）
- *  - 中：VideoStage（9:16 视频）+ CommentsPanel（TT 右侧评论区）连一起
- *  - 右：MockSidebarShell（cream 卡 + 5+1 icon NavRail + 内容区）
- *
- * State：
- *  - currentPostId：跨帖切换的当前帖子（PostSwitcher 触发刷新）
- *  - sidebarTab：sidebar 当前激活的 tab（默认 single-post 直接展示单帖分析）
- *  - subTab："当前帖" / "历史记录"
- *  - tokensUsed：全局 token 余额，跨帖累计
- *  - unlockedExtra：用户在 mock session 中临时解锁的功能（按 postId 存储）
- *  - history：解锁历史（INITIAL_HISTORY 起步，每次确认解锁 push 一条）
- *  - pendingUnlock：解锁 confirm modal 的目标 feature
- *  - forceExpandFeatureId：从历史跳过来要展开的 accordion（消费完清掉）
+ * 已被插件 demo 内嵌的 SinglePostAnalysisPanel 取代，保留作为纯视觉预览。
+ * 3 列布局：黑色页面背景 / VideoStage + CommentsPanel / MockSidebarShell。
  */
 export function MockVideoExperience() {
   const [currentPostId, setCurrentPostId] = useState<string>(MOCK_POSTS[0].id);
   const [sidebarTab, setSidebarTab] = useState<SidebarTabId>("single-post");
-  const [subTab, setSubTab] = useState<AnalysisSubTab>("current");
+  const [subTab, setSubTab] = useState<AnalysisSubTab>("analysis");
   const [tokensUsed, setTokensUsed] = useState<number>(INITIAL_TOKENS_USED);
   const [unlockedExtra, setUnlockedExtra] = useState<Record<string, MockFeatureId[]>>({});
   const [pendingUnlock, setPendingUnlock] = useState<MockFeatureId | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [history, setHistory] = useState<UnlockHistoryEntry[]>(INITIAL_HISTORY);
-  const [forceExpandFeatureId, setForceExpandFeatureId] = useState<MockFeatureId | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -53,7 +37,6 @@ export function MockVideoExperience() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
-  // 合并 fixture + session 解锁项 —— 传给 SinglePostAnalysisView 的 post.unlocked。
   const currentPost = useMemo(() => {
     const base = MOCK_POSTS.find((p) => p.id === currentPostId) ?? MOCK_POSTS[0];
     const extra = unlockedExtra[base.id] ?? [];
@@ -77,33 +60,9 @@ export function MockVideoExperience() {
       if (cur.includes(pendingUnlock)) return prev;
       return { ...prev, [currentPostId]: [...cur, pendingUnlock] };
     });
-    // 写一条新历史 —— 跨帖切走后，用户能在「历史记录」tab 看到这次解锁。
-    const post = MOCK_POSTS.find((p) => p.id === currentPostId);
-    if (post) {
-      setHistory((prev) => [
-        {
-          id: `hist-${Date.now()}`,
-          postId: post.id,
-          postHandle: post.handle,
-          postCaption: post.caption,
-          featureId: pendingUnlock,
-          cost,
-          unlockedAt: new Date().toISOString(),
-        },
-        ...prev,
-      ]);
-    }
     setToast(`已解锁「${FEATURE_LABEL[pendingUnlock]}」`);
     setPendingUnlock(null);
   }, [pendingUnlock, currentPostId]);
-
-  // 用户在「历史记录」tab 点条目 — 切到那帖 + 切回「当前帖」子 tab + 自动展开 accordion。
-  const handleHistoryItemClick = useCallback((entry: UnlockHistoryEntry) => {
-    setCurrentPostId(entry.postId);
-    setSubTab("current");
-    setForceExpandFeatureId(entry.featureId);
-    setToast(`已切换到 ${entry.postHandle} · ${FEATURE_LABEL[entry.featureId]}`);
-  }, []);
 
   const handleSwitchPost = useCallback(
     (postId: string) => {
@@ -115,8 +74,6 @@ export function MockVideoExperience() {
   );
 
   return (
-    // page 用 h-screen + overflow-hidden 钉死 viewport 高度，
-    // 让内部 sidebar 的 overflow-y-auto 真正生效（否则整页跟着内容撑大）
     <div className="relative flex h-screen overflow-hidden bg-[#0a0a0a]">
       <div className="flex flex-1 items-center justify-center px-6 py-6">
         <div className="flex gap-0">
@@ -153,10 +110,7 @@ export function MockVideoExperience() {
               onRequestUnlock={handleRequestUnlock}
               subTab={subTab}
               onSubTabChange={setSubTab}
-              history={history}
-              onHistoryItemClick={handleHistoryItemClick}
-              forceExpandFeatureId={forceExpandFeatureId}
-              onForceExpandConsumed={() => setForceExpandFeatureId(null)}
+              onOpenTracking={() => setToast("投放追踪：请在插件内打开使用")}
             />
           ) : (
             <MockOtherTabPlaceholder label={labelForTab(sidebarTab)} />

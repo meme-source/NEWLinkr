@@ -48,7 +48,7 @@ export function HeaderActions({ creator, rightSlot }: Props) {
         <Search className="h-3.5 w-3.5" /> 找相似
       </ActionSecondary>
       <ActionSecondary onClick={() => setAddOpen(true)}>
-        <Target className="h-3.5 w-3.5" /> 添加追踪
+        <Target className="h-3.5 w-3.5" /> 投放追踪
       </ActionSecondary>
       {rightSlot}
       <AddPlacementDialog open={addOpen} onClose={() => setAddOpen(false)} prefill={prefill} />

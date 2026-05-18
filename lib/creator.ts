@@ -137,6 +137,13 @@ export function dominantStatus(creator: Creator): CollaborationStatus | null {
   );
 }
 
+// 收藏判定 —— 全局唯一规则，博主库 / 抽屉 / 项目卡片「达人投放」都从这里取。
+// 凡是被「筛选过」的博主即视为已收藏（红心点亮）：合作状态只要不是「候选 pending」
+// （刚进库、尚未决定是否建联）就算筛选过。没有任何合作 = 纯候选 = 未收藏。
+export function deriveFavorited(collaborations: Collaboration[]): boolean {
+  return collaborations.some((collab) => collab.status !== "pending");
+}
+
 // 真实存在投放卡片就意味着合作已经在执行：把前置阶段（候选 / 待建联 / 已发送）
 // 的状态在 UI 层归一化为「合作中」。
 //

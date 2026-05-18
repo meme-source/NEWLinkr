@@ -189,11 +189,11 @@ function PlacementGrid({
             unstyled
             type="button"
             onClick={() => setAddOpen(true)}
-            aria-label="添加追踪"
-            title="添加追踪"
+            aria-label="投放追踪"
+            title="投放追踪"
             className="inline-flex items-center gap-1 rounded-full border border-[#c5c0b1] bg-[#fffefb] px-2 py-0.5 text-[11px] font-medium text-[#36342e] transition-colors hover:border-[#ff4f00] hover:text-[#ff4f00]"
           >
-            <Plus className="h-3 w-3" aria-hidden /> 添加追踪
+            <Plus className="h-3 w-3" aria-hidden /> 投放追踪
           </Button>
           <Button
             unstyled

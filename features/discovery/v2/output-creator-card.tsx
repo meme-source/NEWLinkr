@@ -1,27 +1,27 @@
 "use client";
 
-// v3 §4.7 卡片首屏。和 v2 的 CompositeCreatorCard 是并存关系（v2 卡片仍在
-// 旧入口下使用），等数据源全切到 FeatureGroupView 后再删 CompositeCreatorCard。
-//
-// 这张卡跟 v2 的核心差异：
-//   - 顶右角的 ER 角标改成「特征匹配度 NN」
-//   - 中段不再展示 3 张视频砖 + 单条 reason，而是 4 个 matched-feature 徽章
-//   - 多一行 ContactabilityBar（粉丝 / 中位播放 / ER / 邮箱状态 / 可建联）
-//   - 风险行保留，但取自 OutputCreatorView.risks[0]
-//   - 底部 NO / 收藏 按钮形态完全沿用 v2，避免引入第二套交互习惯
+// 博主发现卡片 —— 6 信息区结构(2026-05 发现页重构讨论):
+//   A 身份   → 头像 / handle / 达人类型
+//   B 量级   → 粉丝 / 均播 / ER          —— ContactabilityBar
+//   C 维度关系→ 维度专属主指标 + 推荐理由 —— CardDimensionMetric(随维度变)
+//   D 内容证据→ 近期作品样本             —— ContentSampleStrip
+//   E 建联   → 邮箱状态分档             —— ContactabilityBar
+//   F 风险   → risks[0]
+// 卡片是「决策卡」不是「档案页」—— 首屏只放决定收藏/跳过所需的最小集合,
+// 完整受众画像 / 历史样本 / 报价进点开后的详情。
 
 import { motion } from "framer-motion";
-import { ChevronDown, Check, Heart, MailCheck, MailWarning, Sparkles, X } from "lucide-react";
+import { ChevronDown, Heart, MailCheck, MailWarning, X } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { MATCHED_FEATURE_LABELS, listHitFeatures, type OutputCreatorView } from "../v3-view-models";
+import type { OutputCreatorView } from "../v3-view-models";
+import { CardDimensionMetric, ContentSampleStrip, dimensionBadge } from "./card-dimension-metric";
 
 const BRAND = "#ff4f00";
 
-// v3 §4.8：详情页"匹配组合分析 + 参考依据"在 mock 阶段下沉为卡片内嵌
-// 折叠区。groupContext 由所属 FeatureGroup 注入，包含组名与脱敏的 rationale。
-// 完整版（独立抽屉 + 历史样本 + 基线对照）等真后端 API 接通后再做。
 export interface OutputCreatorCardGroupContext {
   groupName: string;
   rationale: string;
@@ -34,51 +34,38 @@ interface Props {
   onSkip: (id: string) => void;
   onOpenProfile: (creator: OutputCreatorView) => void;
   groupContext?: OutputCreatorCardGroupContext;
-  /** "根据此博主找相似"：把这位 creator 追加到 session 的种子池。空表示不支持
-   * 找相似入口（例如纯 intake 流程下不出找相似）。 */
+  /** "根据此博主找相似"：把这位 creator 追加到 session 的种子池。 */
   onFindSimilar?: (creator: OutputCreatorView) => void;
-  /** 这位 creator 自己已经在种子池里时为 true —— 找相似按钮变成禁用状态，
-   * 视觉上提示用户"你已经在 seed 这一位了"。 */
+  /** 这位 creator 自己已经在种子池里时为 true。 */
   isSeed?: boolean;
 }
 
-// 给 ContactabilityBar 用的数字格式化 —— 把 89000 渲染成 "89K"。
 function compactNum(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
   return String(n);
 }
 
-function MatchedFeatureRow({ creator }: { creator: OutputCreatorView }) {
-  const axes = Object.keys(MATCHED_FEATURE_LABELS) as Array<keyof typeof MATCHED_FEATURE_LABELS>;
+// 右上角主指标徽章 —— 维度专属数字(复刻置信度 / 场景适配度 / 最高播放 / 爆发倍数)。
+function MetricBadge({ label, value }: { label: string; value: string }) {
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-      {axes.map((axis) => {
-        const hit = creator.matchedFeatures[axis];
-        return (
-          <li
-            key={axis}
-            className="flex items-center gap-1.5 text-[12.5px] leading-tight"
-            style={{ color: hit ? "#201515" : "#b8b4a8" }}
-          >
-            <span
-              aria-hidden
-              className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: hit ? BRAND : "#f1efe9",
-                color: hit ? "white" : "#b8b4a8",
-              }}
-            >
-              {hit ? <Check size={10} strokeWidth={3} /> : <X size={9} strokeWidth={2.4} />}
-            </span>
-            {MATCHED_FEATURE_LABELS[axis]}
-          </li>
-        );
-      })}
-    </ul>
+    <div
+      className="shrink-0 rounded-md px-2 py-1 text-right"
+      style={{ backgroundColor: "rgba(255,79,0,0.1)" }}
+      title={label}
+    >
+      <div
+        className="text-[15px] leading-none font-extrabold tabular-nums"
+        style={{ color: BRAND }}
+      >
+        {value}
+      </div>
+      <div className="mt-0.5 text-[9px] leading-none font-medium text-[#939084]">{label}</div>
+    </div>
   );
 }
 
+// Zone B + E —— 量级(粉丝/均播/ER)+ 建联(邮箱分档)。
 function ContactabilityBar({ creator }: { creator: OutputCreatorView }) {
   const emailNode =
     creator.emailStatus === "verified" ? (
@@ -103,7 +90,7 @@ function ContactabilityBar({ creator }: { creator: OutputCreatorView }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-[#5d5a52]">
       <span className="tabular-nums">粉丝 {compactNum(creator.followers)}</span>
-      <span className="tabular-nums">中播 {compactNum(creator.medianViews)}</span>
+      <span className="tabular-nums">均播 {compactNum(creator.medianViews)}</span>
       <span className="tabular-nums" style={{ color: BRAND, fontWeight: 600 }}>
         {erText}
       </span>
@@ -126,7 +113,8 @@ export function OutputCreatorCard({
   const isSkipped = status === "skipped";
   const topRisk = creator.risks[0];
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const hitFeatures = listHitFeatures(creator.matchedFeatures);
+  const badge = dimensionBadge(creator.dimensionData);
+  const extraReasons = creator.reasons.slice(1);
 
   return (
     <motion.article
@@ -138,7 +126,7 @@ export function OutputCreatorCard({
       className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_36px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="flex flex-1 flex-col px-5 pt-5 pb-4">
-        {/* Header — avatar + handle + feature_match_score 角标 */}
+        {/* Zone A —— 身份 + 主指标徽章 */}
         <header className="flex items-start gap-3">
           <Button
             unstyled
@@ -174,30 +162,29 @@ export function OutputCreatorCard({
                 <h3 className="truncate text-[16px] leading-tight font-bold tracking-tight text-zinc-900">
                   {creator.handle}
                 </h3>
-                <div className="mt-0.5 truncate text-[11.5px] font-normal text-zinc-400">
-                  {creator.reasons[0] ?? "AI 推荐"}
-                </div>
+                {creator.creatorType ? (
+                  <span className="mt-1 inline-flex items-center rounded-full bg-[#f1efe9] px-2 py-0.5 text-[11px] font-medium text-[#5d5a52]">
+                    {creator.creatorType}
+                  </span>
+                ) : null}
               </Button>
-              <div
-                className="rounded-md px-2 py-0.5 text-[11px] font-extrabold whitespace-nowrap tabular-nums"
-                style={{ backgroundColor: "rgba(255,79,0,0.1)", color: BRAND }}
-                title="特征匹配度（0-100）"
-              >
-                匹配度 {creator.featureMatchScore}
-              </div>
+              <MetricBadge label={badge.label} value={badge.value} />
             </div>
           </div>
         </header>
 
-        {/* Matched features — 4 个轴是否命中 */}
-        <div className="mt-4 rounded-lg bg-[#fafaf6] p-3">
-          <div className="mb-2 text-[11px] font-semibold tracking-[0.06em] text-[#939084] uppercase">
-            匹配到的特征
-          </div>
-          <MatchedFeatureRow creator={creator} />
-        </div>
+        {/* 具体推荐理由 —— 人话,不是抽象打勾 */}
+        {creator.reasons[0] ? (
+          <p className="mt-2.5 text-[12px] leading-relaxed text-[#5d5a52]">{creator.reasons[0]}</p>
+        ) : null}
 
-        {/* Risks / brief 引导 —— mt-auto 把这一行钉到底部，保证多卡片对齐 */}
+        {/* Zone C —— 维度关系(随维度变) */}
+        <CardDimensionMetric creator={creator} />
+
+        {/* Zone D —— 内容证据 */}
+        <ContentSampleStrip samples={creator.contentSamples} />
+
+        {/* Zone F —— 风险。mt-auto 把这一行钉到底部,保证多卡片对齐 */}
         <p
           className="mt-auto flex items-start gap-1.5 pt-4 text-[12px] leading-relaxed text-zinc-500"
           style={{ minHeight: "calc(2 * 1.55em + 1rem)" }}
@@ -206,13 +193,12 @@ export function OutputCreatorCard({
           <span className="line-clamp-2">{topRisk ?? "无明显风险，可按标准 brief 推进"}</span>
         </p>
 
-        {/* Contactability bar —— 粉丝 / 中播 / ER / 邮箱状态 */}
+        {/* Zone B + E —— 量级 + 建联 */}
         <div className="mt-3 border-t border-zinc-100 pt-3">
           <ContactabilityBar creator={creator} />
         </div>
 
-        {/* v3 §4.8 详情下沉版 —— 卡片内嵌折叠的匹配依据。groupContext 缺失
-            时按钮不出，避免空内容。 */}
+        {/* 匹配依据折叠区 —— 组上下文 + 其余推荐理由 */}
         {groupContext ? (
           <div className="mt-3 border-t border-zinc-100 pt-2">
             <Button
@@ -238,14 +224,15 @@ export function OutputCreatorCard({
                   <span className="font-medium">{groupContext.groupName}</span>
                 </div>
                 <div className="text-[#5d5a52]">{groupContext.rationale}</div>
-                <div>
-                  <span className="text-[#939084]">命中特征轴 </span>
-                  {hitFeatures.length === 0 ? (
-                    <span className="text-[#b8b4a8]">无 — 按通用规则候选</span>
-                  ) : (
-                    <span className="font-medium">{hitFeatures.join(" / ")}</span>
-                  )}
-                </div>
+                {extraReasons.length > 0 ? (
+                  <ul className="space-y-1">
+                    {extraReasons.map((r) => (
+                      <li key={r} className="text-[#5d5a52]">
+                        · {r}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 <Button
                   unstyled
                   type="button"
@@ -261,9 +248,7 @@ export function OutputCreatorCard({
         ) : null}
       </div>
 
-      {/* Action bar —— NO / 找相似 / 收藏 三键形态。
-          找相似在中间 —— 与 NO（左）+ 收藏（右）形成"否决 / 探索 / 接受"的三态语义。
-          缺省 onFindSimilar 时退化为原来的 NO / 收藏 双键，保持向后兼容。 */}
+      {/* Action bar —— NO / 找相似 / 收藏 三键(缺省 onFindSimilar 退化为双键)。 */}
       {onFindSimilar ? (
         <div className="grid grid-cols-3 border-t border-zinc-100">
           <Button

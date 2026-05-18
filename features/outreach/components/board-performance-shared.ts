@@ -2,7 +2,11 @@
 // Kept here (not in data/board-placements.ts) so the data file stays free of
 // UI/Tailwind concerns.
 
-import type { Placement, PlacementStatus } from "@/features/outreach/data/board-placements";
+import type {
+  Placement,
+  PlacementCollabPhase,
+  PlacementStatus,
+} from "@/features/outreach/data/board-placements";
 import type { CreatorCategory } from "@/types/api";
 
 // 量级三分桶（用于"量级统计"卡片与散点图配色）：
@@ -74,6 +78,19 @@ export const STATUS_TEXT_TONE: Record<PlacementStatus, string> = {
   增长中: "text-[#ff4f00]",
   稳定中: "text-[#939084]",
   下降中: "text-[#ff4f00]",
+};
+
+// 合作生命周期标签 —— 候选 / 合作中 / 已完成。与趋势 status 正交，单独成片。
+export const COLLAB_PHASE_LABEL: Record<PlacementCollabPhase, string> = {
+  candidate: "候选",
+  collaborating: "合作中",
+  completed: "已完成",
+};
+
+export const COLLAB_PHASE_BADGE: Record<PlacementCollabPhase, string> = {
+  candidate: "bg-[#fdf6e3] text-[#936400] border-[#e8d3a0]",
+  collaborating: "bg-[#fff7f4] text-[#ff4f00] border-[#ffd9c8]",
+  completed: "bg-[#ebf2ec] text-[#3d6a4a] border-[#c0d2c5]",
 };
 
 // 用户主动暂停时的徽章样式（独立于自动识别状态）。

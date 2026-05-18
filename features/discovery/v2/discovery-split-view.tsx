@@ -7,10 +7,7 @@ import { DEFAULT_RANGE } from "../data/chat-chips";
 import { IntentCards } from "../components/intent-cards";
 import { IntentHero } from "../components/intent-hero";
 import { InputArea } from "../components/input-area";
-import {
-  isEditorEmpty,
-  serializeEditorState,
-} from "../components/structured-editor/structured-editor";
+import { serializeEditorState } from "../components/structured-editor/structured-editor";
 import {
   DEFAULT_EDITOR_STATE,
   type StructuredEditorState,
@@ -21,8 +18,16 @@ import { useCreatorProfile } from "@/features/creator/components/creator-profile
 import { useWorkspaceProject } from "@/features/project/components/project-context";
 import type { FeatureGroupView, OutputCreatorView } from "../v3-view-models";
 import { AgentConsole, type AgentConsoleHandle } from "./agent-console";
-import { deriveFeatureGroups } from "./data/mock-feature-groups";
+import {
+  buildCompetitorConfirm,
+  buildScenarioConfirm,
+  ConfirmStep,
+  type ConfirmStepData,
+} from "./confirm-step";
+import { deriveFeatureGroups, type ConfirmedSelection } from "./data/mock-feature-groups";
+import { getDimension, isAnchorSatisfied } from "./dimensions";
 import { DiscardModal } from "./discard-modal";
+import type { ProposedScenario } from "./lib/scenario-proposal";
 import { applyBriefFilters, applyHardFilters } from "./filters";
 import { OutputCreatorCard } from "./output-creator-card";
 import { ProjectSwitcher } from "./project-switcher";
@@ -45,7 +50,8 @@ const BRAND = "#ff4f00";
 
 type CardStatus = "pending" | "saved" | "skipped";
 
-type RunState = "idle" | "thinking" | "ready";
+// `confirming`：提交后、跑 agent 前的中间确认层(场景勾选 / 竞品消歧)。
+type RunState = "idle" | "confirming" | "thinking" | "ready";
 
 interface UserMessage {
   productUrl: string | null;
@@ -91,6 +97,17 @@ export function DiscoverySplitView() {
   // 的是普通 intake，没有从某个具体博主出发。
   const [seeds, setSeeds] = useState<SeedDescriptor[]>([]);
 
+  // 中间确认层(§dimensions.confirmStep)：`confirmData` 驱动确认屏渲染;
+  // `confirmedSelection` 是用户在确认屏的选择,驱动结果分组(deriveFeatureGroups)。
+  // `scenarioProposalRef` 是 intake→confirm 之间的临时态,不进渲染,故用 ref。
+  const [confirmData, setConfirmData] = useState<ConfirmStepData | null>(null);
+  const [confirmedSelection, setConfirmedSelection] = useState<ConfirmedSelection>({
+    scenarios: [],
+    competitors: [],
+  });
+  const scenarioProposalRef = useRef<ProposedScenario[]>([]);
+  const pendingRunRef = useRef<{ message: UserMessage; brief: ParsedBrief } | null>(null);
+
   const consoleRef = useRef<AgentConsoleHandle>(null);
   // Sync guard against double-submit while the (async) brief parser is in
   // flight. setState is not synchronous, so a fast second Enter / click
@@ -104,13 +121,17 @@ export function DiscoverySplitView() {
 
   // v3 §4.6：把当前候选池按 FeatureGroup 重新分组。intent 影响每组的名称
   // 与 rationale（"竞品已验证组合" vs "高匹配场景组合" vs "近期爆款组合"）。
-  const featureGroups = useMemo(() => deriveFeatureGroups(creators, intent), [creators, intent]);
+  const featureGroups = useMemo(
+    () => deriveFeatureGroups(creators, intent, confirmedSelection),
+    [creators, intent, confirmedSelection],
+  );
 
   // Auto-collapse the workspace sidebar when entering split-view so the canvas
   // gets max width. We don't auto-expand on the way back — let the user keep
   // their preference once set.
   const { setCollapsed: setSidebarCollapsed } = useSidebarCollapse();
-  const isSplitView = runState !== "idle";
+  // 确认屏是居中全屏(非分栏)—— 只有 thinking / ready 才折叠侧边栏进分栏。
+  const isSplitView = runState === "thinking" || runState === "ready";
   useEffect(() => {
     if (isSplitView) setSidebarCollapsed(true);
   }, [isSplitView, setSidebarCollapsed]);
@@ -178,7 +199,8 @@ export function DiscoverySplitView() {
   const handleIntakeSubmit = useCallback(() => {
     if (intakeInFlightRef.current) return;
     if (runState === "thinking") return;
-    if (isEditorEmpty(editorState)) return;
+    // 维度锚点未满足 —— 不允许提交(竞品要竞品、场景要产品、爆款/低粉要品类)。
+    if (!isAnchorSatisfied(intent, editorState)) return;
     const product = editorState.productChip;
     const freeText = serializeEditorState(intent, editorState).trim();
     if (!freeText && !product) return;
@@ -207,12 +229,63 @@ export function DiscoverySplitView() {
           }
           return { ...prev, platform, countries };
         });
-        await runStreamingAgent(message, false, brief);
+        // 维度的中间交互层 —— AI 做了有后果的判断时,先让用户确认再跑 agent。
+        const dimension = getDimension(intent);
+        if (dimension.confirmStep === "scenario-pick") {
+          const { data, scenarios } = buildScenarioConfirm(brief);
+          scenarioProposalRef.current = scenarios;
+          pendingRunRef.current = { message, brief };
+          setConfirmData(data);
+          setRunState("confirming");
+        } else if (
+          dimension.confirmStep === "competitor-disambig" &&
+          !(editorState.brandMode === "manual" && editorState.brands.length > 0)
+        ) {
+          // 用户手动指定了竞品 → 锚点无歧义,跳过确认直接跑。
+          scenarioProposalRef.current = [];
+          pendingRunRef.current = { message, brief };
+          setConfirmData(buildCompetitorConfirm(brief));
+          setRunState("confirming");
+        } else {
+          await runStreamingAgent(message, false, brief);
+        }
       } finally {
         intakeInFlightRef.current = false;
       }
     })();
   }, [editorState, intent, runState, runStreamingAgent]);
+
+  // 确认屏「确定」—— 记录用户的场景 / 竞品选择,再跑 agent。
+  const handleConfirmComplete = useCallback(
+    (selectedIds: string[]) => {
+      const pending = pendingRunRef.current;
+      if (!pending || !confirmData) return;
+      pendingRunRef.current = null;
+      if (confirmData.kind === "scenario-pick") {
+        setConfirmedSelection({
+          scenarios: scenarioProposalRef.current.filter((s) => selectedIds.includes(s.id)),
+          competitors: [],
+        });
+      } else {
+        setConfirmedSelection({
+          scenarios: [],
+          competitors: confirmData.options
+            .filter((o) => selectedIds.includes(o.id))
+            .map((o) => o.title),
+        });
+      }
+      setConfirmData(null);
+      void runStreamingAgent(pending.message, false, pending.brief);
+    },
+    [confirmData, runStreamingAgent],
+  );
+
+  // 确认屏「返回修改输入」—— 丢弃这次确认,回到 intake。
+  const handleConfirmCancel = useCallback(() => {
+    pendingRunRef.current = null;
+    setConfirmData(null);
+    setRunState("idle");
+  }, []);
 
   const handleFollowUpSubmit = useCallback(() => {
     if (intakeInFlightRef.current) return;
@@ -316,6 +389,10 @@ export function DiscoverySplitView() {
     setFollowUpValue("");
     setParsedBrief(null);
     setSeeds([]);
+    setConfirmData(null);
+    setConfirmedSelection({ scenarios: [], competitors: [] });
+    pendingRunRef.current = null;
+    scenarioProposalRef.current = [];
     setToast("已丢弃此次搜索");
   }, []);
 
@@ -480,6 +557,12 @@ export function DiscoverySplitView() {
                 </div>
               </div>
             </motion.div>
+          ) : runState === "confirming" && confirmData ? (
+            <ConfirmStep
+              data={confirmData}
+              onConfirm={handleConfirmComplete}
+              onCancel={handleConfirmCancel}
+            />
           ) : (
             <motion.div
               key="split"
@@ -497,8 +580,6 @@ export function DiscoverySplitView() {
                   inputValue={followUpValue}
                   onInputChange={setFollowUpValue}
                   onSubmit={handleFollowUpSubmit}
-                  chips={chatChips}
-                  onChipsChange={handleChipsChange}
                   onRequestDiscard={handleRequestDiscard}
                   onToast={setToast}
                   seeds={seeds}

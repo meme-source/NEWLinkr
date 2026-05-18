@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -18,8 +18,8 @@ interface UnlockConfirmModalProps {
 }
 
 /**
- * UnlockConfirmModal — 小型居中弹窗。点击 paywall「消耗 0.5 次解锁」CTA 后弹出，
- * 二次确认是否扣 token。视觉跟 SinglePostAnalysisView 的 inline paywall 同源。
+ * UnlockConfirmModal — 小型居中弹窗。点击 paywall「消耗 0.5 积分解锁」CTA 后弹出，
+ * 二次确认是否扣积分。视觉跟 SinglePostAnalysisView 的 inline paywall 同源。
  */
 export function UnlockConfirmModal({
   open,
@@ -54,7 +54,7 @@ export function UnlockConfirmModal({
       >
         <div className="flex items-start justify-between px-4 pt-4 pb-2">
           <div className="flex items-center gap-2">
-            <Sparkles size={14} strokeWidth={2.4} style={{ color: "#ff4f00" }} aria-hidden />
+            <Lock size={14} strokeWidth={2.4} style={{ color: "#ff4f00" }} aria-hidden />
             <h2 className="text-[14px] font-semibold" style={{ color: "#201515" }}>
               解锁「{featureLabel}」
             </h2>
@@ -73,7 +73,7 @@ export function UnlockConfirmModal({
 
         <div className="px-4 pb-3">
           <p className="text-[12.5px] leading-[1.55]" style={{ color: "#36342e" }}>
-            此次操作消耗 <span className="font-semibold tabular-nums">{cost}</span> 次任务，
+            此次操作消耗 <span className="font-semibold tabular-nums">{cost}</span> 积分，
             解锁后本帖永久可见。
           </p>
           <div
@@ -82,11 +82,11 @@ export function UnlockConfirmModal({
           >
             <div className="flex items-center justify-between">
               <span style={{ color: "#939084" }}>本月剩余</span>
-              <span style={{ color: "#201515" }}>{remaining} 次</span>
+              <span style={{ color: "#201515" }}>{remaining} 积分</span>
             </div>
             <div className="mt-1 flex items-center justify-between">
               <span style={{ color: "#939084" }}>解锁后剩</span>
-              <span style={{ color: "#201515", fontWeight: 600 }}>{remainingAfter} 次</span>
+              <span style={{ color: "#201515", fontWeight: 600 }}>{remainingAfter} 积分</span>
             </div>
           </div>
         </div>

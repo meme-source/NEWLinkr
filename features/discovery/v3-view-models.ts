@@ -38,6 +38,46 @@ export interface MatchedFeaturesView {
   format: boolean;
 }
 
+// ── Content sample ──────────────────────────────────────────────────────────
+// 卡片「内容证据区」的近期作品样本 —— 让用户看到达人到底拍什么。
+export interface ContentSampleView {
+  thumbSeed: number;
+  postedAgo: string;
+  views: string;
+  /** 这条是不是品牌合作内容。 */
+  isCollab: boolean;
+}
+
+// ── Per-dimension card data ─────────────────────────────────────────────────
+// 产品决策(2026-05 发现页重构讨论):卡片主指标随维度变 —— 每个维度有自己的
+// 「置信度语言」与特异字段,不再统一用「证据强度」。
+//   - competitor → 复刻置信度 + 给哪个竞品拍过 / 合作条数
+//   - scenario   → 场景适配度 + 他能拍这个场景的角度 + 还适配哪些场景
+//   - trending   → 近期爆款表现(最高播放 / 爆款条数 / 发生时间)+ 对标拍法
+//   - lowFollower→ 爆发倍数(最高播放÷粉丝)+ 预估单价 + 爆款是否可复制
+export type CreatorDimensionData =
+  | {
+      kind: "competitor";
+      replicaConfidence: number;
+      collabBrand: string | null;
+      collabCount: number;
+    }
+  | { kind: "scenario"; fitScore: number; angle: string; alsoFits: string[] }
+  | {
+      kind: "trending";
+      peakViews: number;
+      viralCount: number;
+      postedAgo: string;
+      formatLabel: string;
+    }
+  | {
+      kind: "lowFollower";
+      burstMultiple: number;
+      peakViews: number;
+      estPrice: string;
+      repeatable: boolean;
+    };
+
 // ── Output creator ──────────────────────────────────────────────────────────
 // v3 卡片渲染所需的最小字段集合。详情页需要的更深字段（rate_card / audience
 // profile / 历史样本）走单独接口拉，不在这里堆。
@@ -58,6 +98,12 @@ export interface OutputCreatorView {
   matchedFeatures: MatchedFeaturesView;
   reasons: string[];
   risks: string[];
+  /** 达人垂类 / 类型 —— 场景维度卡片首屏突出展示。 */
+  creatorType: string;
+  /** 近期作品样本 —— 卡片「内容证据区」。 */
+  contentSamples: ContentSampleView[];
+  /** 维度专属卡片数据 —— 决定卡片主指标与特异字段。 */
+  dimensionData: CreatorDimensionData;
 }
 
 // ── Feature group ───────────────────────────────────────────────────────────
@@ -127,6 +173,16 @@ export function fromOutputCreator(api: OutputCreator): OutputCreatorView {
     matchedFeatures: fromMatchedFeatures(api.matched_features),
     reasons: api.reasons,
     risks: api.risks,
+    // 后端契约尚未带这三段卡片数据(Phase 0 stub)—— 给诚实的空值。
+    // mock 路径走 mock-feature-groups.ts,会填上真正的派生数据。
+    creatorType: "",
+    contentSamples: [],
+    dimensionData: {
+      kind: "competitor",
+      replicaConfidence: api.feature_match_score,
+      collabBrand: null,
+      collabCount: 0,
+    },
   };
 }
 
