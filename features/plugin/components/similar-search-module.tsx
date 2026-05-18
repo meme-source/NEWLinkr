@@ -2,7 +2,18 @@
 
 import { useId, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, RotateCcw } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { MultiSelectField } from "@/features/plugin/components/multi-select-field";
+
+type NumRange = { min: number | null; max: number | null };
+
+// Default range applied to both 粉丝数 and 平均播放量. Mirrors discovery
+// (features/discovery/data/chat-chips.ts → DEFAULT_RANGE): a soft floor of 1K
+// gates out the long tail of <1K creators that almost never represent serious
+// collab candidates. Users can clear either side to "不限" manually.
+const DEFAULT_RANGE: NumRange = { min: 1_000, max: null };
 
 export type SimilarSearchModeKey = "comprehensive" | "budget" | "seed";
 
@@ -29,17 +40,17 @@ const MODES: ModeDef[] = [
   {
     key: "seed",
     label: "找种子达人",
-    summary: "打开后台博主发现，基于当前达人扩展低重合、高潜力的种子。",
+    summary: "打开后台博主发现，从零物色一批适合的种子博主。",
     eta: "跳转",
   },
 ];
 
 // Per docs/DESIGN.md §6: outermost plugin cards use #fffefb cream surface with sand border.
 const SIDEBAR_CARD_CLASSES =
-  "relative overflow-hidden rounded-[20px] border border-[#c5c0b1] bg-[#fffefb]";
+  "relative overflow-hidden rounded-[8px] border border-[#c5c0b1] bg-[#fffefb]";
 // Per docs/DESIGN.md §4 Primary Orange button: flat #ff4f00, no gradient, no shadow.
 const PRIMARY_ACTION_BUTTON_CLASSES =
-  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-[13px] font-semibold tracking-[-0.01em] text-[#fffefb] transition-colors hover:bg-[#ff4f00] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4f00]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffefb]";
+  "inline-flex h-9 w-full items-center justify-center gap-2 rounded-[8px] bg-[#ff4f00] px-5 text-[13px] font-semibold tracking-[-0.01em] text-[#fffefb] transition-colors hover:bg-[#ff4f00] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff4f00]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffefb]";
 
 const REGION_OPTIONS = [
   "全球",
@@ -90,10 +101,11 @@ export function SimilarSearchModule({
   actionSubject,
   actionSubjectLabel = "当前博主",
 }: Props) {
-  const [region, setRegion] = useState("全球");
-  const [language, setLanguage] = useState("全部语言");
-  const [fans, setFans] = useState(10_000);
-  const [views, setViews] = useState(1_000);
+  // 地区 / 语言 are multi-select: an empty array means 全球 / 全部语言 (不限).
+  const [regions, setRegions] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [fans, setFans] = useState<NumRange>(DEFAULT_RANGE);
+  const [views, setViews] = useState<NumRange>(DEFAULT_RANGE);
 
   const active = MODES.find((m) => m.key === selectedMode) ?? MODES[0];
   const isSeed = active.key === "seed";
@@ -106,14 +118,15 @@ export function SimilarSearchModule({
           {header}
           {onOpenAnalysis ? (
             <div className="flex justify-center px-3.5 pb-3">
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={onOpenAnalysis}
                 className="inline-flex items-center gap-0.5 rounded-md px-2 py-0.5 text-[13px] font-medium text-[#ff4f00] transition-colors hover:bg-[#eceae3]"
                 style={{ letterSpacing: "-0.146px", lineHeight: "19.5px" }}
               >
                 查看完整档案 →
-              </button>
+              </Button>
             </div>
           ) : null}
         </div>
@@ -126,14 +139,15 @@ export function SimilarSearchModule({
           <div
             role="tablist"
             aria-label="相似搜索模式"
-            className="relative mx-3 mt-3 grid grid-cols-3 rounded-full p-1"
+            className="relative mx-3 mt-3 grid grid-cols-3 rounded-[8px] p-0.5"
             style={{ backgroundColor: "#eceae3" }}
           >
             {MODES.map((mode) => {
               const isActive = mode.key === active.key;
               const isSeedTab = mode.key === "seed";
               return (
-                <button
+                <Button
+                  unstyled
                   key={mode.key}
                   role="tab"
                   type="button"
@@ -146,7 +160,7 @@ export function SimilarSearchModule({
                     onSelectMode(mode.key);
                   }}
                   className={[
-                    "relative isolate inline-flex min-h-[28px] items-center justify-center gap-0.5 rounded-full px-1.5 text-[11.5px] font-semibold whitespace-nowrap transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#ff4f00]/30 focus-visible:outline-none focus-visible:ring-inset",
+                    "relative isolate inline-flex min-h-[30px] items-center justify-center gap-1 rounded-[6px] px-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#ff4f00]/30 focus-visible:outline-none focus-visible:ring-inset",
                     isActive ? "z-10 text-[#201515]" : "text-[#939084] hover:text-[#201515]",
                   ].join(" ")}
                 >
@@ -155,14 +169,14 @@ export function SimilarSearchModule({
                       layoutId="similar-search-active-tab"
                       aria-hidden="true"
                       transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.7 }}
-                      className="absolute inset-0 rounded-full border border-[#c5c0b1] bg-[#fffefb]"
+                      className="absolute inset-0 rounded-[6px] border border-[#c5c0b1] bg-[#fffefb]"
                     />
                   ) : null}
                   <span className="relative z-10 whitespace-nowrap">{mode.label}</span>
                   {isSeedTab ? (
-                    <ArrowUpRight className="relative z-10 h-2.5 w-2.5 shrink-0 opacity-70" />
+                    <ArrowUpRight className="relative z-10 h-3 w-3 shrink-0 opacity-70" />
                   ) : null}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -174,85 +188,71 @@ export function SimilarSearchModule({
 
           {isSeed ? (
             <div className="px-4 pt-2 pb-4">
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => onOpenSeedFinder?.()}
                 className={PRIMARY_ACTION_BUTTON_CLASSES}
               >
                 打开博主发现
                 <ArrowUpRight className="h-3.5 w-3.5" />
-              </button>
-              <div className="mt-2 text-center text-[10px] text-[#939084]">
-                将在后台打开并基于当前达人自动筛选
-              </div>
+              </Button>
             </div>
           ) : (
-            <div className="space-y-4 px-4 pt-2 pb-4">
+            <div className="space-y-2 px-4 pt-2 pb-4">
               <div className="grid grid-cols-2 gap-3">
-                <SelectField
+                <MultiSelectField
                   label="地区"
-                  value={region}
-                  onChange={setRegion}
-                  options={REGION_OPTIONS}
+                  allLabel={REGION_OPTIONS[0]}
+                  options={REGION_OPTIONS.slice(1)}
+                  values={regions}
+                  onChange={setRegions}
                 />
-                <SelectField
+                <MultiSelectField
                   label="语言"
-                  value={language}
-                  onChange={setLanguage}
-                  options={LANGUAGE_OPTIONS}
+                  allLabel={LANGUAGE_OPTIONS[0]}
+                  options={LANGUAGE_OPTIONS.slice(1)}
+                  values={languages}
+                  onChange={setLanguages}
                 />
               </div>
 
-              <RangeField
-                label="粉丝数"
-                value={fans}
-                onChange={setFans}
-                min={1_000}
-                max={1_000_000}
-                step={1_000}
-                formatter={formatCount}
-              />
-
-              <RangeField
-                label="平均观看量"
-                value={views}
-                onChange={setViews}
-                min={100}
-                max={500_000}
-                step={100}
-                formatter={formatCount}
-              />
+              <RangeField label="粉丝数" value={fans} onChange={setFans} />
+              <RangeField label="平均播放量" value={views} onChange={setViews} />
             </div>
           )}
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={isSeed ? () => onOpenSeedFinder?.() : onRunSearch}
-        disabled={isSearching}
-        aria-label={`根据 ${actionSubjectLabel} ${isSearching ? "搜索中" : active.label}，消耗 3 点`}
-        className={PRIMARY_ACTION_BUTTON_CLASSES}
-      >
-        <span>根据</span>
-        {actionSubject ? (
-          <span
-            aria-hidden="true"
-            className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full"
-          >
-            {actionSubject}
+      {!isSeed && (
+        <Button
+          unstyled
+          type="button"
+          onClick={onRunSearch}
+          disabled={isSearching}
+          aria-label={`根据 ${actionSubjectLabel} ${isSearching ? "搜索中" : active.label}，消耗 3 点`}
+          className={PRIMARY_ACTION_BUTTON_CLASSES}
+        >
+          <span>根据</span>
+          {actionSubject ? (
+            <span
+              aria-hidden="true"
+              className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full"
+            >
+              {actionSubject}
+            </span>
+          ) : (
+            <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[9px] font-semibold text-[#36342e]">
+              博
+            </span>
+          )}
+          <span>{isSearching ? "搜索中..." : active.label}</span>
+          <span aria-hidden="true" className="mx-1 h-3 w-px bg-[#fffefb]/35" />
+          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#fffefb]/90">
+            <PointsIcon className="h-3 w-3" />3
           </span>
-        ) : (
-          <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[9px] font-semibold text-[#36342e]">
-            博
-          </span>
-        )}
-        <span>{isSearching ? "搜索中..." : active.label}</span>
-        <span aria-hidden="true" className="mx-1 h-3 w-px bg-[#fffefb]/35" />
-        <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#fffefb]/90">
-          <PointsIcon className="h-3 w-3" />3
-        </span>
-      </button>
+        </Button>
+      )}
     </div>
   );
 }
@@ -268,123 +268,76 @@ function PointsIcon({ className }: { className?: string }) {
   );
 }
 
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: string[];
-}) {
-  const id = useId();
-  return (
-    <label htmlFor={id} className="block">
-      <span className="mb-1 block text-[9.5px] font-semibold tracking-[0.12em] text-[#939084] uppercase">
-        {label}
-      </span>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-full cursor-pointer appearance-none border-0 bg-transparent py-1 pr-5 pl-0 text-[13px] font-semibold text-[#201515] transition-colors outline-none hover:text-[#ff4f00] focus:text-[#ff4f00]"
-        >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="pointer-events-none absolute top-1/2 right-1 h-3 w-3 -translate-y-1/2 text-[#939084]" />
-      </div>
-    </label>
-  );
-}
-
+// Numeric min–max range field. Mirrors the discovery page's chip popover
+// (features/discovery/components/chip-bar.tsx RangeRow) so the plugin sidebar's
+// 找相似 / 找平替 filter feels identical to 博主发现页. Either side may be cleared
+// to null ("不限").
 function RangeField({
   label,
   value,
   onChange,
-  min,
-  max,
-  step,
-  formatter,
 }: {
   label: string;
-  value: number;
-  onChange: (value: number) => void;
-  min: number;
-  max: number;
-  step: number;
-  formatter: (value: number) => string;
+  value: NumRange;
+  onChange: (next: NumRange) => void;
 }) {
-  const id = useId();
-  const pct = ((value - min) / (max - min)) * 100;
-
   return (
     <div>
-      <div className="mb-0.5 flex items-baseline justify-between">
-        <label
-          htmlFor={id}
-          className="text-[9.5px] font-semibold tracking-[0.12em] text-[#939084] uppercase"
-        >
-          {label}
-        </label>
-        <span className="text-[12px] leading-none font-bold text-[#201515]">
-          {formatter(value)}
-        </span>
+      <div className="mb-1 text-[9.5px] font-semibold tracking-[0.12em] text-[#939084] uppercase">
+        {label}
       </div>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="linkr-range h-[3px] w-full cursor-pointer appearance-none rounded-full outline-none"
-        style={{
-          background: `linear-gradient(to right, #ff4f00 0%, #ff4f00 ${pct}%, #c5c0b1 ${pct}%, #c5c0b1 100%)`,
-        }}
-      />
-      <style jsx>{`
-        .linkr-range::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 12px;
-          height: 12px;
-          border-radius: 9999px;
-          background: #ff4f00;
-          border: 2px solid #fffefb;
-          box-shadow: 0 1px 4px rgba(201, 100, 66, 0.28);
-          cursor: pointer;
-        }
-        .linkr-range::-moz-range-thumb {
-          width: 12px;
-          height: 12px;
-          border-radius: 9999px;
-          background: #ff4f00;
-          border: 2px solid #fffefb;
-          box-shadow: 0 1px 4px rgba(201, 100, 66, 0.28);
-          cursor: pointer;
-        }
-      `}</style>
+      <div className="flex items-center gap-2 text-[12px]">
+        <RangeInput
+          value={value.min}
+          onChange={(v) => onChange({ ...value, min: v })}
+          ariaLabel={`${label} 下限`}
+        />
+        <span aria-hidden className="shrink-0 text-[11px] text-[#939084]">
+          –
+        </span>
+        <RangeInput
+          value={value.max}
+          onChange={(v) => onChange({ ...value, max: v })}
+          ariaLabel={`${label} 上限`}
+        />
+        <Button
+          unstyled
+          type="button"
+          onClick={() => onChange({ min: null, max: null })}
+          title="清空"
+          aria-label={`清空${label}`}
+          className="ml-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#939084] transition-colors hover:bg-[#eceae3] hover:text-[#36342e]"
+        >
+          <RotateCcw className="h-3 w-3" aria-hidden />
+        </Button>
+      </div>
     </div>
   );
 }
 
-function formatCount(value: number): string {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M`;
-  }
-  if (value >= 10_000) {
-    return `${Math.round(value / 1_000)}K`;
-  }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}K`;
-  }
-  return value.toLocaleString();
+function RangeInput({
+  value,
+  onChange,
+  ariaLabel,
+}: {
+  value: number | null;
+  onChange: (v: number | null) => void;
+  ariaLabel: string;
+}) {
+  const id = useId();
+  return (
+    <input
+      id={id}
+      type="text"
+      inputMode="numeric"
+      value={value === null ? "" : String(value)}
+      onChange={(event) => {
+        const raw = event.target.value.replace(/[^\d]/g, "");
+        onChange(raw === "" ? null : Number(raw));
+      }}
+      placeholder="不限"
+      aria-label={ariaLabel}
+      className="min-w-0 flex-1 rounded-md border border-[#c5c0b1] bg-[#fffefb] px-2 py-1 text-center text-[12px] text-[#201515] tabular-nums placeholder:text-[#939084] focus:border-[#ff4f00] focus:outline-none"
+    />
+  );
 }

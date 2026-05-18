@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Upload, X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -24,7 +26,7 @@ export function LibraryImportFlow({ open, onClose, onImport }: Props) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]"
+        className="relative w-full max-w-md overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="flex items-center justify-between border-b border-[#c5c0b1] px-4 py-3">
@@ -32,13 +34,14 @@ export function LibraryImportFlow({ open, onClose, onImport }: Props) {
             <Upload className="h-4 w-4 text-[#ff4f00]" />
             导入名单
           </div>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onClose}
             className="rounded-full p-1 text-[#939084] hover:bg-[#fffdf9]"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </header>
         <div className="space-y-3 px-4 py-4">
           <p className="text-[12px] text-[#36342e]">
@@ -49,19 +52,21 @@ export function LibraryImportFlow({ open, onClose, onImport }: Props) {
             onChange={(event) => setText(event.target.value)}
             rows={6}
             placeholder="@skincare_sam&#10;@fit_jenny&#10;@beautytipskaren"
-            className="w-full rounded-xl border border-[#c5c0b1] bg-[#fffdf9] p-3 text-[13px] text-[#201515] outline-none placeholder:text-[#939084] focus:border-[#ff4f00]"
+            className="w-full rounded-lg border border-[#c5c0b1] bg-[#fffdf9] p-3 text-[13px] text-[#201515] outline-none placeholder:text-[#939084] focus:border-[#ff4f00]"
           />
           <div className="text-[11px] text-[#939084]">已识别 {handles.length} 位博主</div>
         </div>
         <footer className="flex items-center justify-end gap-2 border-t border-[#c5c0b1] bg-[#fffdf9] px-4 py-3">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onClose}
             className="rounded-full border border-[#c5c0b1] bg-[#fffefb] px-3.5 py-1.5 text-[12px] text-[#36342e] hover:bg-[#fffdf9]"
           >
             取消
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             disabled={handles.length === 0}
             onClick={() => {
@@ -71,7 +76,7 @@ export function LibraryImportFlow({ open, onClose, onImport }: Props) {
             className="rounded-full bg-[#ff4f00] px-3.5 py-1.5 text-[12px] font-medium text-[#fffefb] transition-colors hover:bg-[#ff4f00] disabled:cursor-not-allowed disabled:bg-[#c5c0b1]"
           >
             导入
-          </button>
+          </Button>
         </footer>
       </div>
     </div>

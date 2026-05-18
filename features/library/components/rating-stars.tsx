@@ -5,7 +5,7 @@ import type { Rating } from "@/types/api";
 import { cn } from "@/lib/utils";
 
 export const RATING_LABELS: Record<Rating, string> = {
-  1: "普通",
+  1: "一般",
   2: "良好",
   3: "优秀",
 };

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Search, X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { tierLabel } from "@/features/settings/components/cpm/types";
 import {
   CPM_COUNTRY_DICT,
@@ -65,16 +66,17 @@ export function AddCountryButton({ currentTier, assignedMap, onPick }: AddCountr
 
   return (
     <div ref={wrapRef} className="relative">
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#ff4f00]/45 bg-[#fffefb] px-2.5 py-1 text-[11px] font-medium text-[#ff4f00] transition-colors hover:border-[#ff4f00]/80 hover:bg-[#fff7f4]"
       >
         <Plus className="h-3 w-3" />
         添加国家
-      </button>
+      </Button>
       {open ? (
-        <div className="absolute left-0 z-30 mt-2 w-72 overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb] shadow-xl">
+        <div className="absolute left-0 z-30 mt-2 w-72 overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] shadow-xl">
           <div className="flex items-center gap-2 border-b border-[#eceae3] px-3 py-2">
             <Search className="h-3.5 w-3.5 text-[#939084]" />
             <input
@@ -85,13 +87,14 @@ export function AddCountryButton({ currentTier, assignedMap, onPick }: AddCountr
               className="w-full bg-transparent text-xs text-[#201515] placeholder:text-[#939084] focus:outline-none"
             />
             {query ? (
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => setQuery("")}
                 className="rounded-full p-0.5 text-[#939084] transition-colors hover:bg-[#eceae3]"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             ) : null}
           </div>
           <div className="max-h-64 overflow-y-auto py-1">
@@ -104,7 +107,8 @@ export function AddCountryButton({ currentTier, assignedMap, onPick }: AddCountr
                 const assigned = assignedMap.get(c.name);
                 const isHere = assigned === currentTier;
                 return (
-                  <button
+                  <Button
+                    unstyled
                     key={c.name}
                     type="button"
                     disabled={isHere}
@@ -135,7 +139,7 @@ export function AddCountryButton({ currentTier, assignedMap, onPick }: AddCountr
                         {isHere ? "已在此档" : `${tierLabel(assigned)} → 迁移`}
                       </span>
                     ) : null}
-                  </button>
+                  </Button>
                 );
               })
             )}

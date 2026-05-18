@@ -1,17 +1,18 @@
 "use client";
 
-import { Check, ChevronDown, Globe2, TrendingUp, UsersRound } from "lucide-react";
+import { Check, ChevronDown, Globe2, MailCheck, RotateCcw, UsersRound } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import type { ChatChips, CountryCode, ViewsStep } from "../chat-types";
+
+import { Button } from "@/components/ui/button";
+import type { ChatChips, CountryCode, NumRange } from "../chat-types";
 import {
   COUNTRY_OPTIONS,
-  FOLLOWER_OPTIONS,
+  DEFAULT_RANGE,
   LANGUAGE_OPTIONS,
   PLATFORM_OPTIONS,
-  VIEWS_STEPS,
   geoLabel,
-  viewsLabel,
+  summarizeRange,
 } from "../data/chat-chips";
 import { T } from "../data/tokens";
 import { PlatformIcon } from "./platform-icons";
@@ -32,7 +33,8 @@ function PlatformSegment({ chips, onChange }: ChipBarProps) {
         const selected = chips.platform === p.id;
         const disabled = !p.available;
         return (
-          <button
+          <Button
+            unstyled
             key={p.id}
             type="button"
             onClick={() => {
@@ -64,7 +66,7 @@ function PlatformSegment({ chips, onChange }: ChipBarProps) {
                 即将开放，敬请期待
               </span>
             ) : null}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -161,7 +163,8 @@ function ChipShell({
 
   return (
     <div className="relative">
-      <button
+      <Button
+        unstyled
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -179,12 +182,12 @@ function ChipShell({
         <span style={{ color: T.stone }}>{prefix}</span>
         <span style={{ color: active ? T.nearBlack : T.charcoal, fontWeight: 500 }}>{label}</span>
         <ChevronDown size={12} style={{ color: T.stone }} aria-hidden />
-      </button>
+      </Button>
       {open && portalTarget
         ? createPortal(
             <div
               ref={popRef}
-              className="bg-background fixed z-50 overflow-hidden rounded-[14px] border shadow-[0_18px_44px_-26px_rgba(20,20,19,0.32)]"
+              className="bg-background fixed z-50 overflow-hidden rounded-lg border shadow-[0_18px_44px_-26px_rgba(20,20,19,0.32)]"
               style={{
                 borderColor: T.border,
                 width: popSize?.width ?? width,
@@ -311,14 +314,15 @@ function GeoPopover({ chips, onChange, onApply }: ChipBarProps & { onApply: () =
             {comboSummary(draftCountries, draftLanguages)}
           </span>
         </span>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={apply}
           className="rounded-full px-3.5 py-1 text-[12px] font-medium text-white transition-[filter] hover:brightness-110 active:scale-[0.98]"
           style={{ backgroundColor: T.terracotta }}
         >
           应用
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -350,14 +354,15 @@ function ColHeader({
       >
         {title}
       </span>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onAction}
         className="text-[11px] underline-offset-2 hover:underline"
         style={{ color: T.stone }}
       >
         {actionLabel}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -374,7 +379,8 @@ function CheckRow({
   label: string;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
       role="checkbox"
@@ -398,7 +404,7 @@ function CheckRow({
       </span>
       {leading ? <span className="shrink-0">{leading}</span> : null}
       <span className="truncate">{label}</span>
-    </button>
+    </Button>
   );
 }
 
@@ -416,7 +422,8 @@ function AnyRow({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
       className="flex w-full items-center gap-2 border-b px-3 py-1.5 text-left text-[12.5px]"
@@ -436,103 +443,170 @@ function AnyRow({
       <span className="text-[10.5px]" style={{ color: T.stone }}>
         {hint}
       </span>
-    </button>
+    </Button>
   );
 }
 
-// ── Followers popover ────────────────────────────────────────────────────────
-function FollowerPopover({ chips, onChange }: ChipBarProps) {
+// ── Range popover (粉丝 × 均播) ───────────────────────────────────────────────
+// Single follower range + single avg-views range. Multiple ranges are
+// intentionally not supported: a brief filter that overlays "Nano 5K–20K OR
+// Micro 50K–200K" mixes two different audience hypotheses and produces
+// confusing scoring downstream — users who want that should run two queries.
+// Defaults to "≥1K" on both axes (DEFAULT_RANGE); fully clearable to 不限.
+interface RangePopoverProps extends ChipBarProps {
+  onApply: () => void;
+}
+
+function RangePopover({ chips, onChange, onApply }: RangePopoverProps) {
+  const [followers, setFollowers] = useState<NumRange>(chips.followers);
+  const [views, setViews] = useState<NumRange>(chips.views);
+
+  const resetDefaults = () => {
+    setFollowers({ ...DEFAULT_RANGE });
+    setViews({ ...DEFAULT_RANGE });
+  };
+
+  const apply = () => {
+    onChange({ ...chips, followers, views });
+    onApply();
+  };
+
+  const summary = `粉丝 ${summarizeRange(followers)} · 平均播放量 ${summarizeRange(views)}`;
+
   return (
-    <div className="py-1">
-      {FOLLOWER_OPTIONS.map((f) => {
-        const active = f.id === chips.follower;
-        return (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => onChange({ ...chips, follower: f.id })}
-            className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[12.5px]"
-            style={{
-              backgroundColor: active ? T.ivory : "transparent",
-              color: active ? T.terracotta : T.nearBlack,
-            }}
-          >
-            <span className="font-medium">{f.label}</span>
-            {f.range ? (
-              <span className="text-[11px]" style={{ color: T.stone }}>
-                {f.range}
-              </span>
-            ) : null}
-          </button>
-        );
-      })}
+    <div>
+      <ColHeader title="粉丝量 · 平均播放量" actionLabel="重置默认" onAction={resetDefaults} />
+
+      <div className="space-y-2.5 px-3 py-3">
+        <RangeRow label="粉丝量" value={followers} onChange={setFollowers} />
+        <RangeRow label="平均播放量" value={views} onChange={setViews} />
+      </div>
+
+      <div
+        className="flex items-center justify-between gap-3 border-t px-3 py-2 text-[11.5px]"
+        style={{ borderColor: T.borderLight, color: T.charcoal }}
+      >
+        <span className="min-w-0 flex-1 truncate">
+          将筛选 · <span style={{ color: T.nearBlack, fontWeight: 500 }}>{summary}</span>
+        </span>
+        <Button
+          unstyled
+          type="button"
+          onClick={apply}
+          className="rounded-full px-3.5 py-1 text-[12px] font-medium text-white transition-[filter] hover:brightness-110 active:scale-[0.98]"
+          style={{ backgroundColor: T.terracotta }}
+        >
+          应用
+        </Button>
+      </div>
     </div>
   );
 }
 
-// ── Views slider popover ─────────────────────────────────────────────────────
-function ViewsPopover({ chips, onChange }: ChipBarProps) {
-  const current = VIEWS_STEPS.find((v) => v.step === chips.viewsStep) ?? VIEWS_STEPS[0];
-  const max = VIEWS_STEPS.length - 1;
-  const pct = (chips.viewsStep / max) * 100;
+function RangeRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: NumRange;
+  onChange: (next: NumRange) => void;
+}) {
   return (
-    <div className="px-4 pt-3 pb-4">
-      <div className="flex items-baseline justify-between">
-        <p className="text-[11px]" style={{ color: T.stone }}>
-          中位播放阈值
-        </p>
-        <p className="text-[14px] font-semibold" style={{ color: T.nearBlack }}>
-          {current.label}
-        </p>
-      </div>
-      <input
-        type="range"
-        min={0}
-        max={max}
-        step={1}
-        value={chips.viewsStep}
-        onChange={(e) => onChange({ ...chips, viewsStep: Number(e.target.value) as ViewsStep })}
-        aria-label="播放阈值"
-        className="mt-3 h-1.5 w-full cursor-pointer appearance-none rounded-full"
-        style={{
-          background: `linear-gradient(to right, ${T.terracotta} 0%, ${T.terracotta} ${pct}%, ${T.borderLight} ${pct}%, ${T.borderLight} 100%)`,
-        }}
+    <div className="flex items-center gap-2 text-[12px]">
+      <span
+        className="w-20 shrink-0 text-[11px] font-semibold tracking-[0.04em] uppercase"
+        style={{ color: T.stone }}
+      >
+        {label}
+      </span>
+      <RangeInput
+        value={value.min}
+        onChange={(v) => onChange({ ...value, min: v })}
+        ariaLabel={`${label} 下限`}
       />
-      <div className="mt-2 flex justify-between text-[10.5px]" style={{ color: T.stone }}>
-        {VIEWS_STEPS.map((v) => (
-          <span
-            key={v.step}
-            className="flex-1 text-center"
-            style={{
-              color: v.step === chips.viewsStep ? T.terracotta : T.stone,
-              fontWeight: v.step === chips.viewsStep ? 600 : 400,
-            }}
-          >
-            {v.short}
-          </span>
-        ))}
-      </div>
-      <style jsx>{`
-        input[type="range"]::-webkit-slider-thumb {
-          appearance: none;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: white;
-          border: 2px solid ${T.terracotta};
-          cursor: pointer;
-          box-shadow: 0 2px 4px rgba(20, 20, 19, 0.16);
-        }
-        input[type="range"]::-moz-range-thumb {
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: white;
-          border: 2px solid ${T.terracotta};
-          cursor: pointer;
-        }
-      `}</style>
+      <span className="shrink-0 text-[11px]" aria-hidden style={{ color: T.stone }}>
+        –
+      </span>
+      <RangeInput
+        value={value.max}
+        onChange={(v) => onChange({ ...value, max: v })}
+        ariaLabel={`${label} 上限`}
+      />
+      <Button
+        unstyled
+        type="button"
+        onClick={() => onChange({ min: null, max: null })}
+        title="清空该行"
+        aria-label={`清空${label}`}
+        className="ml-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full hover:bg-[--hover]"
+        style={{ ["--hover" as string]: T.parchment, color: T.stone }}
+      >
+        <RotateCcw size={11} aria-hidden />
+      </Button>
     </div>
+  );
+}
+
+function RangeInput({
+  value,
+  onChange,
+  ariaLabel,
+}: {
+  value: number | null;
+  onChange: (v: number | null) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={value === null ? "" : String(value)}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/[^\d]/g, "");
+        onChange(raw === "" ? null : Number(raw));
+      }}
+      placeholder="不限"
+      aria-label={ariaLabel}
+      className="min-w-0 flex-1 rounded-md border px-2 py-1 text-center tabular-nums focus:outline-none"
+      style={{
+        borderColor: T.border,
+        color: value === null ? T.stone : T.nearBlack,
+        backgroundColor: "white",
+      }}
+    />
+  );
+}
+
+// ── 「仅可建联」开关 ──────────────────────────────────────────────────────────
+// v3 §4.4：以 chip 形式而不是 popover 形式呈现 —— 单一布尔开关，点击即翻转。
+// 开启态视觉上和其他 active chip 对齐（terracotta 边框 + near-black 文字），
+// 关闭态保留 chip 容器但用 stone 文字 + ✕ 提示「未启用此过滤」。
+function ContactableChip({ chips, onChange }: ChipBarProps) {
+  const active = chips.contactableOnly;
+  const label = active ? "仅可建联" : "含未验证";
+  return (
+    <Button
+      unstyled
+      type="button"
+      onClick={() => onChange({ ...chips, contactableOnly: !active })}
+      aria-pressed={active}
+      title={
+        active ? "已过滤掉无邮箱 / 30 天未发布 / 已被 No 的达人" : "保留全部候选（包括未验证邮箱）"
+      }
+      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[12px] transition-colors"
+      style={{
+        backgroundColor: "white",
+        borderColor: active ? T.terracotta : T.border,
+        color: T.charcoal,
+      }}
+    >
+      <span style={{ color: active ? T.terracotta : T.stone }} className="inline-flex">
+        <MailCheck size={13} />
+      </span>
+      <span style={{ color: T.stone }}>建联</span>
+      <span style={{ color: active ? T.nearBlack : T.charcoal, fontWeight: 500 }}>{label}</span>
+    </Button>
   );
 }
 
@@ -540,11 +614,11 @@ function ViewsPopover({ chips, onChange }: ChipBarProps) {
 export function ChipBar({ chips, onChange }: ChipBarProps) {
   const geo = geoLabel(chips.countries, chips.languages);
   const geoActive = chips.countries.length > 0 || chips.languages.length > 0;
-  const followerActive = chips.follower !== "any";
-  const followerLabelText = followerActive
-    ? (FOLLOWER_OPTIONS.find((f) => f.id === chips.follower)?.label ?? "不限")
-    : "不限";
-  const viewsActive = chips.viewsStep !== 0;
+
+  const followersActive = chips.followers.min !== null || chips.followers.max !== null;
+  const viewsActive = chips.views.min !== null || chips.views.max !== null;
+  const rangeActive = followersActive || viewsActive;
+  const rangeLabel = `粉丝 ${summarizeRange(chips.followers)} · 均播 ${summarizeRange(chips.views)}`;
 
   return (
     <div data-chip-bounds className="flex flex-wrap items-center gap-2">
@@ -558,23 +632,16 @@ export function ChipBar({ chips, onChange }: ChipBarProps) {
         renderContent={(close) => <GeoPopover chips={chips} onChange={onChange} onApply={close} />}
       />
       <ChipShell
-        prefix="粉丝"
-        label={followerLabelText}
-        active={followerActive}
+        prefix="粉丝·均播"
+        label={rangeLabel}
+        active={rangeActive}
         icon={<UsersRound size={13} />}
-        width={200}
-      >
-        <FollowerPopover chips={chips} onChange={onChange} />
-      </ChipShell>
-      <ChipShell
-        prefix="播放"
-        label={viewsLabel(chips.viewsStep)}
-        active={viewsActive}
-        icon={<TrendingUp size={13} />}
         width={300}
-      >
-        <ViewsPopover chips={chips} onChange={onChange} />
-      </ChipShell>
+        renderContent={(close) => (
+          <RangePopover chips={chips} onChange={onChange} onApply={close} />
+        )}
+      />
+      <ContactableChip chips={chips} onChange={onChange} />
     </div>
   );
 }

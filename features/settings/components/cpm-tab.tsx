@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { PricingSection } from "@/features/settings/components/cpm/pricing-section";
 import { RegionSection } from "@/features/settings/components/cpm/region-section";
 import {
@@ -72,18 +73,20 @@ export function CpmTab() {
       <RegionSection tierCountries={tierCountries} onAdd={addCountry} onRemove={removeCountry} />
 
       <div className="flex justify-end gap-2 pt-2">
-        <button
+        <Button
+          unstyled
           type="button"
-          className="rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-4 py-2 text-sm text-[#36342e] transition-colors hover:bg-[#eceae3]"
+          className="rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-4 py-2 text-sm text-[#36342e] transition-colors hover:bg-[#eceae3]"
         >
           重置为系统默认
-        </button>
-        <button
+        </Button>
+        <Button
+          unstyled
           type="button"
-          className="rounded-xl bg-[#201515] px-5 py-2 text-sm font-medium text-[#fffefb] shadow-sm transition-colors hover:bg-[#36342e]"
+          className="rounded-lg bg-[#201515] px-5 py-2 text-sm font-medium text-[#fffefb] shadow-sm transition-colors hover:bg-[#36342e]"
         >
           保存
-        </button>
+        </Button>
       </div>
     </div>
   );

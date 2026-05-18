@@ -68,8 +68,11 @@ export const COLLABORATION_STATUS_ORDER: CollaborationStatus[] = [
 
 // 7 个核心状态的中文 label —— 全站唯一来源。
 // 不要在组件里再写 "已建联" / "建联成功" / "已暂停" 等旧叫法，导入这里的 label。
+//
+// 注意：内部 enum 仍是 "pending"，UI 文案是 "候选"。语义上指"刚加入博主库、
+// 尚未决定是否建联的候选博主"。"评级"是合作完成后的复盘评分，不要混淆这两件事。
 export const COLLABORATION_STATUS_LABEL: Record<CollaborationStatus, string> = {
-  pending: "待评估",
+  pending: "候选",
   queued: "待建联",
   sent: "已发送",
   collaborating: "合作中",
@@ -80,7 +83,7 @@ export const COLLABORATION_STATUS_LABEL: Record<CollaborationStatus, string> = {
 
 // 7 个核心状态的徽章配色 —— 全站唯一来源。
 // 设计意图：每个状态有自己的主色相，避免全部灰带来的视觉混淆。
-//   待评估 → 暖灰（中性占位）
+//   候选   → 暖灰（中性占位）
 //   待建联 → 琥珀（待行动）
 //   已发送 → 蓝（在途）
 //   合作中 → 玫红（高亮活跃）
@@ -134,6 +137,29 @@ export function dominantStatus(creator: Creator): CollaborationStatus | null {
   );
 }
 
+// 真实存在投放卡片就意味着合作已经在执行：把前置阶段（候选 / 待建联 / 已发送）
+// 的状态在 UI 层归一化为「合作中」。
+//
+// 终态（已完成 / 暂停中 / 已拒绝）属于"用户主动决定"，不在这里被改写 ——
+// 否则会把"暂停后又给挂了一条投放占位"或"完成复盘后归档"的语义吃掉。
+//
+// 这是 UI 层归一化：底层 collab.status 不动，便于 Phase 1+ 后端落 service 时
+// 直接镜像同一规则。
+const STATUS_STAGES_BEFORE_COLLAB: ReadonlySet<CollaborationStatus> = new Set([
+  "pending",
+  "queued",
+  "sent",
+]);
+
+export function deriveEffectiveCollabStatus(
+  rawStatus: CollaborationStatus,
+  hasActivePlacements: boolean,
+): CollaborationStatus {
+  if (!hasActivePlacements) return rawStatus;
+  if (STATUS_STAGES_BEFORE_COLLAB.has(rawStatus)) return "collaborating";
+  return rawStatus;
+}
+
 // ── 文案 ─────────────────────────────────────────────────────────────────────
 
 export const CREATOR_CATEGORY_LABEL: Record<CreatorCategory, string> = {
@@ -159,3 +185,79 @@ export const CREATOR_SOURCE_LABEL: Record<CreatorSource, string> = {
   manual: "手动导入",
   referral: "推荐",
 };
+
+// 博主类型胶囊配色。每个类目固定一种低饱和度的背景 + 同色系深色文字，
+// 14 个类目的色相分布在暖色调与冷色调之间，整体仍服从 cream/sand 的画布。
+// 引用方式：className={CREATOR_CATEGORY_CHIP_CLASS[creator.category]}
+export const CREATOR_CATEGORY_CHIP_CLASS: Record<CreatorCategory, string> = {
+  beauty: "bg-[#fdecef] text-[#a02b4a]",
+  skincare: "bg-[#fce8df] text-[#a44a26]",
+  fashion: "bg-[#efe6f4] text-[#6e3b8a]",
+  food: "bg-[#fbf0d4] text-[#8a6112]",
+  travel: "bg-[#ddefee] text-[#1c6663]",
+  vlog: "bg-[#e3ecf6] text-[#27548a]",
+  fitness: "bg-[#e8edda] text-[#4f5e1f]",
+  parenting: "bg-[#fde7ec] text-[#a83a5a]",
+  tech: "bg-[#e2e5f0] text-[#3a3f7a]",
+  home: "bg-[#efe6d8] text-[#6f5224]",
+  review: "bg-[#e6e7ea] text-[#3f4654]",
+  education: "bg-[#e0eedb] text-[#2d6a32]",
+  comedy: "bg-[#ffe7d6] text-[#a04a16]",
+  other: "bg-[#eceae3] text-[#5b574a]",
+};
+
+// 话题词是自由文本，无法穷举。用一个低饱和度的 8 色调色板，按文本哈希分配，
+// 保证同一个词在任何位置每次都拿到同一种颜色（视觉记忆稳定）。
+const TOPIC_CHIP_PALETTE = [
+  "bg-[#fff1ec] text-[#a8421b]",
+  "bg-[#eef3e3] text-[#516a2c]",
+  "bg-[#e8edf6] text-[#34528e]",
+  "bg-[#f5e9ef] text-[#8d3461]",
+  "bg-[#fbf1d9] text-[#7b5a16]",
+  "bg-[#e3eeeb] text-[#235a55]",
+  "bg-[#ece7f4] text-[#4d3a85]",
+  "bg-[#f2ebde] text-[#6b5530]",
+] as const;
+
+export function topicChipClass(topic: string): string {
+  // djb2 简易哈希足够稳定 & 跨平台一致，无需密码学强度。
+  let hash = 5381;
+  for (let i = 0; i < topic.length; i += 1) {
+    hash = ((hash << 5) + hash + topic.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % TOPIC_CHIP_PALETTE.length;
+  return TOPIC_CHIP_PALETTE[idx];
+}
+
+// Creator.region 当前存的是国旗 emoji（mock 数据沿用此约定），UI 想同时展示
+// 国家名时通过这张表反查。后续切到真实数据后建议拆成独立字段。
+const FLAG_TO_REGION_NAME: Record<string, string> = {
+  "🇺🇸": "美国",
+  "🇨🇦": "加拿大",
+  "🇬🇧": "英国",
+  "🇦🇺": "澳大利亚",
+  "🇰🇷": "韩国",
+  "🇯🇵": "日本",
+  "🇨🇳": "中国",
+  "🇸🇬": "新加坡",
+  "🇮🇩": "印度尼西亚",
+  "🇲🇾": "马来西亚",
+  "🇹🇭": "泰国",
+  "🇻🇳": "越南",
+  "🇵🇭": "菲律宾",
+  "🇮🇳": "印度",
+  "🇪🇸": "西班牙",
+  "🇫🇷": "法国",
+  "🇩🇪": "德国",
+  "🇮🇹": "意大利",
+  "🇧🇷": "巴西",
+  "🇲🇽": "墨西哥",
+  "🇦🇪": "阿联酋",
+  "🇸🇦": "沙特阿拉伯",
+};
+
+export function regionDisplay(region: string): { flag: string; name: string } {
+  const flag = region.trim();
+  const name = FLAG_TO_REGION_NAME[flag] ?? "";
+  return { flag, name };
+}

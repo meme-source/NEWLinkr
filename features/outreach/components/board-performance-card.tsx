@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import {
   CATEGORY_LABEL,
@@ -44,6 +45,9 @@ interface Props {
   placement: Placement;
   // 仅在"全部项目"视图下传入；单项目视图下省略，避免重复噪音。
   projectName?: string;
+  // 在博主抽屉里复用时打开 —— 抽屉头部已经显示博主，再画一遍头部是重复噪音。
+  // 仅隐藏头部（头像/handle/平台/粉丝/状态徽章），其余内容与交互完全一致。
+  hideCreatorHeader?: boolean;
 }
 
 const PLATFORM_ICON_MAP: Record<PlacementPlatform, React.ComponentType<{ className?: string }>> = {
@@ -58,7 +62,7 @@ const PROFILE_PLATFORM_MAP: Record<PlacementPlatform, "tiktok" | "instagram" | u
   Xiaohongshu: undefined,
 };
 
-export function PlacementCard({ placement: p, projectName }: Props) {
+export function PlacementCard({ placement: p, projectName, hideCreatorHeader }: Props) {
   const [trendRange, setTrendRange] = useState<"7d" | "30d">("7d");
   const { isPlacementPaused, togglePlacementPaused, setPlacementDeleted } = useOutreachState();
   const { openCreatorProfile } = useCreatorProfile();
@@ -88,63 +92,91 @@ export function PlacementCard({ placement: p, projectName }: Props) {
 
   return (
     <article
+      // Mock-driven deep-link anchor —— 浏览器扩展 sidebar 的「投放效果监控」
+      // 模块底部 CTA 跳到这里，URL 形如
+      //   /workspace/outreach?tab=board&view=performance#placement-<handle-no-@>
+      // 这里 strip 掉 creatorHandle 的 '@' 让 DOM id / CSS 选择器合法。
+      // scroll-mt-32 给出固定 tab bar 让出滚动 offset，让锚点不被遮挡。
+      id={`placement-${p.creatorHandle.replace(/^@/, "")}`}
       className={cn(
-        "group flex flex-col rounded-2xl border bg-[#fffefb] p-4 transition-colors",
-        paused ? "border-[#eceae3] opacity-90" : "border-[#c5c0b1] hover:border-[#b5b2aa]",
+        // 2026-05-11 mock 卡片 hover：transform/shadow/border-color 200ms 联动。
+        // 暂停态保持冷启动外观，不参与 hover 上浮，避免视觉上"暂停了反而被强调"。
+        "group flex scroll-mt-32 flex-col rounded-lg border bg-[#fffefb] p-4 transition-[transform,box-shadow,border-color] duration-200",
+        paused
+          ? "border-[#eceae3] opacity-90"
+          : "border-[#c5c0b1] hover:-translate-y-0.5 hover:border-[#b5b2aa] hover:shadow-[0_8px_22px_rgba(32,21,21,0.05)]",
       )}
     >
-      <div className="flex items-start gap-2.5">
-        <button
-          type="button"
-          onClick={openProfile}
-          className="shrink-0 rounded-full ring-2 ring-[#fff7f4] transition-shadow hover:ring-[#ffd9c8]"
-          aria-label={`查看 ${p.creatorHandle} 资料`}
-        >
-          <Image
-            src={p.creatorAvatarUrl}
-            alt={p.creatorName}
-            width={36}
-            height={36}
-            className="h-9 w-9 rounded-full bg-[#fff7f4] object-cover"
-            unoptimized
-          />
-        </button>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={openProfile}
-              className="truncate text-[13px] font-semibold text-[#201515] transition-colors hover:text-[#ff4f00]"
-            >
-              {p.creatorHandle}
-            </button>
-            <span
-              className="inline-flex items-center gap-0.5 rounded-md bg-[#eceae3] px-1.5 py-0.5 text-[10px] text-[#36342e]"
-              title={p.platform}
-            >
-              <PlatformIcon className="h-3 w-3" aria-hidden />
-              {p.platform}
-            </span>
-          </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#939084] tabular-nums">
-            <span>{fmtCount(p.creatorFollowers)} 粉丝</span>
-            <span aria-hidden>·</span>
-            <span className="rounded-md bg-[#fff7f4] px-1.5 py-0.5 text-[10px] font-medium text-[#ff4f00]">
-              {CATEGORY_LABEL[p.creatorCategory]}
-            </span>
-            {projectName ? (
-              <span
-                className="inline-flex max-w-[12rem] items-center gap-1 rounded-md border border-[#eceae3] bg-[#fffefb] px-1.5 py-0.5 text-[10px] font-medium text-[#36342e]"
-                title={`所属项目：${projectName}`}
-              >
-                <FolderOpen className="h-3 w-3 shrink-0" aria-hidden />
-                <span className="truncate">{projectName}</span>
-              </span>
-            ) : null}
-          </div>
+      {hideCreatorHeader ? (
+        // 抽屉里复用时虽然不再画博主头像 / handle / 粉丝 / 类别，但仍需要
+        // 投放卡片自己的「平台 + 状态」信息 —— 这是与具体投放绑定的属性，
+        // 不能因为头部塌掉就消失。
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="inline-flex items-center gap-0.5 rounded-md bg-[#eceae3] px-1.5 py-0.5 text-[10px] text-[#36342e]"
+            title={p.platform}
+          >
+            <PlatformIcon className="h-3 w-3" aria-hidden />
+            {p.platform}
+          </span>
+          <StatusBadge status={p.status} paused={paused} />
         </div>
-        <StatusBadge status={p.status} paused={paused} />
-      </div>
+      ) : (
+        <div className="flex items-start gap-2.5">
+          <Button
+            unstyled
+            type="button"
+            onClick={openProfile}
+            className="shrink-0 rounded-full ring-2 ring-[#fff7f4] transition-shadow hover:ring-[#ffd9c8]"
+            aria-label={`查看 ${p.creatorHandle} 资料`}
+          >
+            <Image
+              src={p.creatorAvatarUrl}
+              alt={p.creatorName}
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-full bg-[#fff7f4] object-cover"
+              unoptimized
+            />
+          </Button>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Button
+                unstyled
+                type="button"
+                onClick={openProfile}
+                className="truncate text-[13px] font-semibold text-[#201515] transition-colors hover:text-[#ff4f00]"
+              >
+                {p.creatorHandle}
+              </Button>
+              <span
+                className="inline-flex items-center gap-0.5 rounded-md bg-[#eceae3] px-1.5 py-0.5 text-[10px] text-[#36342e]"
+                title={p.platform}
+              >
+                <PlatformIcon className="h-3 w-3" aria-hidden />
+                {p.platform}
+              </span>
+            </div>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[#939084] tabular-nums">
+              <span>{fmtCount(p.creatorFollowers)} 粉丝</span>
+              <span aria-hidden>·</span>
+              <span className="rounded-md bg-[#fff7f4] px-1.5 py-0.5 text-[10px] font-medium text-[#ff4f00]">
+                {CATEGORY_LABEL[p.creatorCategory]}
+              </span>
+              {projectName ? (
+                <span
+                  className="inline-flex max-w-[12rem] items-center gap-1 rounded-md border border-[#eceae3] bg-[#fffefb] px-1.5 py-0.5 text-[10px] font-medium text-[#36342e]"
+                  title={`所属项目：${projectName}`}
+                >
+                  <FolderOpen className="h-3 w-3 shrink-0" aria-hidden />
+                  <span className="truncate">{projectName}</span>
+                </span>
+              ) : null}
+            </div>
+          </div>
+          <StatusBadge status={p.status} paused={paused} />
+        </div>
+      )}
 
       <TrendBlock
         trend={trend}
@@ -282,7 +314,8 @@ function RangeToggle({
   return (
     <div className="flex shrink-0 items-center rounded-full bg-[#eceae3] p-0.5 text-[10px]">
       {(["7d", "30d"] as const).map((opt) => (
-        <button
+        <Button
+          unstyled
           key={opt}
           type="button"
           onClick={() => onRangeChange(opt)}
@@ -292,7 +325,7 @@ function RangeToggle({
           )}
         >
           {opt === "7d" ? "7天" : "30天"}
-        </button>
+        </Button>
       ))}
     </div>
   );

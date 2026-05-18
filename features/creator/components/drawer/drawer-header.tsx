@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { Bookmark, RefreshCw, Star, X } from "lucide-react";
+import { Heart, RefreshCw, X } from "lucide-react";
 import { useCallback, useState } from "react";
 
-import { RatingStars } from "@/features/library/components/rating-stars";
-import { CREATOR_CATEGORY_LABEL } from "@/lib/creator";
-import type { CollaborationStatus, Creator } from "@/types/api";
+import { Button } from "@/components/ui/button";
+import { RatingStars, RATING_LABELS } from "@/features/library/components/rating-stars";
+import { dominantStatus, regionDisplay } from "@/lib/creator";
+import { useCreatorOverrides } from "@/features/creator/components/creator-overrides-context";
+import type { CollaborationStatus, Creator, Rating } from "@/types/api";
 import { cn } from "@/lib/utils";
 
 import { HeaderActions } from "./header-actions";
@@ -20,20 +22,42 @@ interface Props {
     projectId: string,
     next: CollaborationStatus,
   ) => void;
+  onFavoriteToggle?: (favorited: boolean) => void;
+  onToast?: (msg: string) => void;
 }
 
-const PLATFORM_LABEL = {
-  tiktok: "TikTok",
-  instagram: "Instagram",
-  youtube: "YouTube",
-} as const;
-
-export function DrawerHeader({ creator, onClose, onChangeCollaborationStatus }: Props) {
-  const platformLabel = PLATFORM_LABEL[creator.platform];
-  const categoryLabel = CREATOR_CATEGORY_LABEL[creator.category];
+export function DrawerHeader({
+  creator,
+  onClose,
+  onChangeCollaborationStatus,
+  onFavoriteToggle,
+  onToast,
+}: Props) {
+  const region = regionDisplay(creator.region);
   const [favorited, setFavorited] = useState(creator.favorited);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshedAt, setRefreshedAt] = useState(creator.lastRefreshedAt);
+  const isCompleted = dominantStatus(creator) === "completed";
+
+  const { setCreatorRating } = useCreatorOverrides();
+  // creator.rating 已经过 override 合并，所以星级直接读它即可。
+  const rating = creator.rating;
+
+  const handleRatingChange = useCallback(
+    (next: Rating) => {
+      setCreatorRating(creator.id, next);
+      onToast?.(`已更新评级为「${RATING_LABELS[next]}」`);
+    },
+    [creator.id, onToast, setCreatorRating],
+  );
+
+  const handleFavoriteClick = useCallback(() => {
+    setFavorited((prev) => {
+      const next = !prev;
+      onFavoriteToggle?.(next);
+      return next;
+    });
+  }, [onFavoriteToggle]);
 
   const handleRefresh = useCallback(() => {
     if (refreshing) return;
@@ -64,9 +88,10 @@ export function DrawerHeader({ creator, onClose, onChangeCollaborationStatus }: 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-[18px] font-bold text-[#201515]">{creator.handle}</h2>
-            <button
+            <Button
+              unstyled
               type="button"
-              onClick={() => setFavorited((prev) => !prev)}
+              onClick={handleFavoriteClick}
               aria-label={favorited ? "取消收藏" : "收藏"}
               aria-pressed={favorited}
               className={cn(
@@ -76,64 +101,78 @@ export function DrawerHeader({ creator, onClose, onChangeCollaborationStatus }: 
                   : "border-[#c5c0b1] text-[#939084] hover:border-[#ff4f00] hover:text-[#ff4f00]",
               )}
             >
-              <Bookmark className={cn("h-3.5 w-3.5", favorited && "fill-current")} />
-            </button>
+              <Heart className={cn("h-3.5 w-3.5", favorited && "fill-current")} />
+            </Button>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[#36342e]">
-            <span>{creator.name}</span>
-            <span aria-hidden>·</span>
-            <span>{creator.region}</span>
+            <span className="inline-flex items-center gap-1">
+              <span aria-hidden>{region.flag}</span>
+              {region.name && <span>{region.name}</span>}
+            </span>
             <span aria-hidden>·</span>
             <span>{fmtFollowers(creator.followers)} 粉丝</span>
-            <span aria-hidden>·</span>
-            <span>{categoryLabel}</span>
-            <span aria-hidden>·</span>
-            <span className="rounded-full bg-[#eceae3] px-1.5 py-0.5 text-[10px] text-[#36342e]">
-              {platformLabel}
-            </span>
           </div>
           <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-[#939084]">
-            <Star className="h-3 w-3" />
-            <RatingStars value={creator.rating} size="sm" />
+            <span>评级</span>
+            {isCompleted ? (
+              <>
+                <RatingStars
+                  value={rating}
+                  size="sm"
+                  onChange={handleRatingChange}
+                  ariaLabel="编辑评级"
+                />
+                <span className="text-[11px] text-[#36342e]">{RATING_LABELS[rating]}</span>
+              </>
+            ) : (
+              <span className="text-[11px] text-[#bdb9ac]" title="合作完成后可评级">
+                合作完成后可评级
+              </span>
+            )}
           </div>
         </div>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onClose}
           className="rounded-full border border-[#c5c0b1] p-1.5 text-[#939084] transition-colors hover:bg-[#fffefb]"
           aria-label="关闭"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
-      {/* Row 2：项目 + 状态 chip 组 */}
+      {/* Row 2：项目 chip 组（含状态下拉，单一来源） */}
       <HeaderProjectChips
         creator={creator}
         onChangeCollaborationStatus={onChangeCollaborationStatus}
+        onToast={onToast}
       />
 
-      {/* Row 3：操作按钮 */}
-      <HeaderActions creator={creator} />
-
-      {/* Row 4：更新时间 + 刷新（作用于整张博主信息） */}
-      <div className="flex items-center justify-end gap-2 text-[11px] text-[#939084]">
-        <span className="tabular-nums">
-          {refreshedAt ? `${fmtRefreshedAt(refreshedAt)} 更新` : "尚未刷新"}
-        </span>
-        <button
-          type="button"
-          onClick={handleRefresh}
-          aria-label="刷新博主数据"
-          title="刷新博主数据"
-          className={cn(
-            "inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:border-[#ff4f00] hover:text-[#ff4f00]",
-            refreshing && "border-[#ff4f00] text-[#ff4f00]",
-          )}
-        >
-          <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
-        </button>
-      </div>
+      {/* Row 3：操作按钮 + 数据刷新 */}
+      <HeaderActions
+        creator={creator}
+        rightSlot={
+          <div className="ml-auto flex items-center gap-2 text-[11px] text-[#939084]">
+            <span className="tabular-nums">
+              {refreshedAt ? `${fmtRefreshedAt(refreshedAt)} 更新` : "尚未刷新"}
+            </span>
+            <Button
+              unstyled
+              type="button"
+              onClick={handleRefresh}
+              aria-label="刷新博主数据"
+              title="刷新博主数据"
+              className={cn(
+                "inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:border-[#ff4f00] hover:text-[#ff4f00]",
+                refreshing && "border-[#ff4f00] text-[#ff4f00]",
+              )}
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+            </Button>
+          </div>
+        }
+      />
     </div>
   );
 }

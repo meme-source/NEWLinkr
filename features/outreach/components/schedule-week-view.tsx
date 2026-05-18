@@ -3,6 +3,7 @@
 import { Flag } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { CalendarItem } from "@/features/outreach/components/schedule-calendar-grid";
 import { CATEGORY_VISUAL } from "@/features/outreach/data/calendar-events";
 import { cn } from "@/lib/utils";
@@ -70,7 +71,8 @@ export function ScheduleWeekView({
           const isDropOver = iso === dropOverDate;
 
           return (
-            <button
+            <Button
+              unstyled
               key={iso}
               type="button"
               onClick={() => onSelectDate(iso)}
@@ -128,7 +130,7 @@ export function ScheduleWeekView({
                   <span className="text-[11px] text-[#c5c0b1]">— 无事件 —</span>
                 ) : null}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

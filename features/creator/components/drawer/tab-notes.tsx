@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Tag, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Creator } from "@/types/api";
 
 interface Props {
@@ -53,7 +54,7 @@ export function TabNotes({ creator }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-3">
+      <div className="rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-3">
         <textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
@@ -69,13 +70,14 @@ export function TabNotes({ creator }: Props) {
               className="inline-flex items-center gap-1 rounded-full border border-[#fff7f4] bg-[#fff7f4] px-2 py-0.5 text-[11px] text-[#ff4f00]"
             >
               {tag}
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => removeDraftTag(tag)}
                 aria-label={`移除标签 ${tag}`}
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </span>
           ))}
           <input
@@ -93,19 +95,20 @@ export function TabNotes({ creator }: Props) {
           />
         </div>
         <div className="mt-2 flex justify-end">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={handleAdd}
             disabled={draft.trim().length === 0}
             className="inline-flex items-center gap-1.5 rounded-full bg-[#ff4f00] px-3 py-1 text-[11px] font-medium text-[#fffefb] transition-colors hover:bg-[#ff4f00] disabled:cursor-not-allowed disabled:bg-[#c5c0b1]"
           >
             <Plus className="h-3 w-3" /> 添加
-          </button>
+          </Button>
         </div>
       </div>
 
       {notes.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-[#c5c0b1] py-8 text-center text-[12px] text-[#939084]">
+        <p className="rounded-lg border border-dashed border-[#c5c0b1] py-8 text-center text-[12px] text-[#939084]">
           暂无备注
         </p>
       ) : (
@@ -113,18 +116,19 @@ export function TabNotes({ creator }: Props) {
           {notes.map((note) => (
             <li
               key={note.id}
-              className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-3 text-[13px]"
+              className="rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-3 text-[13px]"
             >
               <div className="flex items-start justify-between gap-2">
                 <p className="whitespace-pre-wrap text-[#201515]">{note.body}</p>
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={() => setNotes((prev) => prev.filter((n) => n.id !== note.id))}
                   className="rounded-full p-1 text-[#939084] hover:bg-[#fdf2f2] hover:text-[#b00020]"
                   aria-label="删除"
                 >
                   <Trash2 className="h-3 w-3" />
-                </button>
+                </Button>
               </div>
               {note.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">

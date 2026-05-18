@@ -13,4 +13,5 @@ export interface TiktokVideoTileProps {
   showStats?: boolean;
   viralThreshold?: number;
   flopThreshold?: number;
+  enabledCategories?: ReadonlySet<TiktokVideoCategory>;
 }

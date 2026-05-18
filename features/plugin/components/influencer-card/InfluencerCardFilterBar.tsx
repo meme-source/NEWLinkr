@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, CircleHelp } from "lucide-react";
 
-import { ACCENT, BORDER, SURFACE, TEXT, TYPE } from "./tokens";
+import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
+import { ACCENT, BORDER, TEXT, TYPE } from "./tokens";
 import {
+  COVER_COUNT_OPTIONS,
   SCRAPE_COUNT_OPTIONS,
   type CoverCount,
   type InfluencerCardSampleConfig,
@@ -14,8 +17,6 @@ import {
 interface InfluencerCardFilterBarProps {
   sample: InfluencerCardSampleConfig;
   onChangeScrapeCount?: (next: ScrapeCount) => void;
-  /** Retained for backwards compatibility — the cover-count dropdown was
-   *  removed per the floating-creator-card reference image. */
   onChangeCoverCount?: (next: CoverCount) => void;
   onTogglePerspective?: () => void;
 }
@@ -58,19 +59,16 @@ function DropdownPill<T extends number>({
 
   return (
     <div ref={ref} className={`relative ${flex ? "min-w-0 flex-1" : "shrink-0"}`}>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex h-7 w-full items-center gap-1 rounded-full px-[11px] py-[5px] transition-colors hover:bg-[#eceae3]"
-        style={{
-          background: SURFACE.pill,
-          border: `1px solid ${BORDER.pill}`,
-        }}
+        className="flex h-6 items-center gap-0.5 transition-opacity hover:opacity-70"
       >
         <span
-          className="flex-1 truncate text-center"
+          className="truncate"
           style={{
             color: TEXT.tertiary,
             fontSize: TYPE.pillText.size,
@@ -86,7 +84,7 @@ function DropdownPill<T extends number>({
           strokeWidth={1.75}
           color={TEXT.tertiary}
         />
-      </button>
+      </Button>
       {open ? (
         <div
           role="listbox"
@@ -96,7 +94,8 @@ function DropdownPill<T extends number>({
           {options.map((opt) => {
             const selected = opt === value;
             return (
-              <button
+              <Button
+                unstyled
                 key={opt}
                 type="button"
                 role="option"
@@ -115,7 +114,7 @@ function DropdownPill<T extends number>({
               >
                 <span>{formatOption(opt)}</span>
                 {selected ? <Check size={12} strokeWidth={2.5} /> : null}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -124,54 +123,32 @@ function DropdownPill<T extends number>({
   );
 }
 
-interface ToggleProps {
-  on: boolean;
-  onClick?: () => void;
-}
-
-function Toggle({ on, onClick }: ToggleProps) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label="透视开关"
-      onClick={onClick}
-      className="relative h-[18px] w-8 shrink-0 rounded-full transition-colors"
-      style={{
-        background: on ? ACCENT.terracotta : SURFACE.toggleTrack,
-      }}
-    >
-      <span
-        className="absolute top-[2px] h-[14px] w-[14px] rounded-full transition-all"
-        style={{
-          left: on ? "16px" : "2px",
-          background: "#fffefb",
-          border: "1px solid #c5c0b1",
-        }}
-      />
-    </button>
-  );
-}
-
 export function InfluencerCardFilterBar({
   sample,
   onChangeScrapeCount,
+  onChangeCoverCount,
   onTogglePerspective,
 }: InfluencerCardFilterBarProps) {
-  // Per the floating-creator-card reference image: a single sample-count pill
-  // ("最近 N 条") on the left, "数据透视 ? toggle" on the right. The cover-count
-  // dropdown and the "样本设置" leading label have both been retired — callers
-  // can still pass `onChangeCoverCount`, it is just unused.
+  // 单行布局:左侧两个无边框下拉(近 N 条 / 封面 N),右侧「数据透视 ? toggle」。
+  // 不再有「样本设置」标题,也不给下拉套胶囊框 —— 与右侧透视开关同处一行。
   return (
-    <div className="flex items-center justify-between gap-2 px-3 pt-2 pb-2">
-      <DropdownPill
-        label={`最近 ${sample.scrapeCount} 条`}
-        value={sample.scrapeCount}
-        options={SCRAPE_COUNT_OPTIONS}
-        formatOption={(n) => `最近 ${n} 条`}
-        onChange={onChangeScrapeCount}
-      />
+    <div className="flex items-center justify-between gap-2 px-3 pt-1.5 pb-1.5">
+      <div className="flex min-w-0 items-center gap-3">
+        <DropdownPill
+          label={`近 ${sample.scrapeCount} 条`}
+          value={sample.scrapeCount}
+          options={SCRAPE_COUNT_OPTIONS}
+          formatOption={(n) => `近 ${n} 条`}
+          onChange={onChangeScrapeCount}
+        />
+        <DropdownPill
+          label={`封面 ${sample.coverCount}`}
+          value={sample.coverCount}
+          options={COVER_COUNT_OPTIONS}
+          formatOption={(n) => `封面 ${n} 张`}
+          onChange={onChangeCoverCount}
+        />
+      </div>
       <div className="flex shrink-0 items-center gap-1.5">
         <span
           style={{
@@ -187,12 +164,17 @@ export function InfluencerCardFilterBar({
           <CircleHelp className="h-3.5 w-3.5 cursor-help text-[#b8b6ad] transition-colors hover:text-[#939084]" />
           <span
             role="tooltip"
-            className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/help:opacity-100"
+            className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/help:opacity-100"
           >
             开启数据透视后，会叠加播放量、平均播放与互动率，并按平均播放量排序前 N 条视频。
           </span>
         </span>
-        <Toggle on={sample.perspective} onClick={onTogglePerspective} />
+        <Toggle
+          checked={sample.perspective}
+          onCheckedChange={() => onTogglePerspective?.()}
+          size="sm"
+          aria-label="透视开关"
+        />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarClock, Check, ChevronDown, Clock3, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export type BulkOutreachSendMode = "now" | "scheduled";
@@ -36,7 +37,8 @@ export function BulkOutreachSendButton({
   return (
     <div className="relative">
       <div className="flex overflow-hidden rounded-full bg-[#ff4f00] text-[#fffefb]">
-        <button
+        <Button
+          unstyled
           type="button"
           disabled={!ready}
           onClick={onSend}
@@ -48,8 +50,9 @@ export function BulkOutreachSendButton({
             <Send className="h-3.5 w-3.5" />
           )}
           {label}
-        </button>
-        <button
+        </Button>
+        <Button
+          unstyled
           type="button"
           aria-label="选择发送方式"
           aria-haspopup="menu"
@@ -60,10 +63,10 @@ export function BulkOutreachSendButton({
           <ChevronDown
             className={cn("h-3.5 w-3.5 transition-transform", menuOpen && "rotate-180")}
           />
-        </button>
+        </Button>
       </div>
       {menuOpen && (
-        <div className="absolute right-0 bottom-full z-30 mb-2 w-44 overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb]">
+        <div className="absolute right-0 bottom-full z-30 mb-2 w-44 overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
           <SendModeItem
             icon={<Send className="h-3.5 w-3.5" />}
             label="立即发送"
@@ -94,7 +97,8 @@ function SendModeItem({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       role="menuitem"
       onClick={onClick}
@@ -108,6 +112,6 @@ function SendModeItem({
         {label}
       </span>
       {active && <Check className="h-3.5 w-3.5" />}
-    </button>
+    </Button>
   );
 }

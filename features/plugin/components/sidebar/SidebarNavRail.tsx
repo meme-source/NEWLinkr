@@ -1,8 +1,9 @@
 "use client";
 
-import { Mail, PanelRight, Search, Settings, User } from "lucide-react";
+import { Activity, Mail, PanelRight, Search, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SidebarTab } from "@/features/plugin/types";
+import { Button } from "@/components/ui/button";
 
 export function SidebarNavRail({
   collapsed,
@@ -19,7 +20,8 @@ export function SidebarNavRail({
     <div className="flex w-11 flex-shrink-0 flex-col items-center border-l border-[#c5c0b1] bg-[#eceae3]">
       <div className="flex flex-col items-center gap-2 pt-5">
         <div className="group relative">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onToggleCollapse}
             aria-label={collapsed ? "打开侧边栏" : "收起侧边栏"}
@@ -29,14 +31,15 @@ export function SidebarNavRail({
             )}
           >
             <PanelRight className="h-3.5 w-3.5" />
-          </button>
-          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
             {collapsed ? "打开侧边栏" : "收起侧边栏"}
           </span>
         </div>
 
         <div className="group relative">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => {
               onSelectSidebarTab("similar");
@@ -51,14 +54,15 @@ export function SidebarNavRail({
             )}
           >
             <Search className="h-3.5 w-3.5" />
-          </button>
-          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
             找相似
           </span>
         </div>
 
         <div className="group relative">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => {
               onSelectSidebarTab("current");
@@ -73,14 +77,15 @@ export function SidebarNavRail({
             )}
           >
             <User className="h-3.5 w-3.5" />
-          </button>
-          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
             博主分析
           </span>
         </div>
 
         <div className="group relative">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => {
               onSelectSidebarTab("email");
@@ -95,14 +100,15 @@ export function SidebarNavRail({
             )}
           >
             <Mail className="h-3.5 w-3.5" />
-          </button>
-          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
             邮件建联
           </span>
         </div>
 
         <div className="group relative">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => {
               onSelectSidebarTab("quick");
@@ -117,9 +123,35 @@ export function SidebarNavRail({
             )}
           >
             <Settings className="h-3.5 w-3.5" />
-          </button>
-          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
             预览设置
+          </span>
+        </div>
+
+        {/* 1px 沙色短分割线 —— 单帖 AI 分析独立于上面 4 个跟项目流程相关的入口。 */}
+        <div className="h-px w-5 bg-[#c5c0b1]" role="separator" aria-orientation="horizontal" />
+
+        <div className="group relative">
+          <Button
+            unstyled
+            type="button"
+            onClick={() => {
+              onSelectSidebarTab("single-post");
+              if (collapsed) onToggleCollapse();
+            }}
+            aria-label="单帖 AI 分析"
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150",
+              !collapsed && activeSidebarTab === "single-post"
+                ? "bg-[#ff4f00]/10 text-[#ff4f00]"
+                : "text-[#939084] hover:bg-[#fffefb] hover:text-[#36342e]",
+            )}
+          >
+            <Activity className="h-3.5 w-3.5" />
+          </Button>
+          <span className="pointer-events-none absolute top-1/2 right-[calc(100%+8px)] z-50 -translate-y-1/2 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[11px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
+            单帖 AI 分析
           </span>
         </div>
       </div>

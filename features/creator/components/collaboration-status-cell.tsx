@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { CollaborationStatus } from "@/types/api";
 import {
   COLLABORATION_STATUS_LABEL,
@@ -23,9 +25,43 @@ interface Props {
   compact?: boolean;
 }
 
+interface MenuPosition {
+  top: number;
+  left: number;
+}
+
 export function CollaborationStatusCell({ value, onChange, allowedStatuses, compact }: Props) {
   const [open, setOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<MenuPosition | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const readonly = !onChange;
+
+  // Position popover on open + reposition on viewport resize/scroll.
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const update = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMenuPos({ top: rect.bottom + 4, left: rect.left });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open]);
+
+  // ESC closes.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   if (!value) {
     return <span className="text-[11px] text-[#939084]">—</span>;
@@ -45,8 +81,10 @@ export function CollaborationStatusCell({ value, onChange, allowedStatuses, comp
   }
 
   return (
-    <div className="relative">
-      <button
+    <>
+      <Button
+        unstyled
+        ref={triggerRef}
         type="button"
         onClick={(event) => {
           event.stopPropagation();
@@ -56,42 +94,58 @@ export function CollaborationStatusCell({ value, onChange, allowedStatuses, comp
       >
         <span>{COLLABORATION_STATUS_LABEL[value]}</span>
         <ChevronDown className="h-3 w-3 opacity-70" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="absolute top-full left-0 z-20 mt-1 min-w-[120px] overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb] py-1">
-            {options.map((status) => {
-              const active = status === value;
-              const optionStyle = COLLABORATION_STATUS_STYLE[status];
-              return (
-                <button
-                  key={status}
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setOpen(false);
-                    if (status !== value) onChange(status);
-                  }}
-                  className={cn(
-                    "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[11px]",
-                    active ? "bg-[#fff7f4] text-[#ff4f00]" : "text-[#36342e] hover:bg-[#fffdf9]",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px]",
-                      optionStyle.badge,
-                    )}
-                  >
-                    {COLLABORATION_STATUS_LABEL[status]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </div>
+      </Button>
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[1000]"
+              onClick={() => setOpen(false)}
+              aria-hidden="true"
+            />
+            {menuPos && (
+              <div
+                role="listbox"
+                style={{ top: menuPos.top, left: menuPos.left }}
+                className="fixed z-[1001] min-w-[120px] overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] py-1 shadow-lg shadow-[rgba(20,20,19,0.12)]"
+              >
+                {options.map((status) => {
+                  const active = status === value;
+                  const optionStyle = COLLABORATION_STATUS_STYLE[status];
+                  return (
+                    <Button
+                      unstyled
+                      key={status}
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setOpen(false);
+                        if (status !== value) onChange(status);
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[11px]",
+                        active
+                          ? "bg-[#fff7f4] text-[#ff4f00]"
+                          : "text-[#36342e] hover:bg-[#fffdf9]",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px]",
+                          optionStyle.badge,
+                        )}
+                      >
+                        {COLLABORATION_STATUS_LABEL[status]}
+                      </span>
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+          </>,
+          document.body,
+        )}
+    </>
   );
 }

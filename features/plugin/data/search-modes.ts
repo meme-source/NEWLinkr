@@ -14,7 +14,7 @@ export const searchModes = [
   {
     key: "seed" as const,
     label: "找种子达人",
-    summary: "围绕当前达人扩展低重合、高潜力的种子达人。",
+    summary: "打开后台博主发现，从零物色一批适合的种子博主。",
     eta: "预计 8-12 秒",
   },
 ];

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, Mail, Plus } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import type { MailAccount } from "@/features/outreach/components/mailbar/use-mail-settings";
 
 interface MailbarAccountRowProps {
@@ -18,26 +19,27 @@ export function MailbarAccountRow({ account, onConnect, onDisconnect }: MailbarA
 
   if (!account.connected) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[#c5c0b1] bg-[#fffdf9] px-4 py-3">
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-[#c5c0b1] bg-[#fffdf9] px-4 py-3">
         <div className="flex items-center gap-2 text-sm text-[#939084]">
           <Mail className="h-4 w-4" />
           尚未绑定发件邮箱
         </div>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onConnect}
           className="flex items-center gap-1.5 rounded-lg bg-[#201515] px-3.5 py-1.5 text-xs font-medium text-[#fffefb] hover:bg-[#36342e]"
         >
           <Mail className="h-3.5 w-3.5" />
           连接 Gmail
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-[#c5c0b1] bg-[#fffdf9] px-4 py-2.5">
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-[#c5c0b1] bg-[#fffdf9] px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <Mail className="h-4 w-4 shrink-0 text-[#939084]" />
           <span className="truncate text-sm font-medium text-[#201515]">{account.email}</span>
@@ -50,27 +52,30 @@ export function MailbarAccountRow({ account, onConnect, onDisconnect }: MailbarA
           </span>
         </div>
         <div className="flex shrink-0 gap-1.5">
-          <button
+          <Button
+            unstyled
             type="button"
             className="rounded-md border border-[#c5c0b1] px-2.5 py-1 text-[11px] text-[#36342e] hover:bg-[#eceae3]"
           >
             重新授权
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             onClick={() => setConfirmDisconnect(true)}
             className="rounded-md border border-red-200 px-2.5 py-1 text-[11px] text-red-600 hover:bg-red-50"
           >
             断开
-          </button>
+          </Button>
         </div>
       </div>
 
       {confirmDisconnect ? (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-xs">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-red-100 bg-red-50 px-4 py-2.5 text-xs">
           <span className="text-red-700">断开后进行中的发件任务将暂停。确认？</span>
           <div className="flex gap-1.5">
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={() => {
                 onDisconnect();
@@ -79,25 +84,27 @@ export function MailbarAccountRow({ account, onConnect, onDisconnect }: MailbarA
               className="rounded-md bg-red-500 px-3 py-1 text-[11px] font-medium text-[#fffefb] hover:bg-red-600"
             >
               确认断开
-            </button>
-            <button
+            </Button>
+            <Button
+              unstyled
               type="button"
               onClick={() => setConfirmDisconnect(false)}
               className="rounded-md border border-[#c5c0b1] bg-[#fffefb] px-3 py-1 text-[11px] text-[#36342e] hover:bg-[#eceae3]"
             >
               取消
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
 
-      <button
+      <Button
+        unstyled
         type="button"
         className="flex items-center gap-1 text-[11px] text-[#ff4f00] hover:underline"
       >
         <Plus className="h-3 w-3" />
         绑定新邮箱
-      </button>
+      </Button>
     </div>
   );
 }

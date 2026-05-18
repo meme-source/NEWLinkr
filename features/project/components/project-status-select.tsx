@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   getProjectStatusDotClass,
   getProjectStatusLabel,
@@ -57,7 +58,8 @@ export function ProjectStatusSelect({
 
   return (
     <div ref={containerRef} className="relative inline-block">
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={() => {
           if (!disabled) setOpen((p) => !p);
@@ -76,16 +78,17 @@ export function ProjectStatusSelect({
         <span className={cn("h-2 w-2 rounded-full", getProjectStatusDotClass(value))} aria-hidden />
         <span>{getProjectStatusLabel(value)}</span>
         {!disabled ? <ChevronDown className="h-3 w-3" aria-hidden /> : null}
-      </button>
+      </Button>
       {open && !disabled ? (
         <div
           role="listbox"
-          className="absolute top-[calc(100%+6px)] left-0 z-[95] w-[300px] overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]"
+          className="absolute top-[calc(100%+6px)] left-0 z-[95] w-[300px] overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]"
         >
           {STATUS_OPTIONS.map((option) => {
             const isActive = option.value === value;
             return (
-              <button
+              <Button
+                unstyled
                 key={option.value}
                 type="button"
                 role="option"
@@ -115,7 +118,7 @@ export function ProjectStatusSelect({
                   ) : null}
                 </span>
                 <span className="text-[10px] leading-snug text-[#939084]">{option.rule}</span>
-              </button>
+              </Button>
             );
           })}
         </div>

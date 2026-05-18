@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // 反馈聚焦的功能模块：和左侧导航的主线保持一致，方便我们后续做漏斗分析。
@@ -147,20 +148,21 @@ export function FeedbackDialog({ onClose }: Props) {
       role="presentation"
     >
       <div
-        className="relative w-full max-w-[560px] rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-6"
+        className="relative w-full max-w-[560px] rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-6"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="feedback-dialog-title"
       >
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onClose}
           aria-label="关闭"
           className="absolute top-4 right-4 inline-flex h-7 w-7 items-center justify-center rounded-full text-[#939084] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
 
         {submitted ? (
           <SubmittedPanel />
@@ -174,7 +176,8 @@ export function FeedbackDialog({ onClose }: Props) {
                 {FEEDBACK_TOPICS.map((t) => {
                   const active = topic === t.id;
                   return (
-                    <button
+                    <Button
+                      unstyled
                       key={t.id}
                       type="button"
                       onClick={() => setTopic(t.id)}
@@ -186,7 +189,7 @@ export function FeedbackDialog({ onClose }: Props) {
                       )}
                     >
                       {t.label}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -205,7 +208,7 @@ export function FeedbackDialog({ onClose }: Props) {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={cn(
-                  "relative rounded-xl border bg-[#fffdf9] transition-colors",
+                  "relative rounded-lg border bg-[#fffdf9] transition-colors",
                   dragActive ? "border-[#ff4f00] bg-[#fff7f4]" : "border-[#c5c0b1]",
                 )}
               >
@@ -216,10 +219,10 @@ export function FeedbackDialog({ onClose }: Props) {
                   rows={4}
                   maxLength={500}
                   placeholder="比如：AI 推荐的博主匹配度怎么样？建联流程顺不顺？还有什么功能你希望我们做？"
-                  className="block min-h-[120px] w-full resize-y rounded-xl bg-transparent px-3 py-2.5 text-[13px] leading-[1.55] text-[#201515] placeholder:text-[#939084] focus:outline-none"
+                  className="block min-h-[120px] w-full resize-y rounded-lg bg-transparent px-3 py-2.5 text-[13px] leading-[1.55] text-[#201515] placeholder:text-[#939084] focus:outline-none"
                 />
                 {dragActive ? (
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl border border-dashed border-[#ff4f00] bg-[#fff7f4]/90 text-[12px] font-medium text-[#ff4f00]">
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border border-dashed border-[#ff4f00] bg-[#fff7f4]/90 text-[12px] font-medium text-[#ff4f00]">
                     松开添加附件
                   </div>
                 ) : null}
@@ -232,14 +235,15 @@ export function FeedbackDialog({ onClose }: Props) {
                   className="hidden"
                   onChange={handleFilesSelected}
                 />
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[#c5c0b1] bg-[#fffefb] px-2.5 text-[11px] text-[#36342e] transition-colors hover:border-[#ff4f00] hover:bg-[#fff7f4] hover:text-[#ff4f00]"
                 >
                   <Paperclip className="h-3 w-3" />
                   添加附件
-                </button>
+                </Button>
                 <div className="text-right text-[11px] text-[#939084]">{comment.length}/500</div>
               </div>
               {attachments.length > 0 ? (
@@ -253,14 +257,16 @@ export function FeedbackDialog({ onClose }: Props) {
                 我们会认真读完每一条反馈
               </p>
               <div className="flex items-center gap-2">
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={onClose}
                   className="rounded-full border border-[#c5c0b1] bg-[#fffefb] px-3.5 py-1.5 text-[12px] text-[#36342e] transition-colors hover:bg-[#fffdf9]"
                 >
                   取消
-                </button>
-                <button
+                </Button>
+                <Button
+                  unstyled
                   type="button"
                   onClick={handleSubmit}
                   disabled={!canSubmit}
@@ -272,7 +278,7 @@ export function FeedbackDialog({ onClose }: Props) {
                   )}
                 >
                   发送反馈
-                </button>
+                </Button>
               </div>
             </div>
           </>
@@ -359,14 +365,15 @@ function AttachmentItem({
         </span>
         <span className="block text-[10px] text-[#939084]">{formatFileSize(file.size)}</span>
       </span>
-      <button
+      <Button
+        unstyled
         type="button"
         aria-label={`移除附件 ${fileName}`}
         onClick={() => onRemove(attachment.id)}
         className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[#939084] transition-colors hover:bg-[#eceae3] hover:text-[#36342e]"
       >
         <X className="h-3 w-3" />
-      </button>
+      </Button>
     </span>
   );
 }
@@ -395,7 +402,8 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
       {[1, 2, 3, 4, 5].map((n) => {
         const filled = n <= value;
         return (
-          <button
+          <Button
+            unstyled
             key={n}
             type="button"
             onClick={() => onChange(value === n ? 0 : n)}
@@ -409,7 +417,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
               )}
               fill={filled ? "#ff4f00" : "none"}
             />
-          </button>
+          </Button>
         );
       })}
       <span className="ml-2 text-[12px] text-[#939084]">{ratingHint(value)}</span>

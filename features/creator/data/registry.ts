@@ -71,11 +71,14 @@ export function getCreatorById(id: string): Creator | null {
   return getCreators().find((c) => c.id === id) ?? null;
 }
 
-export function getCreatorByHandle(handle: string): Creator | null {
+export function getCreatorByHandle(handle: string, fallback?: CreatorFallback): Creator | null {
   const normalized = normalizeHandle(handle);
   const lib = getCreators().find((c) => normalizeHandle(c.handle) === normalized);
+  // 命中博主库 → 直接返回完整 Creator。注意此时 fallback 必须丢弃 ——
+  // 调用方传过来的 hint（投放卡的稀疏字段）可能比博主库里的真实字段更陈旧 /
+  // 不准确，让真实数据胜出，这样无论从哪个入口点进来都显示同一份卡。
   if (lib) return lib;
-  return synthesizeFromOutreach(normalized);
+  return synthesizeFromOutreach(normalized, fallback);
 }
 
 // ── 合成（仅当 handle 已在建联 / 投放表里出现） ─────────────────────────────
@@ -164,13 +167,41 @@ function buildSyntheticCreator(input: {
 // ── 顶层解析：所有调用点都用它 ──────────────────────────────────────────────
 //
 // 返回 Creator | null：null 表示"未入库"，调用方应直接放弃打开抽屉。
+//
+// 优先级（必须严格保持，否则不同入口会弹出不一样的卡片）：
+//   1. 博主库 mock（getCreators()）—— 命中即返回完整 Creator
+//   2. 建联 / 投放表合成 —— 同一份后端数据的另一面
+//   3. 都没命中 → null（未入库）
 export function resolveCreator(input: CreatorResolverInput): Creator | null {
-  if (isCreator(input)) return input;
-  if ("id" in input) {
-    return getCreatorById(input.id);
+  if (isCreator(input)) {
+    console.info("[creator-registry] resolved via direct Creator", {
+      handle: input.handle,
+      emails: input.emails.length,
+      collaborations: input.collaborations.length,
+      userTags: input.userTags.length,
+    });
+    return input;
   }
-  // handle 入口：只有命中 mock 库 / 建联 / 投放才返回；否则 null。
-  return synthesizeFromOutreach(normalizeHandle(input.handle), input.fallback);
+  if ("id" in input) {
+    const found = getCreatorById(input.id);
+    console.info("[creator-registry] resolved by id", {
+      id: input.id,
+      hit: Boolean(found),
+    });
+    return found;
+  }
+  const found = getCreatorByHandle(input.handle, input.fallback);
+  const inLibrary = getCreators().some(
+    (c) => c.handle.replace(/^@/, "") === input.handle.replace(/^@/, ""),
+  );
+  console.info("[creator-registry] resolved by handle", {
+    handle: input.handle,
+    layer: found ? (inLibrary ? "library" : "synth-from-outreach") : "null",
+    emails: found?.emails.length ?? 0,
+    collaborations: found?.collaborations.length ?? 0,
+    userTags: found?.userTags.length ?? 0,
+  });
+  return found;
 }
 
 // ── 投放查询 ─────────────────────────────────────────────────────────────────

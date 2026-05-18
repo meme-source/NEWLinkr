@@ -2,6 +2,8 @@
 
 import { TEXT, TYPE } from "./tokens";
 
+import { Button } from "@/components/ui/button";
+
 interface InfluencerCardFooterProps {
   onOpenAnalysis: () => void;
 }
@@ -9,7 +11,8 @@ interface InfluencerCardFooterProps {
 export function InfluencerCardFooter({ onOpenAnalysis }: InfluencerCardFooterProps) {
   return (
     <div className="flex h-7 items-center justify-center">
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onOpenAnalysis}
         className="inline-flex items-center gap-0.5 rounded-md px-2 py-0.5 transition-colors hover:bg-[#eceae3]"
@@ -22,7 +25,7 @@ export function InfluencerCardFooter({ onOpenAnalysis }: InfluencerCardFooterPro
         }}
       >
         查看完整档案 →
-      </button>
+      </Button>
     </div>
   );
 }

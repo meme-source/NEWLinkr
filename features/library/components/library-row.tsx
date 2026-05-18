@@ -3,8 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
-import type { CollaborationStatus, Creator, Rating } from "@/types/api";
-import { CREATOR_CATEGORY_LABEL, CREATOR_SOURCE_LABEL } from "@/lib/creator";
+import type { CollaborationStatus, Creator } from "@/types/api";
+import {
+  CREATOR_CATEGORY_CHIP_CLASS,
+  CREATOR_CATEGORY_LABEL,
+  CREATOR_SOURCE_LABEL,
+  topicChipClass,
+} from "@/lib/creator";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { LibraryScope, LibraryViewRow } from "@/features/library/types";
 import type { ToggleableColumnId } from "@/features/library/hooks/use-library-columns";
@@ -21,7 +27,6 @@ interface Props {
   onToggleSelect: (id: string) => void;
   onOpen: (creator: Creator) => void;
   onAction: (action: RowAction, creator: Creator) => void;
-  onRate: (creatorId: string, rating: Rating) => void;
   onChangeStatus: (creatorId: string, status: CollaborationStatus) => void;
   onChangeNotes: (creatorId: string, notes: string) => void;
 }
@@ -37,7 +42,6 @@ export function LibraryRow({
   onToggleSelect,
   onOpen,
   onAction,
-  onRate,
   onChangeStatus,
   onChangeNotes,
 }: Props) {
@@ -55,7 +59,7 @@ export function LibraryRow({
   return (
     <div
       className={cn(
-        "grid items-center gap-3 border-b border-[#eceae3] px-3 py-2.5 text-[12px] transition-colors hover:bg-[#fffdf9]",
+        "grid items-center gap-3 border-b border-[#eceae3]/60 px-3 py-3 text-[12px] transition-colors last:border-b-0 hover:bg-[#fffdf9]",
         selected && "bg-[#fff7f4] hover:bg-[#fff7f4]",
       )}
       style={{ gridTemplateColumns: buildGridTemplate(visibleColumns, showCampaigns) }}
@@ -68,30 +72,45 @@ export function LibraryRow({
       />
 
       {/* Creator: avatar + name + followers */}
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={() => onOpen(creator)}
         className="flex min-w-0 items-center gap-2.5 text-left"
       >
-        {creator.avatar && (
+        {creator.avatar ? (
           <Image
             src={creator.avatar}
             alt={creator.name}
-            width={32}
-            height={32}
-            className="h-8 w-8 shrink-0 rounded-full bg-[#fff7f4]"
+            width={30}
+            height={30}
+            className="h-[30px] w-[30px] shrink-0 rounded-full bg-[#fff7f4]"
             unoptimized
           />
+        ) : (
+          <span
+            aria-hidden
+            className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full bg-[#eceae3] text-[11px] font-medium text-[#36342e]"
+          >
+            {initialsOf(creator.name)}
+          </span>
         )}
         <div className="min-w-0">
           <div className="truncate text-[13px] font-medium text-[#201515]">{creator.name}</div>
-          <div className="mt-0.5 text-[10px] text-[#939084]">{fmtN(creator.followers)} 粉丝</div>
+          <div className="mt-0.5 text-[11px] font-normal text-[#939084]">
+            {fmtN(creator.followers)} 粉丝
+          </div>
         </div>
-      </button>
+      </Button>
 
       {visibleColumns.has("category") && (
         <div className="min-w-0">
-          <span className="inline-flex items-center rounded-full bg-[#eceae3] px-2 py-0.5 text-[11px] text-[#36342e]">
+          <span
+            className={cn(
+              "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium",
+              CREATOR_CATEGORY_CHIP_CLASS[creator.category],
+            )}
+          >
             {CREATOR_CATEGORY_LABEL[creator.category]}
           </span>
         </div>
@@ -111,9 +130,20 @@ export function LibraryRow({
         </div>
       )}
 
-      {visibleColumns.has("rating") && (
-        <RatingStars value={creator.rating} onChange={(next) => onRate(creator.id, next)} />
-      )}
+      {visibleColumns.has("rating") &&
+        // 评级是合作完成后的复盘评分。非已完成状态显示占位符 "—"。
+        // 表格里只读：编辑入口在抽屉的「合作复盘 → 编辑 → 更新」（数据共享 store）。
+        (displayStatus === "completed" ? (
+          <RatingStars value={creator.rating} ariaLabel={`评级：${creator.rating} 星`} />
+        ) : (
+          <span
+            className="text-[12px] text-[#bdb9ac] tabular-nums"
+            title="合作完成后可评级"
+            aria-label="未评级"
+          >
+            —
+          </span>
+        ))}
 
       {visibleColumns.has("engagement") && (
         <div className="text-right text-[12px] text-[#36342e]">{er}</div>
@@ -185,14 +215,15 @@ export function LibraryRow({
 
       {/* Action menu */}
       <div className="relative flex justify-end">
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
           className="rounded-full border border-transparent p-1 text-[#939084] hover:border-[#c5c0b1] hover:bg-[#fffefb]"
           aria-label="更多操作"
         >
           <MoreHorizontal className="h-3.5 w-3.5" />
-        </button>
+        </Button>
         {menuOpen && (
           <>
             <div
@@ -200,7 +231,7 @@ export function LibraryRow({
               onClick={() => setMenuOpen(false)}
               aria-hidden="true"
             />
-            <div className="absolute top-7 right-0 z-20 min-w-[140px] overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb] py-1.5">
+            <div className="absolute top-7 right-0 z-20 min-w-[140px] overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] py-1.5">
               {(
                 [
                   ["outreach", "发起建联"],
@@ -209,7 +240,8 @@ export function LibraryRow({
                   ["trash", "删除"],
                 ] as const
               ).map(([key, label]) => (
-                <button
+                <Button
+                  unstyled
                   key={key}
                   type="button"
                   onClick={() => {
@@ -224,7 +256,7 @@ export function LibraryRow({
                   )}
                 >
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
           </>
@@ -264,7 +296,8 @@ function primaryNote(creator: Creator): string {
 }
 
 // 话题词与用户标签都是同样形态的 chip list，但视觉上分开：
-// topic 走中性灰，userTag 走品牌橙——一眼能区分系统数据 vs 用户数据。
+// topic 按词哈希落到一组低饱和度调色板（同一个词永远是同一种颜色），
+// userTag 走品牌橙——一眼能区分系统数据 vs 用户数据。
 function ChipList({ items, variant }: { items: string[]; variant: "topic" | "userTag" }) {
   if (items.length === 0) {
     return (
@@ -273,12 +306,8 @@ function ChipList({ items, variant }: { items: string[]; variant: "topic" | "use
       </div>
     );
   }
-  const chipClass =
-    variant === "topic"
-      ? "bg-[#eceae3] text-[#36342e]"
-      : "border border-[#c5c0b1] bg-[#fff7f4] text-[#ff4f00]";
   const overflowClass =
-    variant === "topic" ? "bg-[#fff7f4] text-[#ff4f00]" : "bg-[#eceae3] text-[#939084]";
+    variant === "topic" ? "bg-[#eceae3] text-[#5b574a]" : "bg-[#eceae3] text-[#939084]";
   return (
     <div className="min-w-0">
       <div className="flex flex-wrap gap-1">
@@ -287,7 +316,9 @@ function ChipList({ items, variant }: { items: string[]; variant: "topic" | "use
             key={item}
             className={cn(
               "inline-flex max-w-[90px] items-center truncate rounded-full px-2 py-0.5 text-[11px]",
-              chipClass,
+              variant === "topic"
+                ? topicChipClass(item)
+                : "border border-[#c5c0b1] bg-[#fff7f4] text-[#ff4f00]",
             )}
             title={item}
           >
@@ -320,6 +351,14 @@ function fmtN(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
+}
+
+// 取名字前两个有效字符（拉丁姓+名各 1）做 fallback 头像。
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 // 表格中"合作时间"只展示到月份粒度（例 "2026-04"）；底层数据 lastContactAt

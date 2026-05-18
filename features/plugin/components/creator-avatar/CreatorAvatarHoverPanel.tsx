@@ -10,6 +10,8 @@ import type {
   LinkedAccountPlatform,
 } from "./types";
 
+import { Button } from "@/components/ui/button";
+
 interface CreatorAvatarHoverPanelProps {
   profile: CreatorHoverProfile;
 }
@@ -204,7 +206,7 @@ export function CreatorAvatarHoverPanel({ profile }: CreatorAvatarHoverPanelProp
     <div
       role="dialog"
       aria-label="博主链接面板"
-      className="flex w-[140px] min-w-0 flex-col gap-1 rounded-xl p-2"
+      className="flex w-[140px] min-w-0 flex-col gap-1 rounded-[8px] p-2"
       style={{
         background: PANEL_BG,
         border: `1px solid ${PANEL_BORDER}`,
@@ -239,7 +241,8 @@ export function CreatorAvatarHoverPanel({ profile }: CreatorAvatarHoverPanelProp
         </div>
       ) : null}
 
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={() => setExpanded((v) => !v)}
         disabled={!hasExpandable}
@@ -261,7 +264,7 @@ export function CreatorAvatarHoverPanel({ profile }: CreatorAvatarHoverPanelProp
           className="transition-transform"
           style={{ transform: expanded ? "rotate(180deg)" : undefined }}
         />
-      </button>
+      </Button>
 
       {expanded && hasExpandable ? (
         <>

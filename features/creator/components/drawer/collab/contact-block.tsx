@@ -3,6 +3,7 @@
 import { Mail, MessageSquare, User } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { Creator } from "@/types/api";
 
 interface Props {
@@ -33,7 +34,7 @@ export function ContactBlock({ creator, onChangeManualContactName }: Props) {
         <span className="h-2 w-2 rounded-full bg-[#ff4f00]" />
         <h3 className="text-[14px] font-semibold text-[#201515]">联系方式</h3>
       </div>
-      <div className="space-y-2 rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-4">
+      <div className="space-y-2 rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-4">
         {creator.emails.length === 0 ? (
           <Row icon={<Mail className="h-3.5 w-3.5" />} label="尚未找到邮箱" tone="muted" />
         ) : (
@@ -75,13 +76,14 @@ export function ContactBlock({ creator, onChangeManualContactName }: Props) {
               className="min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-[#b5b2aa]"
             />
           ) : (
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={startEditing}
               className="min-w-0 flex-1 text-left text-[12px] text-[#36342e] hover:text-[#ff4f00]"
             >
               {creator.manualContactName ?? "点击填写对接姓名 / 备用联系"}
-            </button>
+            </Button>
           )}
         </div>
       </div>

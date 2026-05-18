@@ -3,6 +3,7 @@
 import { ExternalLink, MoreHorizontal, Pause, Play, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // §3.3 投放卡片右下角的"更多操作"按钮 —— 三个用户主动行为：
@@ -24,7 +25,8 @@ export function PlacementActionsMenu({ paused, onTogglePaused, postUrl, onDelete
 
   return (
     <div className="relative">
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={(event) => {
           event.stopPropagation();
@@ -39,13 +41,13 @@ export function PlacementActionsMenu({ paused, onTogglePaused, postUrl, onDelete
         )}
       >
         <MoreHorizontal className="h-3.5 w-3.5" />
-      </button>
+      </Button>
       {open ? (
         <>
           <div className="fixed inset-0 z-10" onClick={close} aria-hidden />
           <div
             role="menu"
-            className="absolute right-0 bottom-full z-20 mb-1 min-w-[140px] overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb] py-1 shadow-md"
+            className="absolute right-0 bottom-full z-20 mb-1 min-w-[140px] overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] py-1 shadow-md"
           >
             <MenuButton
               onClick={() => {
@@ -91,7 +93,8 @@ interface MenuButtonProps {
 
 function MenuButton({ onClick, icon: Icon, label, tone = "default" }: MenuButtonProps) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       role="menuitem"
       onClick={(event) => {
@@ -108,6 +111,6 @@ function MenuButton({ onClick, icon: Icon, label, tone = "default" }: MenuButton
         aria-hidden
       />
       <span className="flex-1">{label}</span>
-    </button>
+    </Button>
   );
 }

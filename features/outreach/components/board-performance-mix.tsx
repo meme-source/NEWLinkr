@@ -3,7 +3,12 @@
 // §3.3 投放表现 — "投放达人结构"两块卡片：
 //   1) 类别分布：按达人主类拆 投放数 / 累计曝光 / 平均 CPE
 //   2) 量级统计：按粉丝量分桶（头部 / 腰部 / 尾部）拆 投放数 / 累计曝光 / 总花费
-// 两个卡片在 TikTok-only 阶段取代了原先的"平台对比"卡。
+// 2026-05-11 与 投放表现 mock 1:1 对齐：
+//   - 卡片 border-radius 12 (rounded-lg)
+//   - 标题区使用 section-label + h3 双层结构 (CATEGORY / TIER)
+//   - 类别分布 bar 填 orange (--orange #ff4f00)，量级 dot 沿用 coral 家族
+//   - 量级卡的"花费占比"caption 改为单行（caption · 总花费 $X）放条上方
+//   - 量级 tier-row 改为 4 列 grid (name 1.3fr | 投放 | 曝光 | CPE)，与 mock 同形
 
 import {
   CATEGORY_LABEL,
@@ -32,39 +37,41 @@ export function CategoryBreakdownCard({ placements }: { placements: Placement[] 
   const maxViews = Math.max(1, ...rows.map((r) => r.views));
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-5">
-      <div className="mb-4">
-        <div className="text-xs font-medium tracking-wider text-[#939084] uppercase">类别分布</div>
-        <p className="mt-1 text-[11px] text-[#939084]">投放达人主类的投放数与产出</p>
+    <div className="flex h-full flex-col rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-[22px] py-[18px]">
+      <div className="mb-[24px]">
+        <div className="text-[11px] font-medium tracking-[0.12em] text-[#939084] uppercase">
+          CATEGORY
+        </div>
+        <h3 className="mt-1.5 text-[17px] font-semibold tracking-tight text-[#201515]">类别分布</h3>
       </div>
       {rows.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="flex-1 space-y-3.5">
+        <div className="flex flex-1 flex-col gap-[22px]">
           {rows.map((r) => {
             const cpe = r.eng > 0 ? r.spend / r.eng : 0;
             const sharePct = totalCount > 0 ? Math.round((r.count / totalCount) * 100) : 0;
             const widthPct = (r.views / maxViews) * 100;
             return (
               <div key={r.category}>
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
+                <div className="mb-2 flex items-center justify-between text-[13px]">
+                  <div className="flex items-center gap-2.5">
                     <span className="font-medium text-[#201515]">{CATEGORY_LABEL[r.category]}</span>
-                    <span className="text-[10px] text-[#939084] tabular-nums">
+                    <span className="text-[12px] text-[#939084] tabular-nums">
                       {r.count} 条 · {sharePct}%
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#36342e] tabular-nums">
+                  <span className="text-[12px] text-[#36342e] tabular-nums">
                     CPE {fmtMoney(cpe, 3)}
                   </span>
                 </div>
-                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#eceae3]">
+                <div className="h-1.5 overflow-hidden rounded-[3px] bg-[#eceae3]">
                   <div
-                    className="h-full rounded-full bg-[#ff4f00]"
+                    className="h-full rounded-[3px] bg-[#ff4f00]"
                     style={{ width: `${widthPct}%` }}
                   />
                 </div>
-                <div className="mt-1 flex items-center justify-between text-[10px] text-[#939084] tabular-nums">
+                <div className="mt-1.5 flex items-center justify-between text-[11px] text-[#939084] tabular-nums">
                   <span>曝光 {fmtCount(r.views)}</span>
                   <span>花费 {fmtMoney(r.spend, 0)}</span>
                 </div>
@@ -91,17 +98,19 @@ export function TierBreakdownCard({ placements }: { placements: Placement[] }) {
   const totalSpend = rows.reduce((s, r) => s + r.spend, 0);
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-5">
-      <div className="mb-4">
-        <div className="text-xs font-medium tracking-wider text-[#939084] uppercase">量级统计</div>
-        <p className="mt-1 text-[11px] text-[#939084]">按达人粉丝量分桶的投放数与花费</p>
+    <div className="flex h-full flex-col rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-[22px] py-[18px]">
+      <div className="mb-[18px]">
+        <div className="text-[11px] font-medium tracking-[0.12em] text-[#939084] uppercase">
+          TIER
+        </div>
+        <h3 className="mt-1.5 text-[17px] font-semibold tracking-tight text-[#201515]">量级统计</h3>
       </div>
       {totalCount === 0 ? (
         <EmptyState />
       ) : (
         <>
           <SpendShareBar rows={rows} totalSpend={totalSpend} />
-          <div className="mt-4 flex-1 space-y-3">
+          <div className="flex flex-1 flex-col gap-[14px]">
             {rows.map((r) => {
               const meta = TIER_META[r.tier];
               const cpe = r.eng > 0 ? r.spend / r.eng : 0;
@@ -109,39 +118,25 @@ export function TierBreakdownCard({ placements }: { placements: Placement[] }) {
               return (
                 <div
                   key={r.tier}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-[#eceae3] bg-[#fffdf9] px-3 py-2.5"
+                  className="grid grid-cols-[1.3fr_1fr_1fr_1fr] items-center gap-3 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-4 py-3.5 transition-colors hover:border-[#b5b2aa]"
                 >
-                  <div className="flex min-w-0 items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2.5">
                     <span
-                      className="h-2 w-2 shrink-0 rounded-full"
+                      className="h-[7px] w-[7px] shrink-0 rounded-full"
                       style={{ backgroundColor: meta.color }}
                     />
                     <div className="min-w-0">
-                      <div className="text-xs font-medium text-[#201515]">{meta.label}</div>
-                      <div className="text-[10px] text-[#939084] tabular-nums">{meta.range}</div>
-                    </div>
-                  </div>
-                  <div className="grid shrink-0 grid-cols-3 gap-3 text-right text-[11px] tabular-nums">
-                    <div>
-                      <div className="text-[10px] text-[#939084]">投放</div>
-                      <div className="font-semibold text-[#201515]">
-                        {r.count}
-                        <span className="ml-1 text-[10px] font-normal text-[#939084]">
-                          {countShare}%
-                        </span>
+                      <div className="text-[13px] font-medium whitespace-nowrap text-[#201515]">
+                        {meta.label}
                       </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-[#939084]">曝光</div>
-                      <div className="font-semibold text-[#201515]">{fmtCount(r.views)}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-[#939084]">CPE</div>
-                      <div className="font-semibold text-[#201515]">
-                        {r.eng > 0 ? fmtMoney(cpe, 3) : "—"}
+                      <div className="mt-0.5 text-[10.5px] whitespace-nowrap text-[#939084] tabular-nums">
+                        {meta.range} 粉丝
                       </div>
                     </div>
                   </div>
+                  <TierMetric label="投放" value={`${r.count} 条 · ${countShare}%`} />
+                  <TierMetric label="曝光" value={fmtCount(r.views)} />
+                  <TierMetric label="CPE" value={r.eng > 0 ? fmtMoney(cpe, 3) : "—"} />
                 </div>
               );
             })}
@@ -152,15 +147,28 @@ export function TierBreakdownCard({ placements }: { placements: Placement[] }) {
   );
 }
 
+function TierMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <div className="mb-[3px] text-[10px] text-[#939084]">{label}</div>
+      <div className="text-[12.5px] font-medium whitespace-nowrap text-[#201515] tabular-nums">
+        {value}
+      </div>
+    </div>
+  );
+}
+
 function SpendShareBar({ rows, totalSpend }: { rows: TierRow[]; totalSpend: number }) {
   if (totalSpend <= 0) return null;
   return (
-    <div>
-      <div className="mb-1.5 flex items-center justify-between text-[10px] text-[#939084]">
-        <span>花费占比</span>
-        <span className="tabular-nums">{fmtMoney(totalSpend, 0)} 总花费</span>
+    <div className="mb-5">
+      <div className="mb-3.5 flex items-center gap-1.5 text-[12px] text-[#939084]">
+        <span>花费占比 · 总花费</span>
+        <strong className="font-medium text-[#201515] tabular-nums">
+          {fmtMoney(totalSpend, 0)}
+        </strong>
       </div>
-      <div className="flex h-2 w-full overflow-hidden rounded-full bg-[#eceae3]">
+      <div className="flex h-1.5 w-full gap-px overflow-hidden rounded-[3px]">
         {rows.map((r) => {
           const pct = (r.spend / totalSpend) * 100;
           if (pct <= 0) return null;
@@ -179,7 +187,7 @@ function SpendShareBar({ rows, totalSpend }: { rows: TierRow[]; totalSpend: numb
 
 function EmptyState() {
   return (
-    <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#eceae3] bg-[#fffdf9] py-10 text-[11px] text-[#939084]">
+    <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-[#eceae3] bg-[#fffdf9] py-10 text-[11px] text-[#939084]">
       暂无投放数据
     </div>
   );

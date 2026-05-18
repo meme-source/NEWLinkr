@@ -51,8 +51,8 @@ export default function SettingsPage() {
     <Suspense
       fallback={
         <div className="space-y-4">
-          <div className="h-8 w-48 animate-pulse rounded-xl bg-[#eceae3]" />
-          <div className="h-64 animate-pulse rounded-2xl bg-[#eceae3]" />
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-[#eceae3]" />
+          <div className="h-64 animate-pulse rounded-lg bg-[#eceae3]" />
         </div>
       }
     >

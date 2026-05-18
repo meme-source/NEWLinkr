@@ -1,9 +1,15 @@
+import type { ChatIntent } from "../../chat-types";
 import { sleep } from "./animation";
-import { AGENT_STEPS } from "./agent-steps";
+import { getAgentSteps } from "./agent-steps";
+import type { ParsedBrief } from "./parsed-brief-types";
 
 interface RunAgentFlowArgs {
   stepsContainer: HTMLElement;
   summaryEl: HTMLElement | null;
+  /** Discovery tab — drives which mid-stage steps stream into the console. */
+  intent: ChatIntent;
+  /** AI's structured understanding of the user's input — drives step content. */
+  brief: ParsedBrief;
   /** Called after the steps + summary finish — used to fade in the canvas. */
   onComplete: () => Promise<void> | void;
   /** Called to flip the header pill from `thinking` → `ready`. */
@@ -23,6 +29,8 @@ interface RunAgentFlowArgs {
 export async function runAgentFlow({
   stepsContainer,
   summaryEl,
+  intent,
+  brief,
   onComplete,
   onReady,
 }: RunAgentFlowArgs): Promise<void> {
@@ -32,7 +40,8 @@ export async function runAgentFlow({
 
   await sleep(400); // initial pause
 
-  for (const step of AGENT_STEPS) {
+  const steps = getAgentSteps(intent, brief);
+  for (const step of steps) {
     const stepEl = document.createElement("div");
     stepEl.className = "agent-step";
     stepEl.innerHTML = `
@@ -64,15 +73,6 @@ export async function runAgentFlow({
 
     stepEl.classList.remove("active");
     stepEl.classList.add("done");
-
-    if (step.narration) {
-      const narrEl = document.createElement("div");
-      narrEl.className = "step-narration";
-      narrEl.textContent = step.narration;
-      stepsContainer.appendChild(narrEl);
-      await sleep(40);
-      narrEl.classList.add("visible");
-    }
 
     await sleep(280);
   }

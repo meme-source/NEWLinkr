@@ -25,7 +25,8 @@ export function TopicWordCloud({ topics }: { topics: Array<{ label: string; weig
     const fontSize = Math.round(10 + ratio * 13);
     rand();
     const colorIdx = Math.floor(rand() * WORD_CLOUD_COLORS.length);
-    const color = ratio >= 0.85 ? "#201515" : WORD_CLOUD_COLORS[colorIdx];
+    // 权重最高的词固定用品牌橙做高亮，其余从暖色词云色板循环取色。
+    const color = ratio >= 0.85 ? "#ff4f00" : WORD_CLOUD_COLORS[colorIdx];
     const fontWeight = ratio >= 0.8 ? 700 : ratio >= 0.5 ? 600 : 500;
     const mentionCount = Math.round(topic.weight * 28 + topic.weight * 7 * (i % 3));
     let estW = 0;

@@ -16,26 +16,27 @@ import type {
   SidebarTab,
   SocialPlatformKey,
 } from "@/features/plugin/types";
+import type { TiktokVideoCategory } from "@/features/plugin/components/tiktok-video-tile/types";
 import { searchResults } from "@/features/plugin/data/search-results";
-import { emailTemplates } from "@/features/plugin/data/email-templates";
+import { DEFAULT_EMAIL_TEMPLATE_ID, emailTemplates } from "@/features/plugin/data/email-templates";
+import { CONNECTED_EMAIL_ACCOUNTS } from "@/features/email/data/accounts";
 import {
   DEFAULT_HOVER_METRICS,
-  computeAudienceHighlights,
-  getAudienceSummary,
   getCreatorDiagnostics,
   getCreatorEmail,
   getCreatorLocation,
   getCreatorMetricSnapshot,
   getCreatorType,
   getDefaultScheduleAt,
-  getEmailSubjectSegments,
-  getEmailTemplateDraft,
   getEmailTemplateSegments,
   getEmailTemplateSubject,
+  htmlToPlainText,
+  segmentsToHtml,
 } from "./shared";
 import { buildSidebarMetricItems } from "./metric-items";
 import { SidebarProjectSelector } from "./SidebarProjectSelector";
 import { SidebarNavRail } from "./SidebarNavRail";
+import { SinglePostAnalysisPanel } from "@/features/plugin/components/video-analysis-mock/SinglePostAnalysisPanel";
 import { QuickSettingsPanel } from "./QuickSettingsPanel";
 import { EmailReviewModal } from "./EmailReviewModal";
 import { CurrentTab } from "./tabs/CurrentTab";
@@ -73,8 +74,6 @@ export function SimilarSidebar({
   onRemoveCreatorTag,
   selectedEmailTemplate,
   onSelectEmailTemplate,
-  emailDraft,
-  onEmailDraftChange,
   onSendCurrent,
   resultPopupOpen,
   onEndSearch,
@@ -97,6 +96,8 @@ export function SimilarSidebar({
   hoverMetricModes,
   onChangeHoverMetricModes,
   onRecordQuickSettingsChange,
+  enabledBadgeCategories,
+  onToggleBadgeCategory,
 }: SimilarSidebarProps) {
   const [reseedAnchorLabel, setReseedAnchorLabel] = useState<string | null>(null);
 
@@ -105,7 +106,6 @@ export function SimilarSidebar({
   const currentCreatorTags = creatorTagsById[creator.id] ?? [];
   const creatorMetrics = getCreatorMetricSnapshot(creator, scrapeCount);
   const creatorCpm = creatorMetrics.cpm;
-  const audienceHighlights = computeAudienceHighlights(getAudienceSummary(creator));
   const configuredMetricKeys = selectedHoverMetricKeys.length
     ? selectedHoverMetricKeys
     : DEFAULT_HOVER_METRICS;
@@ -116,17 +116,22 @@ export function SimilarSidebar({
     hoverMetricModes,
   );
 
-  const [senderEmails] = useState<Array<{ id: string; label: string; address: string }>>([
-    { id: "demo", label: "工作邮箱", address: "team@2linkr.io" },
-  ]);
+  // 发送账号统一来自共享层 features/email（与 Web 工作台「邮箱绑定」同源）。
+  const senderEmails = CONNECTED_EMAIL_ACCOUNTS;
   const [selectedSenderId, setSelectedSenderId] = useState<string>(
     senderEmails.length > 0 ? senderEmails[0].id : "",
   );
   const selectedSender = senderEmails.find((acct) => acct.id === selectedSenderId) ?? null;
-  const [emailSubject, setEmailSubject] = useState("");
+  // 逐人独立草稿：仅存放被用户编辑过的版本；未编辑的博主用 generateDraft 现算。
+  const [editedDrafts, setEditedDrafts] = useState<
+    Record<string, { subject: string; body: string }>
+  >({});
   const [emailAttachments, setEmailAttachments] = useState<File[]>([]);
   const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([creator.id]);
   const [previewRecipientId, setPreviewRecipientId] = useState(creator.id);
+  const [confirmedRecipientIds, setConfirmedRecipientIds] = useState<Set<string>>(
+    () => new Set<string>(),
+  );
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [sendMenuOpen, setSendMenuOpen] = useState(false);
   const [sendMode, setSendMode] = useState<EmailSendOptions["mode"]>("now");
@@ -164,18 +169,62 @@ export function SimilarSidebar({
     emailCandidateCreators.find((item) => item.id === previewRecipientId) ??
     emailRecipientCreators[0] ??
     creator;
+  const previewIndex = emailRecipientCreators.findIndex((item) => item.id === previewCreator.id);
+  const unconfirmedRecipientCount = emailRecipientCreators.filter(
+    (item) => !confirmedRecipientIds.has(item.id),
+  ).length;
+  const isPreviewConfirmed = confirmedRecipientIds.has(previewCreator.id);
+  const goPreviewByOffset = (offset: number) => {
+    const total = emailRecipientCreators.length;
+    if (total === 0) return;
+    const nextIndex =
+      previewIndex < 0 ? (offset > 0 ? 0 : total - 1) : (previewIndex + offset + total) % total;
+    setPreviewRecipientId(emailRecipientCreators[nextIndex].id);
+  };
+  const toggleConfirmPreview = () => {
+    const targetId = previewCreator.id;
+    setConfirmedRecipientIds((current) => {
+      const next = new Set(current);
+      if (next.has(targetId)) {
+        next.delete(targetId);
+      } else {
+        next.add(targetId);
+      }
+      return next;
+    });
+  };
   const emailTemplateSegments = selectedEmailTemplate
     ? getEmailTemplateSegments(selectedEmailTemplate, previewCreator, selectedProject)
     : [];
   const personalizedSegmentCount = emailTemplateSegments.filter((s) => s.personalized).length;
-  const canOpenEmailReview =
-    Boolean(selectedEmailTemplate) &&
-    emailSubject.trim().length > 0 &&
-    emailDraft.trim().length > 0 &&
-    emailRecipientCount > 0;
+  const canOpenEmailReview = Boolean(selectedEmailTemplate) && emailRecipientCount > 0;
+
+  // 取某位博主的草稿：编辑过的取编辑版，否则按模板现场生成。
+  const generateDraft = (target: CreatorProfile): { subject: string; body: string } => {
+    if (!selectedEmailTemplate) return { subject: "", body: "" };
+    return {
+      subject: getEmailTemplateSubject(selectedEmailTemplate, target, selectedProject),
+      body: segmentsToHtml(
+        getEmailTemplateSegments(selectedEmailTemplate, target, selectedProject),
+      ),
+    };
+  };
+  const getRecipientDraft = (target: CreatorProfile): { subject: string; body: string } =>
+    editedDrafts[target.id] ?? generateDraft(target);
+  const previewDraft = getRecipientDraft(previewCreator);
+  const updatePreviewDraft = (patch: Partial<{ subject: string; body: string }>) => {
+    setEditedDrafts((current) => {
+      const base = current[previewCreator.id] ?? generateDraft(previewCreator);
+      return { ...current, [previewCreator.id]: { ...base, ...patch } };
+    });
+  };
+  // 换模板 = 内容重新生成，丢弃所有逐人编辑。
+  const handleSelectTemplate = (templateId: EmailTemplateKey) => {
+    onSelectEmailTemplate(templateId);
+    setEditedDrafts({});
+  };
 
   const toggleRecipient = (creatorId: string) => {
-    setPreviewRecipientId(creatorId);
     setSelectedRecipientIds((current) =>
       current.includes(creatorId)
         ? current.filter((item) => item !== creatorId)
@@ -193,13 +242,9 @@ export function SimilarSidebar({
   };
 
   const activeEmailTemplate =
-    emailTemplates.find((template) => template.key === selectedEmailTemplate) ?? null;
-  const selectedTemplateLabel = activeEmailTemplate?.label ?? "自定义邮件";
+    emailTemplates.find((template) => template.id === selectedEmailTemplate) ?? null;
+  const selectedTemplateLabel = activeEmailTemplate?.name ?? "自定义邮件";
 
-  const [diagnosticsOpen, setDiagnosticsOpen] = useState(true);
-  const [aiReviewOpen, setAiReviewOpen] = useState(true);
-  const [topicsOpen, setTopicsOpen] = useState(true);
-  const [coreMetricsOpen, setCoreMetricsOpen] = useState(true);
   const [metricsRangeMenuOpen, setMetricsRangeMenuOpen] = useState(false);
   const [similarMetricsRangeMenuOpen, setSimilarMetricsRangeMenuOpen] = useState(false);
   const [currentDetailTab, setCurrentDetailTab] = useState<CurrentDetailTabKey>("pricing");
@@ -218,26 +263,15 @@ export function SimilarSidebar({
 
   useEffect(() => {
     setPreviewRecipientId(creator.id);
+    setConfirmedRecipientIds(new Set<string>());
+    setEditedDrafts({});
   }, [creator.id]);
 
   useEffect(() => {
     if (!selectedEmailTemplate) {
-      onSelectEmailTemplate("intro");
-      return;
+      onSelectEmailTemplate(DEFAULT_EMAIL_TEMPLATE_ID);
     }
-    setEmailSubject(
-      getEmailTemplateSubject(selectedEmailTemplate, previewCreator, selectedProject),
-    );
-    onEmailDraftChange(
-      getEmailTemplateDraft(selectedEmailTemplate, previewCreator, selectedProject),
-    );
-  }, [
-    onEmailDraftChange,
-    onSelectEmailTemplate,
-    previewCreator,
-    selectedEmailTemplate,
-    selectedProject,
-  ]);
+  }, [onSelectEmailTemplate, selectedEmailTemplate]);
 
   useEffect(() => {
     const availableIds = new Set(emailCandidateCreators.map((item) => item.id));
@@ -257,12 +291,8 @@ export function SimilarSidebar({
       onRecordQuickSettingsChange("请先选择邮件模板。");
       return;
     }
-    if (!emailSubject.trim()) {
-      onRecordQuickSettingsChange("邮件标题为空，请先补充后再发送。");
-      return;
-    }
-    if (!emailDraft.trim()) {
-      onRecordQuickSettingsChange("邮件内容为空，请先生成或补充后再发送。");
+    if (emailRecipientCount === 0) {
+      onRecordQuickSettingsChange("请先选择建联对象。");
       return;
     }
     if (sendMode === "scheduled" && !scheduledAt) {
@@ -274,38 +304,21 @@ export function SimilarSidebar({
   };
 
   const confirmEmailSend = () => {
-    const previewGeneratedSubject = getEmailTemplateSubject(
-      selectedEmailTemplate,
-      previewCreator,
-      selectedProject,
-    );
-    const previewGeneratedDraft = getEmailTemplateDraft(
-      selectedEmailTemplate,
-      previewCreator,
-      selectedProject,
-    );
-    const subjectWasEdited = emailSubject.trim() !== previewGeneratedSubject.trim();
-    const contentWasEdited = emailDraft.trim() !== previewGeneratedDraft.trim();
     const recipientMessages = emailRecipientCreators.map((recipient) => {
-      const subjectSegments = subjectWasEdited
-        ? [{ text: emailSubject }]
-        : getEmailSubjectSegments(selectedEmailTemplate, recipient, selectedProject);
-      const contentSegments = contentWasEdited
-        ? [{ text: emailDraft }]
-        : getEmailTemplateSegments(selectedEmailTemplate, recipient, selectedProject);
-
+      const draft = getRecipientDraft(recipient);
+      const content = htmlToPlainText(draft.body);
       return {
         creatorId: recipient.id,
-        subject: subjectSegments.map((segment) => segment.text).join(""),
-        content: contentSegments.map((segment) => segment.text).join(""),
-        subjectSegments,
-        contentSegments,
-        personalizedSegmentCount: contentSegments.filter((segment) => segment.personalized).length,
+        subject: draft.subject,
+        content,
+        subjectSegments: [{ text: draft.subject }],
+        contentSegments: [{ text: content }],
+        personalizedSegmentCount: 0,
       };
     });
 
-    onSendCurrent(selectedTemplateLabel, emailDraft, {
-      subject: emailSubject,
+    onSendCurrent(selectedTemplateLabel, htmlToPlainText(previewDraft.body), {
+      subject: previewDraft.subject,
       attachmentCount: emailAttachments.length,
       mode: sendMode,
       scheduledAt: sendMode === "scheduled" ? scheduledAt : undefined,
@@ -357,187 +370,196 @@ export function SimilarSidebar({
       ) : null}
 
       <div className={cn("flex min-w-0 flex-1 flex-col", collapsed && "hidden")}>
-        <div
-          onWheelCapture={handleSidebarWheel}
-          className="hide-scrollbar flex-1 overflow-y-auto px-4 pt-3 pb-5"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          <SidebarProjectSelector
-            projects={projects}
-            selectedProject={selectedProject}
-            onSelectProject={onSelectProject}
-            onQuickCreateProject={onQuickCreateProject}
-            onDeleteProject={onDeleteProject}
-          />
-
-          {activeSidebarTab === "quick" ? (
-            <QuickSettingsPanel
-              creator={creator}
-              location={location}
-              creatorMetrics={creatorMetrics}
-              dataCheckOn={dataCheckOn}
-              onToggleDataCheck={onToggleDataCheck}
-              scrapeCount={scrapeCount}
-              onChangeScrapeCount={onChangeScrapeCount}
-              inlineDataKeys={inlineDataKeys}
-              onChangeInlineDataKeys={onChangeInlineDataKeys}
-              selectedPlatform={selectedPlatform}
-              onChangePlatform={onChangePlatform}
-              selectedHoverMetricKeys={selectedHoverMetricKeys}
-              onChangeHoverMetricKeys={onChangeHoverMetricKeys}
-              hoverMetricModes={hoverMetricModes}
-              onChangeHoverMetricModes={onChangeHoverMetricModes}
-              onRecordQuickSettingsChange={onRecordQuickSettingsChange}
-              pluginStatus={pluginStatus}
-              onTogglePluginStatus={() =>
-                setPluginStatus((s) => (s === "working" ? "idle" : "working"))
-              }
-            />
-          ) : null}
-
-          {activeSidebarTab === "current" ? (
-            <CurrentTab
-              creator={creator}
-              email={email}
-              location={location}
-              creatorType={creatorType}
-              isSaved={savedCreatorIds.includes(creator.id)}
-              onToggleSave={() => onSaveCreator(creator.id)}
-              onOpenEmailSidebar={() => onSelectSidebarTab("email")}
-              tags={currentCreatorTags}
-              onAddTag={(label) => onAddCreatorTag(creator.id, label)}
-              onRemoveTag={(label) => onRemoveCreatorTag(creator.id, label)}
-              currentDetailTab={currentDetailTab}
-              onChangeCurrentDetailTab={setCurrentDetailTab}
-              coreMetricsOpen={coreMetricsOpen}
-              onToggleCoreMetrics={() => setCoreMetricsOpen((v) => !v)}
-              scrapeCount={scrapeCount}
-              onChangeScrapeCount={onChangeScrapeCount}
-              metricsRangeMenuOpen={metricsRangeMenuOpen}
-              onToggleMetricsRangeMenu={() => setMetricsRangeMenuOpen((v) => !v)}
-              creatorCpm={creatorCpm}
-              dataCheckOn={dataCheckOn}
-              onToggleDataCheck={onToggleDataCheck}
-              sidebarMetricItems={sidebarMetricItems}
-              aiReviewOpen={aiReviewOpen}
-              onToggleAiReview={() => setAiReviewOpen((v) => !v)}
-              diagnostics={diagnostics}
-              diagnosticsOpen={diagnosticsOpen}
-              onToggleDiagnostics={() => setDiagnosticsOpen((v) => !v)}
-              topicsOpen={topicsOpen}
-              onToggleTopics={() => setTopicsOpen((v) => !v)}
-              isAudienceUnlocked={isAudienceUnlocked}
-              audienceHighlights={audienceHighlights}
-              onUnlockAudience={handleUnlockAudience}
-              onOpenWorkspaceAudience={() => {
-                window.open(
-                  `/workspace?creator=${encodeURIComponent(creator.id)}&tab=audience`,
-                  "_blank",
-                );
-              }}
-              onSelectSidebarTab={onSelectSidebarTab}
-            />
-          ) : null}
-
-          {activeSidebarTab === "email" ? (
-            <EmailTab
-              creator={creator}
-              orderedRecipientCreators={orderedRecipientCreators}
-              filteredRecipientCreatorsCount={filteredRecipientCreators.length}
-              emailRecipientCount={emailRecipientCount}
-              selectedRecipientSet={selectedRecipientSet}
-              previewCreator={previewCreator}
-              allFilteredRecipientsSelected={allFilteredRecipientsSelected}
-              onToggleAllFilteredRecipients={toggleAllFilteredRecipients}
-              onToggleRecipient={toggleRecipient}
-              onSetPreviewRecipient={setPreviewRecipientId}
-              onOpenProfile={(creatorId) => onOpenProfile(creatorId)}
-              senderEmails={senderEmails}
-              selectedSenderId={selectedSenderId}
-              onChangeSelectedSenderId={setSelectedSenderId}
-              selectedEmailTemplate={selectedEmailTemplate}
-              onSelectEmailTemplate={onSelectEmailTemplate}
-              emailSubject={emailSubject}
-              onChangeEmailSubject={setEmailSubject}
-              emailAttachments={emailAttachments}
-              onChangeEmailAttachments={setEmailAttachments}
-              emailTemplateSegments={emailTemplateSegments}
-              personalizedSegmentCount={personalizedSegmentCount}
-              canOpenEmailReview={canOpenEmailReview}
-              onSendAction={handleSendAction}
-              sendMode={sendMode}
-              onChangeSendMode={(mode) => {
-                setSendMode(mode);
-                setSendMenuOpen(false);
-              }}
-              sendMenuOpen={sendMenuOpen}
-              onToggleSendMenu={() => setSendMenuOpen((value) => !value)}
-              scheduledAt={scheduledAt}
-              onChangeScheduledAt={setScheduledAt}
-            />
-          ) : null}
-
-          {reviewModalOpen ? (
-            <EmailReviewModal
-              templateKey={selectedEmailTemplate}
-              templateLabel={selectedTemplateLabel}
-              project={selectedProject}
-              recipients={emailRecipientCreators}
-              senderAddress={selectedSender?.address ?? "未选择发件账号"}
-              subject={emailSubject}
-              attachmentCount={emailAttachments.length}
-              sendMode={sendMode}
-              scheduledAt={sendMode === "scheduled" ? scheduledAt : undefined}
-              onClose={() => setReviewModalOpen(false)}
-              onConfirm={confirmEmailSend}
-            />
-          ) : null}
-
-          {activeSidebarTab === "similar" ? (
-            <SimilarTab
-              creator={creator}
-              location={location}
-              creatorType={creatorType}
-              scrapeCount={scrapeCount}
-              onChangeScrapeCount={onChangeScrapeCount}
-              similarMetricsRangeMenuOpen={similarMetricsRangeMenuOpen}
-              onToggleSimilarMetricsRangeMenu={() => setSimilarMetricsRangeMenuOpen((v) => !v)}
-              dataCheckOn={dataCheckOn}
-              onToggleDataCheck={onToggleDataCheck}
-              selectedMode={selectedMode}
-              onSelectMode={onSelectMode}
-              onRunSearch={onRunSearch}
-              isSearching={isSearching}
-              hasSearched={hasSearched}
-              resultPopupOpen={resultPopupOpen}
-              searchProgress={searchProgress}
-              activeModeEta={activeModeEta}
-              activeResults={activeResults}
-              visibleCards={visibleCards}
+        {activeSidebarTab === "single-post" ? (
+          // 单帖 AI 分析独占内容列：自带 token banner / 子 tab / 内部滚动，
+          // 不套 SidebarProjectSelector + 统一 padded 滚动壳。
+          <SinglePostAnalysisPanel />
+        ) : (
+          <div
+            onWheelCapture={handleSidebarWheel}
+            className="hide-scrollbar flex-1 overflow-y-auto px-4 pt-3 pb-5"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            <SidebarProjectSelector
+              projects={projects}
               selectedProject={selectedProject}
-              reseedAnchorLabel={reseedAnchorLabel}
-              onChangeReseedAnchorLabel={setReseedAnchorLabel}
-              savedCreatorIds={savedCreatorIds}
-              creatorTagsById={creatorTagsById}
-              onSaveCreator={onSaveCreator}
-              onDismissCreator={onDismissCreator}
-              onSeedCreator={onSeedCreator}
-              onAddCreatorTag={onAddCreatorTag}
-              onRemoveCreatorTag={onRemoveCreatorTag}
-              onQuickScreen={onQuickScreen}
-              onEndSearch={onEndSearch}
-              onCardChange={onCardChange}
-              onOpenSeedFinder={onOpenSeedFinder}
-              onSelectSidebarTab={(tab) => onSelectSidebarTab(tab)}
-              sidebarMetricItems={sidebarMetricItems}
-              onSendEmail={(creatorId) => {
-                onSaveCreator(creatorId);
-                setSelectedRecipientIds((prev) => Array.from(new Set([...prev, creatorId])));
-                onSelectSidebarTab("email");
-              }}
+              onSelectProject={onSelectProject}
+              onQuickCreateProject={onQuickCreateProject}
+              onDeleteProject={onDeleteProject}
             />
-          ) : null}
-        </div>
+
+            {activeSidebarTab === "quick" ? (
+              <QuickSettingsPanel
+                creator={creator}
+                location={location}
+                creatorMetrics={creatorMetrics}
+                dataCheckOn={dataCheckOn}
+                onToggleDataCheck={onToggleDataCheck}
+                scrapeCount={scrapeCount}
+                onChangeScrapeCount={onChangeScrapeCount}
+                inlineDataKeys={inlineDataKeys}
+                onChangeInlineDataKeys={onChangeInlineDataKeys}
+                selectedPlatform={selectedPlatform}
+                onChangePlatform={onChangePlatform}
+                selectedHoverMetricKeys={selectedHoverMetricKeys}
+                onChangeHoverMetricKeys={onChangeHoverMetricKeys}
+                hoverMetricModes={hoverMetricModes}
+                onChangeHoverMetricModes={onChangeHoverMetricModes}
+                onRecordQuickSettingsChange={onRecordQuickSettingsChange}
+                pluginStatus={pluginStatus}
+                onTogglePluginStatus={() =>
+                  setPluginStatus((s) => (s === "working" ? "idle" : "working"))
+                }
+                enabledBadgeCategories={enabledBadgeCategories}
+                onToggleBadgeCategory={onToggleBadgeCategory}
+              />
+            ) : null}
+
+            {activeSidebarTab === "current" ? (
+              <CurrentTab
+                creator={creator}
+                email={email}
+                location={location}
+                creatorType={creatorType}
+                isSaved={savedCreatorIds.includes(creator.id)}
+                onToggleSave={() => onSaveCreator(creator.id)}
+                onOpenEmailSidebar={() => onSelectSidebarTab("email")}
+                tags={currentCreatorTags}
+                onAddTag={(label) => onAddCreatorTag(creator.id, label)}
+                onRemoveTag={(label) => onRemoveCreatorTag(creator.id, label)}
+                currentDetailTab={currentDetailTab}
+                onChangeCurrentDetailTab={setCurrentDetailTab}
+                scrapeCount={scrapeCount}
+                onChangeScrapeCount={onChangeScrapeCount}
+                metricsRangeMenuOpen={metricsRangeMenuOpen}
+                onToggleMetricsRangeMenu={() => setMetricsRangeMenuOpen((v) => !v)}
+                creatorCpm={creatorCpm}
+                dataCheckOn={dataCheckOn}
+                onToggleDataCheck={onToggleDataCheck}
+                diagnostics={diagnostics}
+                isAudienceUnlocked={isAudienceUnlocked}
+                onUnlockAudience={handleUnlockAudience}
+                onOpenWorkspaceAudience={() => {
+                  window.open(
+                    `/workspace?creator=${encodeURIComponent(creator.id)}&tab=audience`,
+                    "_blank",
+                  );
+                }}
+                onSelectSidebarTab={onSelectSidebarTab}
+              />
+            ) : null}
+
+            {activeSidebarTab === "email" ? (
+              <EmailTab
+                creator={creator}
+                orderedRecipientCreators={orderedRecipientCreators}
+                filteredRecipientCreatorsCount={filteredRecipientCreators.length}
+                emailRecipientCount={emailRecipientCount}
+                selectedRecipientSet={selectedRecipientSet}
+                confirmedRecipientSet={confirmedRecipientIds}
+                previewCreator={previewCreator}
+                previewIndex={previewIndex}
+                unconfirmedRecipientCount={unconfirmedRecipientCount}
+                isPreviewConfirmed={isPreviewConfirmed}
+                allFilteredRecipientsSelected={allFilteredRecipientsSelected}
+                onToggleAllFilteredRecipients={toggleAllFilteredRecipients}
+                onToggleRecipient={toggleRecipient}
+                onSetPreviewRecipient={setPreviewRecipientId}
+                onToggleConfirmPreview={toggleConfirmPreview}
+                onPreviewPrev={() => goPreviewByOffset(-1)}
+                onPreviewNext={() => goPreviewByOffset(1)}
+                onOpenProfile={(creatorId) => onOpenProfile(creatorId)}
+                senderEmails={senderEmails}
+                selectedSenderId={selectedSenderId}
+                onChangeSelectedSenderId={setSelectedSenderId}
+                selectedEmailTemplate={selectedEmailTemplate}
+                onSelectEmailTemplate={handleSelectTemplate}
+                emailSubject={previewDraft.subject}
+                onChangeEmailSubject={(value) => updatePreviewDraft({ subject: value })}
+                bodyHtml={previewDraft.body}
+                onChangeBody={(html) => updatePreviewDraft({ body: html })}
+                emailAttachments={emailAttachments}
+                onChangeEmailAttachments={setEmailAttachments}
+                personalizedSegmentCount={personalizedSegmentCount}
+                canOpenEmailReview={canOpenEmailReview}
+                onSendAction={handleSendAction}
+                sendMode={sendMode}
+                onChangeSendMode={(mode) => {
+                  setSendMode(mode);
+                  setSendMenuOpen(false);
+                }}
+                sendMenuOpen={sendMenuOpen}
+                onToggleSendMenu={() => setSendMenuOpen((value) => !value)}
+                scheduledAt={scheduledAt}
+                onChangeScheduledAt={setScheduledAt}
+              />
+            ) : null}
+
+            {reviewModalOpen ? (
+              <EmailReviewModal
+                templateLabel={selectedTemplateLabel}
+                recipients={emailRecipientCreators}
+                recipientDrafts={emailRecipientCreators.map((item) => ({
+                  creatorId: item.id,
+                  ...getRecipientDraft(item),
+                }))}
+                senderAddress={selectedSender?.address ?? "未选择发件账号"}
+                attachmentCount={emailAttachments.length}
+                sendMode={sendMode}
+                scheduledAt={sendMode === "scheduled" ? scheduledAt : undefined}
+                onClose={() => setReviewModalOpen(false)}
+                onConfirm={confirmEmailSend}
+              />
+            ) : null}
+
+            {activeSidebarTab === "similar" ? (
+              <SimilarTab
+                creator={creator}
+                email={email}
+                location={location}
+                creatorType={creatorType}
+                scrapeCount={scrapeCount}
+                onChangeScrapeCount={onChangeScrapeCount}
+                creatorCpm={creatorCpm}
+                similarMetricsRangeMenuOpen={similarMetricsRangeMenuOpen}
+                onToggleSimilarMetricsRangeMenu={() => setSimilarMetricsRangeMenuOpen((v) => !v)}
+                dataCheckOn={dataCheckOn}
+                onToggleDataCheck={onToggleDataCheck}
+                selectedMode={selectedMode}
+                onSelectMode={onSelectMode}
+                onRunSearch={onRunSearch}
+                isSearching={isSearching}
+                hasSearched={hasSearched}
+                resultPopupOpen={resultPopupOpen}
+                searchProgress={searchProgress}
+                activeModeEta={activeModeEta}
+                activeResults={activeResults}
+                visibleCards={visibleCards}
+                selectedProject={selectedProject}
+                reseedAnchorLabel={reseedAnchorLabel}
+                onChangeReseedAnchorLabel={setReseedAnchorLabel}
+                savedCreatorIds={savedCreatorIds}
+                creatorTagsById={creatorTagsById}
+                onSaveCreator={onSaveCreator}
+                onDismissCreator={onDismissCreator}
+                onSeedCreator={onSeedCreator}
+                onAddCreatorTag={onAddCreatorTag}
+                onRemoveCreatorTag={onRemoveCreatorTag}
+                onQuickScreen={onQuickScreen}
+                onEndSearch={onEndSearch}
+                onCardChange={onCardChange}
+                onOpenSeedFinder={onOpenSeedFinder}
+                onSelectSidebarTab={(tab) => onSelectSidebarTab(tab)}
+                sidebarMetricItems={sidebarMetricItems}
+                onSendEmail={(creatorId) => {
+                  onSaveCreator(creatorId);
+                  setSelectedRecipientIds((prev) => Array.from(new Set([...prev, creatorId])));
+                  onSelectSidebarTab("email");
+                }}
+              />
+            ) : null}
+          </div>
+        )}
       </div>
 
       <SidebarNavRail
@@ -605,4 +627,6 @@ type SimilarSidebarProps = {
   hoverMetricModes: Record<HoverMetricKey, MetricAggregation>;
   onChangeHoverMetricModes: (modes: Record<HoverMetricKey, MetricAggregation>) => void;
   onRecordQuickSettingsChange: (message: string) => void;
+  enabledBadgeCategories: ReadonlySet<TiktokVideoCategory>;
+  onToggleBadgeCategory: (category: TiktokVideoCategory) => void;
 };

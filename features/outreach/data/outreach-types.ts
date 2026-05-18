@@ -75,11 +75,12 @@ export interface TrashItem {
 
 export type TemplateTab = "all" | "system" | "mine" | "trash";
 
+// Zaiper Design — scene chip palette, 全部落在 cream + 单一 accent 体系内。
 export const SCENE_CFG: Record<string, string> = {
-  初次: "bg-[#fff7f4] text-[#ff4f00] border-[#fff7f4]",
-  简短: "bg-[#eceae3] text-[#939084] border-[#c5c0b1]",
-  精品: "bg-amber-50  text-amber-700  border-amber-200",
-  跟进: "bg-blue-50   text-blue-700   border-blue-200",
-  确认: "bg-violet-50 text-violet-700 border-violet-200",
-  感谢: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  初次: "bg-[#fff7f4] text-[#ff4f00] border-[#ffc8b3]",
+  简短: "bg-[#eceae3] text-[#36342e] border-[#c5c0b1]",
+  精品: "bg-[#fdf6e3] text-[#936400] border-[#e8d3a0]",
+  跟进: "bg-[#eef1f6] text-[#2c4a78] border-[#c4cfdf]",
+  确认: "bg-[#f1eef6] text-[#5a3d8f] border-[#d4c8e0]",
+  感谢: "bg-[#ebf2ec] text-[#3d6a4a] border-[#c0d2c5]",
 };

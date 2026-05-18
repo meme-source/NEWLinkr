@@ -12,6 +12,7 @@ import {
 import { InboxTab } from "@/features/outreach/components/inbox-tab";
 import { TemplatesTab } from "@/features/outreach/components/templates-tab";
 import { WorkspaceProjectBar } from "@/features/project/components/project-bar";
+import { cn } from "@/lib/utils";
 
 // §2.1 Outreach surface (renamed to 项目管理 in the sidebar) only has three
 // tabs: 追踪看板 / 收件箱 / 邮件模板. The schedule calendar is embedded inside
@@ -35,12 +36,20 @@ function OutreachContent() {
   // OutreachStateProvider 已上移到 workspace layout，让博主抽屉（layout 级渲染）
   // 也能直接读 / 写 投放卡片状态（如 lastRefreshedAt、addPlacement）。
   const showProjectBar = !(tab === "board" && boardView === "overview");
+  // §3.1 main 在 outreach 路径下不再加 px-6 py-8（layout 已让出 padding），
+  // 由本组件接管：
+  //   - sticky Tab 自己贴 main 顶端 0px，no padding interference
+  //   - tab=board 时下方 content 顶端 padding 0（Tab 的 mb-4 已留间距）
+  //   - tab=inbox/templates 时下方 content 顶端补 pt-8（无 sticky bar 占位）
+  const isBoard = tab === "board";
   return (
-    <div className="space-y-4">
-      {tab === "board" ? <BoardViewSwitcher current={boardView} /> : null}
-      {showProjectBar ? <WorkspaceProjectBar pathname={pathname} /> : null}
-      <TabContent />
-    </div>
+    <>
+      {isBoard ? <BoardViewSwitcher current={boardView} /> : null}
+      <div className={cn("space-y-4 px-6 pb-8", isBoard ? "" : "pt-8")}>
+        {showProjectBar ? <WorkspaceProjectBar pathname={pathname} /> : null}
+        <TabContent />
+      </div>
+    </>
   );
 }
 
@@ -49,8 +58,8 @@ export default function OutreachPage() {
     <Suspense
       fallback={
         <div className="space-y-4">
-          <div className="h-8 w-48 animate-pulse rounded-xl bg-[#eceae3]" />
-          <div className="h-64 animate-pulse rounded-2xl bg-[#eceae3]" />
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-[#eceae3]" />
+          <div className="h-64 animate-pulse rounded-lg bg-[#eceae3]" />
         </div>
       }
     >

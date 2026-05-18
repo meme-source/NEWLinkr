@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { HelpCircle, RefreshCw } from "lucide-react";
 import type { Creator, Rating } from "@/types/api";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { dominantStatus } from "@/lib/creator";
 import { RATING_LABELS } from "./rating-stars";
 
 interface Props {
@@ -14,7 +16,7 @@ interface Props {
 
 const TOOLTIPS = {
   total: "本月新增 = 当月被加入博主库的博主数量",
-  rating: "用户主观评级分布：3 星=优秀 / 2 星=良好 / 1 星=普通",
+  rating: "仅统计已完成合作的博主：3 星=优秀 / 2 星=良好 / 1 星=普通",
   sent: "已经向其发送过建联邮件的博主数量",
   replied: "已回复过我方邮件的博主数量",
 } as const;
@@ -24,59 +26,69 @@ export function LibraryOverview({ creators, onRefresh }: Props) {
 
   return (
     <section
-      className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] px-5 py-4"
+      className="rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-5 py-4"
       aria-label="数据总览"
     >
-      <header className="mb-3 flex items-center justify-between">
+      <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-[#ff4f00]" />
           <h2 className="text-[14px] font-semibold text-[#201515]">数据总览</h2>
         </div>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onRefresh}
           className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[12px] text-[#939084] transition-colors hover:bg-[#fffdf9] hover:text-[#36342e]"
         >
           <RefreshCw className="h-3 w-3" />
           同步网红库数据
-        </button>
+        </Button>
       </header>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card label="博主总数" tip={TOOLTIPS.total}>
-          <div className="text-[28px] font-bold text-[#201515]">{summary.total}</div>
-          <div className="text-[12px] text-[#939084]">
-            本月新增 <span className="font-medium text-[#ff4f00]">+{summary.addedThisMonth}</span>
-          </div>
+          <CardValueRow value={summary.total}>
+            <Pill>
+              本月新增{" "}
+              <span className="font-semibold text-[#ff4f00]">+{summary.addedThisMonth}</span>
+            </Pill>
+          </CardValueRow>
         </Card>
 
         <Card label="博主评级" tip={TOOLTIPS.rating}>
-          <div className="text-[28px] font-bold text-[#201515]">{summary.total}</div>
-          <div className="flex items-center gap-2 text-[12px] text-[#939084]">
-            {(Object.entries(summary.byRating) as [string, number][])
-              .map(([k, v]) => [Number(k) as Rating, v] as const)
-              .sort((a, b) => b[0] - a[0])
-              .map(([tier, count]) => (
-                <span key={tier} className="inline-flex items-center gap-1">
-                  <span className="font-medium text-[#36342e]">{RATING_LABELS[tier]}</span>
-                  <span>{count}</span>
-                </span>
-              ))}
-          </div>
+          <CardValueRow value={summary.ratedTotal}>
+            {summary.ratedTotal === 0 ? (
+              <Pill>
+                <span className="text-[#939084]">暂无完成评级</span>
+              </Pill>
+            ) : (
+              (Object.entries(summary.byRating) as [string, number][])
+                .map(([k, v]) => [Number(k) as Rating, v] as const)
+                .sort((a, b) => b[0] - a[0])
+                .map(([tier, count]) => (
+                  <Pill key={tier}>
+                    <span className="text-[#36342e]">{RATING_LABELS[tier]}</span>
+                    <span className="font-semibold text-[#201515]">{count}</span>
+                  </Pill>
+                ))
+            )}
+          </CardValueRow>
         </Card>
 
         <Card label="已发送邮件" tip={TOOLTIPS.sent}>
-          <div className="text-[28px] font-bold text-[#201515]">{summary.sentCount}</div>
-          <div className="text-[12px] text-[#939084]">
-            发送率: <span className="font-medium text-[#36342e]">{summary.sendRate}%</span>
-          </div>
+          <CardValueRow value={summary.sentCount}>
+            <Pill>
+              发送率 <span className="font-semibold text-[#201515]">{summary.sendRate}%</span>
+            </Pill>
+          </CardValueRow>
         </Card>
 
         <Card label="已回复邮件" tip={TOOLTIPS.replied}>
-          <div className="text-[28px] font-bold text-[#201515]">{summary.repliedCount}</div>
-          <div className="text-[12px] text-[#939084]">
-            回复率: <span className="font-medium text-[#36342e]">{summary.replyRate}%</span>
-          </div>
+          <CardValueRow value={summary.repliedCount}>
+            <Pill>
+              回复率 <span className="font-semibold text-[#201515]">{summary.replyRate}%</span>
+            </Pill>
+          </CardValueRow>
         </Card>
       </div>
     </section>
@@ -86,20 +98,22 @@ export function LibraryOverview({ creators, onRefresh }: Props) {
 function Card({ label, tip, children }: { label: string; tip: string; children: React.ReactNode }) {
   const [hover, setHover] = useState(false);
   return (
-    <div className="relative rounded-xl border border-transparent bg-[#eceae3] px-4 py-3 transition-colors hover:border-[#c5c0b1]">
+    // 软米色背景替代描边，hover 时背景轻微加深 + 微微抬升，保留交互反馈但不再有线框。
+    <div className="group relative flex flex-col rounded-lg bg-[#F9F4F1] px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#F2EBE5] hover:shadow-[0_1px_2px_rgba(20,20,19,0.04),0_6px_18px_-8px_rgba(20,20,19,0.10)]">
       <div className="flex items-center gap-1.5">
-        <p className="text-[12px] text-[#939084]">{label}</p>
-        <button
+        <p className="text-[12px] font-medium tracking-wide text-[#939084]">{label}</p>
+        <Button
+          unstyled
           type="button"
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
           onFocus={() => setHover(true)}
           onBlur={() => setHover(false)}
           aria-label={`${label}说明`}
-          className="text-[#939084] transition-colors hover:text-[#36342e]"
+          className="text-[#bdb9ac] transition-colors hover:text-[#36342e]"
         >
           <HelpCircle className="h-3 w-3" />
-        </button>
+        </Button>
         {hover && (
           <span
             role="tooltip"
@@ -112,14 +126,36 @@ function Card({ label, tip, children }: { label: string; tip: string; children: 
           </span>
         )}
       </div>
-      <div className="mt-1 space-y-1">{children}</div>
+      {children}
     </div>
+  );
+}
+
+function CardValueRow({ value, children }: { value: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
+      <span className="text-[28px] leading-none font-semibold tracking-tight text-[#201515] tabular-nums">
+        {value}
+      </span>
+      <div className="flex flex-wrap items-center gap-1.5">{children}</div>
+    </div>
+  );
+}
+
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    // pill 改为纯白底，避开新卡片背景 #F9F4F1（两者太接近会糊在一起）。
+    <span className="inline-flex items-center gap-1 rounded-md bg-white/85 px-2 py-1 text-[12px] text-[#36342e]">
+      {children}
+    </span>
   );
 }
 
 interface Summary {
   total: number;
   addedThisMonth: number;
+  // 仅统计 dominantStatus === "completed" 的博主——评级是合作完成后的复盘。
+  ratedTotal: number;
   byRating: Record<Rating, number>;
   sentCount: number;
   sendRate: number;
@@ -132,13 +168,17 @@ function summarize(creators: Creator[]): Summary {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const byRating: Record<Rating, number> = { 1: 0, 2: 0, 3: 0 };
+  let ratedTotal = 0;
   let addedThisMonth = 0;
   // sentCount = 已发送过建联邮件的博主数；replyRate 仍以"已发送"为分母。
   let sentCount = 0;
   let repliedCount = 0;
 
   for (const c of creators) {
-    byRating[c.rating] += 1;
+    if (dominantStatus(c) === "completed") {
+      byRating[c.rating] += 1;
+      ratedTotal += 1;
+    }
 
     const added = parseDate(c.addedAt);
     if (added && added >= monthStart) addedThisMonth += 1;
@@ -150,6 +190,7 @@ function summarize(creators: Creator[]): Summary {
   return {
     total: creators.length,
     addedThisMonth,
+    ratedTotal,
     byRating,
     sentCount,
     sendRate: rate(sentCount, creators.length),

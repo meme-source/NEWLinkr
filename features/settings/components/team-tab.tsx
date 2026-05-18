@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 // §3.6.6 团队管理 — placeholder. Sub-item visible in sidebar so users know
 // the surface is on the roadmap, but the underlying feature is unbuilt.
 export function TeamTab() {
@@ -12,13 +14,14 @@ export function TeamTab() {
       {sent ? (
         <p className="mt-5 text-sm text-[#36342e]">我们已收到你的建议，敬请期待。</p>
       ) : (
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={() => setSent(true)}
-          className="mt-5 rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-5 py-2 text-sm text-[#36342e] hover:bg-[#eceae3]"
+          className="mt-5 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-5 py-2 text-sm text-[#36342e] hover:bg-[#eceae3]"
         >
           求解锁
-        </button>
+        </Button>
       )}
     </div>
   );

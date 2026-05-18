@@ -3,12 +3,8 @@
 import { Check, Eye, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreatorAvatar } from "@/features/plugin/components/creator-avatar";
-import type {
-  CreatorProfile,
-  EmailSendOptions,
-  EmailTemplateKey,
-  EmailTemplateSegment,
-} from "@/features/plugin/types";
+import { Button } from "@/components/ui/button";
+import type { CreatorProfile, EmailSendOptions, EmailTemplateKey } from "@/features/plugin/types";
 import { SIDEBAR_CARD_RADIUS, getCreatorLocation } from "../shared";
 import { EmailComposerCard, type SenderEmail } from "./EmailComposerCard";
 
@@ -18,11 +14,18 @@ export function EmailTab({
   filteredRecipientCreatorsCount,
   emailRecipientCount,
   selectedRecipientSet,
+  confirmedRecipientSet,
   previewCreator,
+  previewIndex,
+  unconfirmedRecipientCount,
+  isPreviewConfirmed,
   allFilteredRecipientsSelected,
   onToggleAllFilteredRecipients,
   onToggleRecipient,
   onSetPreviewRecipient,
+  onToggleConfirmPreview,
+  onPreviewPrev,
+  onPreviewNext,
   onOpenProfile,
   // composer
   senderEmails,
@@ -32,9 +35,10 @@ export function EmailTab({
   onSelectEmailTemplate,
   emailSubject,
   onChangeEmailSubject,
+  bodyHtml,
+  onChangeBody,
   emailAttachments,
   onChangeEmailAttachments,
-  emailTemplateSegments,
   personalizedSegmentCount,
   canOpenEmailReview,
   onSendAction,
@@ -50,11 +54,18 @@ export function EmailTab({
   filteredRecipientCreatorsCount: number;
   emailRecipientCount: number;
   selectedRecipientSet: Set<string>;
+  confirmedRecipientSet: Set<string>;
   previewCreator: CreatorProfile;
+  previewIndex: number;
+  unconfirmedRecipientCount: number;
+  isPreviewConfirmed: boolean;
   allFilteredRecipientsSelected: boolean;
   onToggleAllFilteredRecipients: () => void;
   onToggleRecipient: (creatorId: string) => void;
   onSetPreviewRecipient: (creatorId: string) => void;
+  onToggleConfirmPreview: () => void;
+  onPreviewPrev: () => void;
+  onPreviewNext: () => void;
   onOpenProfile: (creatorId: string) => void;
   senderEmails: SenderEmail[];
   selectedSenderId: string;
@@ -63,9 +74,10 @@ export function EmailTab({
   onSelectEmailTemplate: (key: EmailTemplateKey) => void;
   emailSubject: string;
   onChangeEmailSubject: (value: string) => void;
+  bodyHtml: string;
+  onChangeBody: (html: string) => void;
   emailAttachments: File[];
   onChangeEmailAttachments: (files: File[]) => void;
-  emailTemplateSegments: EmailTemplateSegment[];
   personalizedSegmentCount: number;
   canOpenEmailReview: boolean;
   onSendAction: () => void;
@@ -87,10 +99,11 @@ export function EmailTab({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="rounded-full bg-[#eceae3] px-2 py-0.5 text-[10.5px] font-semibold text-[#36342e]">
+            <span className="rounded-[8px] bg-[#eceae3] px-2 py-0.5 text-[10.5px] font-semibold text-[#36342e]">
               已选 {emailRecipientCount}/{filteredRecipientCreatorsCount}
             </span>
-            <button
+            <Button
+              unstyled
               type="button"
               disabled={filteredRecipientCreatorsCount === 0}
               onClick={onToggleAllFilteredRecipients}
@@ -106,7 +119,7 @@ export function EmailTab({
               )}
             >
               <Check className="h-2.5 w-2.5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -116,17 +129,19 @@ export function EmailTab({
               const isSelected = selectedRecipientSet.has(targetCreator.id);
               const isPreviewing = previewCreator.id === targetCreator.id;
               const isCurrentCreator = targetCreator.id === creator.id;
+              const isConfirmed = confirmedRecipientSet.has(targetCreator.id);
               const targetLocation = getCreatorLocation(targetCreator);
               return (
                 <div
                   key={targetCreator.id}
                   className={cn(
-                    "group flex h-10 items-center gap-1.5 rounded-[14px] border bg-[#fffefb] px-2 py-1 transition-all",
+                    "group flex h-10 items-center gap-1.5 rounded-[8px] border bg-[#fffefb] px-2 py-1 transition-all",
                     isSelected ? "border-[#ff4f00]/40 bg-[#fff7f4]" : "border-[#c5c0b1]",
                     isPreviewing && "ring-1 ring-[#c5c0b1]/75 ring-inset",
                   )}
                 >
-                  <button
+                  <Button
+                    unstyled
                     type="button"
                     title={`选择 ${targetCreator.handle}`}
                     aria-pressed={isSelected}
@@ -139,13 +154,14 @@ export function EmailTab({
                     )}
                   >
                     <Check className="h-2 w-2" />
-                  </button>
+                  </Button>
                   <CreatorAvatar
                     creator={targetCreator}
                     className="h-7 w-7 shrink-0 border border-[#fffefb]"
                     labelClassName="text-[10px]"
                   />
-                  <button
+                  <Button
+                    unstyled
                     type="button"
                     title={`预览 ${targetCreator.handle} 的个性化邮件`}
                     onClick={() => onSetPreviewRecipient(targetCreator.id)}
@@ -160,14 +176,21 @@ export function EmailTab({
                           当前
                         </span>
                       ) : null}
+                      {isSelected && isConfirmed ? (
+                        <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-[#fff1ea] px-1.5 py-0.5 text-[9px] font-semibold text-[#ff4f00]">
+                          <Check className="h-2 w-2" />
+                          已确认
+                        </span>
+                      ) : null}
                     </span>
                     <span className="mt-0.5 flex min-w-0 items-center gap-1 text-[10px] text-[#939084]">
                       <span className="shrink-0">{targetLocation.flag}</span>
                       <span className="min-w-0 truncate">{targetLocation.country}</span>
                       <span className="shrink-0">· {targetCreator.followers}</span>
                     </span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    unstyled
                     type="button"
                     aria-label={`查看 ${targetCreator.name}`}
                     title="查看账号主页"
@@ -175,13 +198,13 @@ export function EmailTab({
                     className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#fffefb] text-[#939084] transition-all hover:bg-[#eceae3] hover:text-[#36342e]"
                   >
                     <Eye className="h-2.5 w-2.5" />
-                  </button>
+                  </Button>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="mt-2 rounded-[16px] border border-dashed border-[#b5b2aa] bg-[#fffefb] px-3 py-5 text-center text-xs text-[#939084]">
+          <div className="mt-2 rounded-[8px] border border-dashed border-[#b5b2aa] bg-[#fffefb] px-3 py-5 text-center text-xs text-[#939084]">
             当前筛选下暂无对象
           </div>
         )}
@@ -195,10 +218,17 @@ export function EmailTab({
         onSelectEmailTemplate={onSelectEmailTemplate}
         emailSubject={emailSubject}
         onChangeEmailSubject={onChangeEmailSubject}
+        bodyHtml={bodyHtml}
+        onChangeBody={onChangeBody}
         emailAttachments={emailAttachments}
         onChangeEmailAttachments={onChangeEmailAttachments}
         previewCreator={previewCreator}
-        emailTemplateSegments={emailTemplateSegments}
+        previewIndex={previewIndex}
+        onPreviewPrev={onPreviewPrev}
+        onPreviewNext={onPreviewNext}
+        unconfirmedRecipientCount={unconfirmedRecipientCount}
+        isPreviewConfirmed={isPreviewConfirmed}
+        onToggleConfirmPreview={onToggleConfirmPreview}
         personalizedSegmentCount={personalizedSegmentCount}
         emailRecipientCount={emailRecipientCount}
         canOpenEmailReview={canOpenEmailReview}

@@ -3,17 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
   ChevronDown,
   CircleHelp,
-  Copy,
   ExternalLink,
   FileText,
   Heart,
-  Mail,
   MessageCircle,
   Moon,
   Play,
@@ -22,14 +20,20 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
-import { CreatorAvatar, CreatorAvatarWithHover } from "@/features/plugin/components/creator-avatar";
+import { CreatorAvatarWithHover } from "@/features/plugin/components/creator-avatar";
+import { CreatorProfileHeader } from "@/features/plugin/components/creator-profile-header";
 import { TiktokVideoTile } from "@/features/plugin/components/tiktok-video-tile";
+import type { TiktokVideoCategory } from "@/features/plugin/components/tiktok-video-tile/types";
 import {
   CreateProjectModal,
+  DEFAULT_ENABLED_BADGE_CATEGORIES,
+  DEFAULT_FLOP_RATIO_THRESHOLD,
   DEFAULT_HOVER_METRIC_MODES,
   DEFAULT_HOVER_METRICS,
   DEFAULT_INLINE_DATA_KEYS,
+  DEFAULT_VIRAL_RATIO_THRESHOLD,
   DeleteProjectConfirm,
   SCRAPE_COUNT_OPTIONS,
   SIDEBAR_COLLAPSED_WIDTH,
@@ -66,8 +70,11 @@ import type {
   SidebarTab,
   SocialPlatformKey,
 } from "@/features/plugin/types";
+import { toProjectSummary } from "@/features/plugin/lib/project-mapper";
+import { createProject } from "@/features/project/lib/project-model";
 import { searchModes } from "@/features/plugin/data/search-modes";
 import { FLAG_TO_DISCOVERY_COUNTRY } from "@/features/plugin/data/countries";
+import { buildSimilarDiscoveryUrl, type SimilarEntry } from "@/lib/discovery/similar-url";
 import {
   PROJECTS_STORAGE_KEY,
   PROJECT_SCOPED_STATE_KEY,
@@ -172,6 +179,9 @@ function mapFollowersLabelToDiscoveryPreset(followersLabel: string): string | nu
   return "1M+";
 }
 
+// URL schema 已迁移到 lib/discovery/similar-url.ts —— 网页端抽屉的「找相似」
+// 通过同一 builder 跳转，确保两端契约一致。这里负责把插件的 CreatorProfile
+// 适配到通用 input。
 function buildDiscoveryResultsUrl({
   creatorId,
   creator,
@@ -182,38 +192,28 @@ function buildDiscoveryResultsUrl({
   creatorId: string;
   creator: CreatorProfile;
   project?: ProjectSummary;
-  entry: "seed-finder" | "quick-screen";
+  entry: SimilarEntry;
   mode?: "viral";
 }) {
-  const params = new URLSearchParams();
-  params.set("entry", entry);
-  params.set("results", "1");
-  params.set("creator", creatorId);
-  params.set("seedId", creatorId);
-  params.set("seedHandle", creator.handle);
-  params.set("seedName", creator.name);
-  params.set("seedAvatarSeed", creatorId);
-  params.set("platform", "tiktok");
-  if (project) {
-    params.set("projectId", project.id);
-    params.set("projectName", project.name);
-  }
-  if (mode) params.set("mode", mode);
-
   const summary = getAudienceSummary(creator);
-  const countries = new Set<string>();
+  const countrySet = new Set<string>();
   for (const flag of [...(summary.regionT1?.flags ?? []), ...(summary.regionT2?.flags ?? [])]) {
     const name = FLAG_TO_DISCOVERY_COUNTRY[flag];
-    if (name) countries.add(name);
-  }
-  if (countries.size > 0) {
-    params.set("countries", Array.from(countries).join("|"));
+    if (name) countrySet.add(name);
   }
 
-  const fp = mapFollowersLabelToDiscoveryPreset(creator.followers);
-  if (fp) params.set("fp", fp);
-
-  return `/workspace/discovery?${params.toString()}`;
+  return buildSimilarDiscoveryUrl({
+    creatorId,
+    seedHandle: creator.handle,
+    seedName: creator.name,
+    platform: "tiktok",
+    entry,
+    mode,
+    projectId: project?.id,
+    projectName: project?.name,
+    countries: Array.from(countrySet),
+    followersPreset: mapFollowersLabelToDiscoveryPreset(creator.followers),
+  });
 }
 
 /** 插件「找种子达人」→ 后台博主发现结果页深链（含筛选与直接进入结果） */
@@ -259,6 +259,20 @@ export default function PluginPathDemo() {
   const [dataCheckOn, setDataCheckOn] = useState(false);
   const [scrapeCount, setScrapeCount] = useState<number>(10);
   const [inlineDataKeys, setInlineDataKeys] = useState<InlineDataKey[]>(DEFAULT_INLINE_DATA_KEYS);
+  const [enabledBadgeCategories, setEnabledBadgeCategories] = useState<Set<TiktokVideoCategory>>(
+    () => new Set<TiktokVideoCategory>(DEFAULT_ENABLED_BADGE_CATEGORIES),
+  );
+  const toggleBadgeCategory = useCallback((category: TiktokVideoCategory) => {
+    setEnabledBadgeCategories((current) => {
+      const next = new Set(current);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  }, []);
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatformKey>("tiktok");
   const [selectedHoverMetricKeys, setSelectedHoverMetricKeys] =
     useState<HoverMetricKey[]>(DEFAULT_HOVER_METRICS);
@@ -686,15 +700,16 @@ export default function PluginPathDemo() {
       return;
     }
 
-    const now = new Date();
-    const nextProject: ProjectSummary = {
-      id: `project-${now.getTime()}`,
-      name: projectName,
-      productDescription,
-      createdAt: now.toISOString(),
-      createdLabel: "刚刚创建",
-      uploadedListNames: newProjectFiles.map((file) => file.name),
-    };
+    // 走统一创建核心 —— 与网页端、discovery 同一条 createProject() 路径，
+    // 再投影成插件端的 ProjectSummary 视图。
+    const nextProject = toProjectSummary(
+      createProject({
+        name: projectName,
+        productDescription,
+        uploadedListNames: newProjectFiles.map((file) => file.name),
+      }),
+      "刚刚创建",
+    );
 
     searchTimerRefs.current.forEach((timer) => window.clearTimeout(timer));
     searchTimerRefs.current = [];
@@ -928,7 +943,7 @@ export default function PluginPathDemo() {
     });
 
     if (added) {
-      setFeedback(`已在项目「${selectedProject.name}」添加标签 ${normalizedLabel}`);
+      setFeedback(`已在项目「${selectedProject.name}」打标签 ${normalizedLabel}`);
     }
   };
 
@@ -1061,6 +1076,11 @@ export default function PluginPathDemo() {
     setIsSearching(false);
     setSearchProgress(0);
     setResultPopupOpen(false);
+    // 结束找相似进程时,把逐个筛选 / 悬浮卡片状态一起清掉 —— 否则悬浮球上的
+    // 信息卡会继续显示「逐个筛选中」横幅,与已经结束的搜索不同步。
+    setReviewFlow("idle");
+    setSequentialCreatorIds([]);
+    setDemoStage("floating");
   };
 
   return (
@@ -1069,7 +1089,7 @@ export default function PluginPathDemo() {
         <Button
           asChild
           variant="outline"
-          className="rounded-full border-[#c5c0b1] bg-[#fffefb] text-[#36342e] hover:bg-[#eceae3]"
+          className="rounded-[8px] border-[#c5c0b1] bg-[#fffefb] text-[#36342e] hover:bg-[#eceae3]"
         >
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -1136,6 +1156,9 @@ export default function PluginPathDemo() {
                 sequentialTotal={sequentialCreatorIds.length}
                 isSaved={savedCreatorIds.includes(activeCreator.id)}
                 onToggleSave={() => handleSaveCreator(activeCreator.id)}
+                tags={creatorTags[activeCreator.id] ?? []}
+                onAddTag={(label) => handleAddTag(activeCreator.id, label)}
+                onRemoveTag={(label) => handleRemoveTag(activeCreator.id, label)}
                 workMode={workMode}
                 onToggleWorkMode={handleToggleWorkMode}
                 onSetWorkMode={handleSetWorkMode}
@@ -1169,6 +1192,7 @@ export default function PluginPathDemo() {
               dataCheckOn={dataCheckOn}
               scrapeCount={scrapeCount}
               inlineDataKeys={inlineDataKeys}
+              enabledBadgeCategories={enabledBadgeCategories}
             />
           </div>
 
@@ -1228,6 +1252,8 @@ export default function PluginPathDemo() {
               hoverMetricModes={hoverMetricModes}
               onChangeHoverMetricModes={setHoverMetricModes}
               onRecordQuickSettingsChange={(message) => setFeedback(message)}
+              enabledBadgeCategories={enabledBadgeCategories}
+              onToggleBadgeCategory={toggleBadgeCategory}
             />
           ) : null}
 
@@ -1377,20 +1403,21 @@ function formatDuration(sec: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-const VIRAL_RATIO_THRESHOLD = 1.5;
-const FLOP_RATIO_THRESHOLD = Math.max(0.35, 1 / VIRAL_RATIO_THRESHOLD);
-
 function FakeTiktokProfile({
   creator,
   dataCheckOn,
   scrapeCount,
   inlineDataKeys,
+  enabledBadgeCategories,
 }: {
   creator: CreatorProfile;
   dataCheckOn: boolean;
   scrapeCount: number;
   inlineDataKeys: InlineDataKey[];
+  enabledBadgeCategories: ReadonlySet<TiktokVideoCategory>;
 }) {
+  const viralThreshold = DEFAULT_VIRAL_RATIO_THRESHOLD;
+  const flopThreshold = DEFAULT_FLOP_RATIO_THRESHOLD;
   const allVideos = generateSyntheticVideos(creator, Math.max(18, scrapeCount));
   const averagePlays =
     allVideos.reduce((sum, video) => sum + video.plays, 0) / Math.max(allVideos.length, 1);
@@ -1427,19 +1454,25 @@ function FakeTiktokProfile({
             {creator.bio}
           </div>
           <div className="mt-4 flex gap-3">
-            <button className="rounded-xl bg-[#ff4f00] px-6 py-2 text-sm font-medium text-[#fffdf9] transition-colors hover:bg-[#ff4f00]">
+            <Button
+              unstyled
+              className="rounded-[8px] bg-[#ff4f00] px-6 py-2 text-sm font-medium text-[#fffdf9] transition-colors hover:bg-[#ff4f00]"
+            >
               关注
-            </button>
-            <button className="rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-6 py-2 text-sm font-medium text-[#36342e] transition-colors hover:bg-[#eceae3]">
+            </Button>
+            <Button
+              unstyled
+              className="rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-6 py-2 text-sm font-medium text-[#36342e] transition-colors hover:bg-[#eceae3]"
+            >
               发消息
-            </button>
+            </Button>
           </div>
         </div>
       </div>
 
       {dataCheckOn ? (
         <div className="mt-8">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#c5c0b1] bg-[#fff7f4] px-4 py-3 text-sm">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-[#c5c0b1] bg-[#fff7f4] px-4 py-3 text-sm">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-[#ff4f00]" />
               <span className="font-semibold text-[#201515]">数据透视模式已开启</span>
@@ -1470,7 +1503,7 @@ function FakeTiktokProfile({
               return (
                 <div
                   key={video.id}
-                  className="relative aspect-[3/4] overflow-hidden rounded-[14px] bg-[linear-gradient(180deg,#939084_0%,#36342e_55%,#36342e_100%)] text-[#fffefb] transition-transform duration-150 hover:-translate-y-0.5"
+                  className="relative aspect-[3/4] overflow-hidden rounded-[8px] bg-[linear-gradient(180deg,#939084_0%,#36342e_55%,#36342e_100%)] text-[#fffefb] transition-transform duration-150 hover:-translate-y-0.5"
                 >
                   {/* top row: speed + duration */}
                   <div className="absolute top-0 right-0 left-0 flex items-start justify-between px-3 pt-2.5 text-[11px] font-semibold opacity-95">
@@ -1536,9 +1569,9 @@ function FakeTiktokProfile({
                 ? "paid"
                 : video.category === "shop"
                   ? "shop"
-                  : ratio >= VIRAL_RATIO_THRESHOLD
+                  : ratio >= viralThreshold
                     ? "viral"
-                    : ratio <= FLOP_RATIO_THRESHOLD
+                    : ratio <= flopThreshold
                       ? "flop"
                       : "normal";
             return (
@@ -1553,8 +1586,9 @@ function FakeTiktokProfile({
                 plays={video.plays}
                 likes={video.likes}
                 comments={video.comments}
-                viralThreshold={VIRAL_RATIO_THRESHOLD}
-                flopThreshold={FLOP_RATIO_THRESHOLD}
+                viralThreshold={viralThreshold}
+                flopThreshold={flopThreshold}
+                enabledCategories={enabledBadgeCategories}
               />
             );
           })}
@@ -1580,6 +1614,9 @@ function FloatingPluginGroup({
   sequentialTotal,
   isSaved,
   onToggleSave,
+  tags,
+  onAddTag,
+  onRemoveTag,
   workMode,
   onToggleWorkMode,
   onSetWorkMode,
@@ -1606,6 +1643,9 @@ function FloatingPluginGroup({
   sequentialTotal: number;
   isSaved: boolean;
   onToggleSave: () => void;
+  tags: string[];
+  onAddTag: (label: string) => void;
+  onRemoveTag: (label: string) => void;
   workMode: "on" | "off";
   onToggleWorkMode: () => void;
   onSetWorkMode: (mode: "on" | "off") => void;
@@ -1670,6 +1710,9 @@ function FloatingPluginGroup({
           sequentialTotal={sequentialTotal}
           isSaved={isSaved}
           onToggleSave={onToggleSave}
+          tags={tags}
+          onAddTag={onAddTag}
+          onRemoveTag={onRemoveTag}
           onSetWorkMode={onSetWorkMode}
           onOpenTaskList={onOpenTaskList}
           dataCheckOn={dataCheckOn}
@@ -1683,7 +1726,8 @@ function FloatingPluginGroup({
 
       <div className="absolute top-1/2 right-0 z-30 flex -translate-y-1/2 items-center">
         <div className="relative">
-          <button
+          <Button
+            unstyled
             ref={buttonRef}
             type="button"
             aria-label={isOff ? "Linkr 下班模式，点击恢复上班模式" : "打开信息卡片"}
@@ -1758,7 +1802,7 @@ function FloatingPluginGroup({
                 <Moon className="h-2.5 w-2.5" />
               </span>
             ) : null}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -1779,6 +1823,9 @@ function FloatingCard({
   sequentialTotal,
   isSaved,
   onToggleSave,
+  tags,
+  onAddTag,
+  onRemoveTag,
   onSetWorkMode,
   onOpenTaskList,
   dataCheckOn,
@@ -1801,6 +1848,9 @@ function FloatingCard({
   sequentialTotal: number;
   isSaved: boolean;
   onToggleSave: () => void;
+  tags: string[];
+  onAddTag: (label: string) => void;
+  onRemoveTag: (label: string) => void;
   onSetWorkMode: (mode: "on" | "off") => void;
   onOpenTaskList: () => void;
   dataCheckOn: boolean;
@@ -1810,68 +1860,32 @@ function FloatingCard({
   selectedHoverMetricKeys: HoverMetricKey[];
   hoverMetricModes: Record<HoverMetricKey, MetricAggregation>;
 }) {
-  const [copied, setCopied] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [editableEmail, setEditableEmail] = useState("");
   const [scrapeMenuOpen, setScrapeMenuOpen] = useState(false);
   const contactEmail = getCreatorContactEmail(creator);
   const creatorLocation = getCreatorLocation(creator);
   const creatorMetrics = getCreatorMetricSnapshot(creator, scrapeCount);
   const creatorCpm = creatorMetrics.cpm;
-  const displayEmail = editableEmail.trim();
+  const displayEmail = contactEmail ?? "";
   const hasEmail = Boolean(displayEmail);
-
-  useEffect(() => {
-    setEditableEmail(contactEmail ?? "");
-    setIsEditingEmail(false);
-    setCopied(false);
-  }, [contactEmail, creator.id]);
-
-  const copyEmail = () => {
-    if (!displayEmail || isEditingEmail) return;
-    navigator.clipboard
-      .writeText(displayEmail)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => {});
-  };
-
-  const handleFinishEmailEdit = () => {
-    setEditableEmail((current) => current.trim());
-    setIsEditingEmail(false);
-    setCopied(false);
-  };
-
-  const handleCancelEmailEdit = () => {
-    setEditableEmail(contactEmail ?? "");
-    setIsEditingEmail(false);
-  };
-
-  const handleStartEmailEdit = () => {
-    setEditableEmail(displayEmail);
-    setIsEditingEmail(true);
-    setCopied(false);
-  };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="当前博主速览小窗"
-      // Outer shell — 28px chunky radius, sand border, paper-lift shadow.
+      // Outer shell — 14px Social radius (DESIGN.md §5 scale), sand border,
+      // paper-lift shadow.
       // The shadow is the deliberate exception to §6 "borders, not shadows"
       // recorded for the floating-creator-card surface.
       className={cn(
-        "absolute top-1/2 z-20 -translate-y-1/2 rounded-[28px] border border-[#c5c0b1] bg-[#fffefb]/98 text-[#201515] shadow-[0_28px_80px_-34px_rgba(77,76,72,0.22)] backdrop-blur",
+        "absolute top-1/2 z-20 -translate-y-1/2 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb]/98 text-[#201515] shadow-[0_28px_80px_-34px_rgba(77,76,72,0.22)] backdrop-blur",
         compactViewport
-          ? "right-[42px] w-[min(286px,calc(100vw-164px))] max-w-[286px]"
-          : "right-[52px] w-[min(352px,calc(100vw-120px))] max-w-[352px]",
+          ? "right-[42px] w-[min(258px,calc(100vw-164px))] max-w-[258px]"
+          : "right-[52px] w-[min(314px,calc(100vw-120px))] max-w-[314px]",
       )}
     >
       <div
-        className="flex cursor-grab touch-none justify-center pt-1.5 pb-1 select-none active:cursor-grabbing"
+        className="flex cursor-grab touch-none justify-center pt-1 pb-0.5 select-none active:cursor-grabbing"
         onPointerDown={(event) => {
           if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
@@ -1882,49 +1896,52 @@ function FloatingCard({
         <span aria-hidden="true" className="block h-1.5 w-11 rounded-full bg-[#ddd8ce]" />
       </div>
 
-      <div className="px-3 pt-1 pb-3">
+      <div className="px-2.5 pt-0.5 pb-2">
         {reviewFlow === "sequential" && sequentialTotal > 0 ? (
-          <div className="mb-2 rounded-full bg-[#eceae3] px-3 py-1.5 text-center text-[11px] text-[#939084]">
+          <div className="mb-2 rounded-[8px] bg-[#eceae3] px-3 py-1.5 text-center text-[11px] text-[#939084]">
             逐个筛选中：第 {Math.max(sequentialIndex + 1, 1)} / {sequentialTotal} 位
           </div>
         ) : null}
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {/* Window chrome row — ExternalLink + Moon LEFT, X RIGHT. All three
               are Ghost—Window-level (§6.5.3): 30×30, no border, no bg, so
               chrome recedes behind content actions. */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-0.5">
               <div className="group relative">
-                <button
+                <Button
+                  unstyled
                   type="button"
                   aria-label="跳转到 web 页面"
                   onClick={onOpenTaskList}
                   className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-md text-[#5f5e5a] transition-colors hover:bg-[#eceae3] hover:text-[#36342e]"
                 >
                   <ExternalLink className="h-4 w-4" strokeWidth={2} />
-                </button>
-                <span className="pointer-events-none absolute top-full left-0 z-30 mt-1.5 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[10px] whitespace-nowrap text-[#fffefb] opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                </Button>
+                <span className="pointer-events-none absolute top-full left-0 z-30 mt-1.5 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[10px] whitespace-nowrap text-[#fffefb] opacity-0 shadow-md transition-opacity group-hover:opacity-100">
                   跳转到 web 端任务页
                 </span>
               </div>
 
               <div className="group relative">
-                <button
+                <Button
+                  unstyled
                   type="button"
                   aria-label="打开下班模式"
                   onClick={() => onSetWorkMode("off")}
                   className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-md text-[#5f5e5a] transition-colors hover:bg-[#eceae3] hover:text-[#36342e]"
                 >
                   <Moon className="h-4 w-4" strokeWidth={2} />
-                </button>
-                <span className="pointer-events-none absolute top-full left-0 z-30 mt-1.5 w-44 rounded-[10px] bg-[#201515] px-2.5 py-2 text-[10px] leading-4 text-[#fffefb] opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                </Button>
+                <span className="pointer-events-none absolute top-full left-0 z-30 mt-1.5 w-44 rounded-[8px] bg-[#201515] px-2.5 py-2 text-[10px] leading-4 text-[#fffefb] opacity-0 shadow-md transition-opacity group-hover:opacity-100">
                   打开下班模式后，插件将关闭。点击悬浮球可恢复上班模式。
                 </span>
               </div>
             </div>
 
-            <button
+            <Button
+              unstyled
               type="button"
               ref={closeButtonRef}
               aria-label="关闭小窗"
@@ -1935,131 +1952,37 @@ function FloatingCard({
               className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-md text-[#5f5e5a] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
             >
               <X className="h-4 w-4" strokeWidth={2} />
-            </button>
+            </Button>
           </div>
 
-          {/* Identity row — avatar + handle/flag (top line) + meta · email
-              (bottom line, with inline edit) + Heart 40×40 outlined LG
-              (§6.5.3 Outlined LG, active = #fff7f4 bg + #ff4f00 icon, border
-              stays sand). The email used to be inline-chip; per the floating
-              creator-card spec it's promoted to a dedicated CTA row below. */}
-          <div className={cn("flex items-center", compactViewport ? "gap-2" : "gap-3")}>
-            <div className="shrink-0">
-              <CreatorAvatar creator={creator} className="h-12 w-12" labelClassName="text-base" />
-            </div>
-            <div className="flex min-h-[48px] min-w-0 flex-1 flex-col justify-center gap-1">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="truncate text-[14px] leading-[1.2] font-semibold text-[#201515]">
-                  @{creator.handle}
-                </span>
-                <span aria-hidden="true" className="text-[11px] leading-none">
-                  {creatorLocation.flag}
-                </span>
-              </div>
-              <div className="flex min-w-0 items-center gap-1 text-[12px] leading-[1.3] text-[#939084]">
-                <span className="shrink-0">{getCreatorType(creator)}</span>
-                <span aria-hidden="true">·</span>
-                {isEditingEmail ? (
-                  <input
-                    autoFocus
-                    value={editableEmail}
-                    onChange={(event) => setEditableEmail(event.target.value)}
-                    onBlur={handleFinishEmailEdit}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        handleFinishEmailEdit();
-                      }
-                      if (event.key === "Escape") {
-                        event.preventDefault();
-                        handleCancelEmailEdit();
-                      }
-                    }}
-                    placeholder="输入邮箱地址"
-                    className="min-w-0 flex-1 truncate border-b border-[#c5c0b1] bg-transparent text-[12px] text-[#201515] outline-none focus:border-[#ff4f00]"
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    aria-label={hasEmail ? `邮箱 ${displayEmail}，双击编辑` : "添加邮箱"}
-                    title={hasEmail ? "双击编辑邮箱" : "双击添加邮箱"}
-                    onDoubleClick={handleStartEmailEdit}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        handleStartEmailEdit();
-                      }
-                    }}
-                    className="min-w-0 flex-1 cursor-text truncate text-left text-[12px] text-[#939084] transition-colors hover:text-[#36342e]"
-                  >
-                    {hasEmail ? displayEmail : "+ 添加邮箱"}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              aria-label={isSaved ? `取消收藏 ${creator.name}` : `收藏 ${creator.name}`}
-              aria-pressed={isSaved}
-              onClick={onToggleSave}
-              className={cn(
-                "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors duration-150 active:scale-[0.96]",
-                isSaved
-                  ? "border-[#c5c0b1] bg-[#fff7f4] text-[#ff4f00]"
-                  : "border-[#c5c0b1] bg-[#fffefb] text-[#939084] hover:bg-[#eceae3] hover:text-[#ff4f00]",
-              )}
-            >
-              <Heart className={cn("h-4 w-4", isSaved && "fill-current")} />
-            </button>
-          </div>
-
-          {/* Content CTA row — copy email + 建联. Two equal-flex large buttons,
-              outlined sand, hover Light Sand. The 建联 button uses dark fill on
-              hover to telegraph "primary content action". */}
-          <div className="flex items-stretch gap-2">
-            <button
-              type="button"
-              aria-label={hasEmail ? "复制邮箱" : "暂无邮箱，先添加"}
-              disabled={!hasEmail}
-              onClick={() => {
-                if (hasEmail) copyEmail();
-              }}
-              className={cn(
-                "inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-[13px] font-semibold transition-colors active:scale-[0.98]",
-                hasEmail
-                  ? "text-[#201515] hover:bg-[#eceae3]"
-                  : "cursor-not-allowed text-[#b5b2aa]",
-                copied && "text-emerald-700",
-              )}
-            >
-              {copied ? (
-                <Check className="h-4 w-4 shrink-0 text-emerald-700" />
-              ) : (
-                <Copy className="h-4 w-4 shrink-0" />
-              )}
-              {copied ? "已复制" : "复制邮箱"}
-            </button>
-
-            <button
-              type="button"
-              aria-label="建联"
-              onClick={onOpenEmailSidebar}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-[13px] font-semibold text-[#201515] transition-colors hover:border-[#201515] hover:bg-[#201515] hover:text-[#fffefb] active:scale-[0.98]"
-            >
-              <Mail className="h-4 w-4 shrink-0" />
-              建联
-            </button>
-          </div>
+          {/* Unified creator identity strip — shared across all four plugin
+              surfaces (analysis page / similar search / per-candidate review /
+              floating card). See CreatorProfileHeader for the spec. */}
+          <CreatorProfileHeader
+            name={creator.name}
+            handle={creator.handle}
+            flag={creatorLocation.flag}
+            country={creatorLocation.country}
+            creatorType={getCreatorType(creator)}
+            email={displayEmail}
+            hasEmail={hasEmail}
+            onOpenEmailSidebar={onOpenEmailSidebar}
+            isSaved={isSaved}
+            onToggleSave={onToggleSave}
+            tags={tags}
+            onAddTag={onAddTag}
+            onRemoveTag={onRemoveTag}
+          />
 
           {/* Settings strip — Light Sand standalone pill (no outer border).
               Sample-count dropdown · CPM (inline help) · 数据透视 toggle.
               Detached from the metrics grid below per the floating
               creator-card reference (cleaner row hierarchy). */}
-          <div className="flex items-center justify-between gap-2 rounded-lg bg-[#eceae3] px-3 py-2">
+          <div className="flex items-center justify-between gap-2 rounded-lg bg-[#eceae3] px-3 py-1.5">
             <div className={cn("flex items-center", compactViewport ? "gap-1" : "gap-1.5")}>
               <div className="relative">
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={() => setScrapeMenuOpen((v) => !v)}
                   aria-haspopup="listbox"
@@ -2069,21 +1992,22 @@ function FloatingCard({
                     compactViewport ? "px-1.5 py-0.5 text-[11px]" : "px-1.5 py-0.5 text-[12px]",
                   )}
                 >
-                  <span>最近 {scrapeCount} 条</span>
+                  <span>近 {scrapeCount} 条</span>
                   <ChevronDown
                     className={cn(
                       "h-3 w-3 text-[#939084] transition-transform",
                       scrapeMenuOpen && "rotate-180",
                     )}
                   />
-                </button>
+                </Button>
                 {scrapeMenuOpen ? (
                   <div
                     role="listbox"
-                    className="absolute top-full left-0 z-30 mt-1 w-[108px] overflow-hidden rounded-[14px] border border-[#c5c0b1] bg-[#fffefb] shadow-[0_16px_40px_-20px_rgba(77,76,72,0.25)]"
+                    className="absolute top-full left-0 z-30 mt-1 w-[108px] overflow-hidden rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] shadow-[0_16px_40px_-20px_rgba(77,76,72,0.25)]"
                   >
                     {SCRAPE_COUNT_OPTIONS.map((opt) => (
-                      <button
+                      <Button
+                        unstyled
                         key={opt}
                         type="button"
                         role="option"
@@ -2097,9 +2021,9 @@ function FloatingCard({
                           opt === scrapeCount ? "font-semibold text-[#ff4f00]" : "text-[#36342e]",
                         )}
                       >
-                        <span>最近 {opt} 条</span>
+                        <span>近 {opt} 条</span>
                         {opt === scrapeCount ? <Check className="h-3 w-3" /> : null}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 ) : null}
@@ -2118,7 +2042,7 @@ function FloatingCard({
                 </span>
                 <span
                   role="tooltip"
-                  className="pointer-events-none absolute top-full left-1/2 z-40 mt-1.5 w-60 -translate-x-1/2 rounded-[10px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/cpm:opacity-100"
+                  className="pointer-events-none absolute top-full left-1/2 z-40 mt-1.5 w-60 -translate-x-1/2 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/cpm:opacity-100"
                 >
                   系统检测该博主位于{creatorLocation.country}，当前该地区默认 CPM 为 {creatorCpm}
                   。如需修改，请前往设置页面自行调整。
@@ -2140,31 +2064,19 @@ function FloatingCard({
                   <CircleHelp className="h-3 w-3 cursor-help text-[#b8b6ad] transition-colors hover:text-[#939084]" />
                   <span
                     role="tooltip"
-                    className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
+                    className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 shadow-[0_12px_30px_-18px_rgba(77,76,72,0.35)] transition-opacity group-hover/tip:opacity-100"
                   >
                     在当前页面开启数据透视后，会叠加播放量、平均播放与互动率数据，并按平均播放量排序前
                     N 条视频。若取数异常，刷新网页即可。
                   </span>
                 </span>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={dataCheckOn}
+              <Toggle
+                checked={dataCheckOn}
+                onCheckedChange={onToggleDataCheck}
+                size="sm"
                 aria-label="数据透视开关"
-                onClick={onToggleDataCheck}
-                className={cn(
-                  "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                  dataCheckOn ? "bg-[#ff4f00]" : "bg-[#c5c0b1]",
-                )}
-              >
-                <span
-                  className={cn(
-                    "absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-[#fffefb] shadow-sm transition-transform",
-                    dataCheckOn && "translate-x-4",
-                  )}
-                />
-              </button>
+              />
             </div>
           </div>
 
@@ -2240,15 +2152,17 @@ function FloatingCard({
               orange flat fill, the one CTA where Linkr Orange is appropriate
               per §7 Do/Don't). */}
           <div className="flex items-stretch gap-2">
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={onOpenCurrentSidebar}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-[13px] font-semibold text-[#201515] transition-colors hover:bg-[#eceae3] active:scale-[0.98]"
             >
               <FileText className="h-4 w-4 shrink-0 text-[#939084]" />
               博主分析
-            </button>
-            <button
+            </Button>
+            <Button
+              unstyled
               type="button"
               aria-label="找相似"
               onClick={onOpenSimilarSidebar}
@@ -2256,7 +2170,7 @@ function FloatingCard({
             >
               <Search className="h-4 w-4 shrink-0" />
               找相似
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -2270,7 +2184,7 @@ function FloatingCard({
 // tiles. Icons intentionally absent per the floating-creator-card reference.
 function FloatingStatCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg bg-[#eceae3] px-2 py-3 text-center">
+    <div className="flex flex-col items-center justify-center rounded-lg bg-[#eceae3] px-2 py-2 text-center">
       <div className="text-[11px] leading-[1.3] font-medium text-[#939084]">{label}</div>
       <div className="mt-1 text-[16px] leading-[1.2] font-semibold tracking-tight text-[#201515]">
         {value}

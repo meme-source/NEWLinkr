@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getCreatorTopicSummary } from "./shared";
 
+import { Button } from "@/components/ui/button";
+
 export function CreatorTopicSummaryRow({
   topics,
   scrapeCount,
@@ -107,7 +109,7 @@ export function CreatorTopicSummaryRow({
             </span>
             <span
               role="tooltip"
-              className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-1.5 -translate-x-1/2 rounded-[10px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-1.5 text-[10px] font-medium text-[#36342e] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+              className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-1.5 -translate-x-1/2 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-1.5 text-[10px] font-medium text-[#36342e] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
             >
               共提及 {topic.mentions} 次
             </span>
@@ -120,7 +122,8 @@ export function CreatorTopicSummaryRow({
             onMouseEnter={openRemainingTopics}
             onMouseLeave={closeRemainingTopics}
           >
-            <button
+            <Button
+              unstyled
               ref={remainingTopicsTriggerRef}
               type="button"
               aria-expanded={remainingTopicsOpen}
@@ -130,7 +133,7 @@ export function CreatorTopicSummaryRow({
               className="inline-flex items-center rounded-full border border-[#c5c0b1] bg-[#fffefb] px-2 py-1 text-[10.5px] font-semibold tracking-[0.06em] text-[#939084] transition-colors outline-none hover:border-[#b5b2aa] hover:bg-[#eceae3] focus-visible:border-[#b5b2aa] focus-visible:bg-[#eceae3]"
             >
               ...
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>
@@ -143,7 +146,7 @@ export function CreatorTopicSummaryRow({
               role="tooltip"
               onMouseEnter={openRemainingTopics}
               onMouseLeave={closeRemainingTopics}
-              className="pointer-events-auto fixed z-[80] w-full rounded-[10px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[10px] leading-[1.55] whitespace-normal text-[#36342e]"
+              className="pointer-events-auto fixed z-[80] w-full rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[10px] leading-[1.55] whitespace-normal text-[#36342e]"
               style={{
                 left: remainingTopicsTooltipPosition.left,
                 maxWidth: remainingTopicsTooltipPosition.maxWidth,
@@ -155,9 +158,7 @@ export function CreatorTopicSummaryRow({
                 width: remainingTopicsTooltipPosition.maxWidth,
               }}
             >
-              {remainingTopics.map((topic) => (
-                <div key={topic.label}>{topic.label}</div>
-              ))}
+              {remainingTopics.map((topic) => `${topic.label} ×${topic.mentions}`).join("；")}
             </div>,
             document.body,
           )

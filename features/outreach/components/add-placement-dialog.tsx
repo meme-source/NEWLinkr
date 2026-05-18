@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, Link2, Sparkles, X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   useOutreachState,
   type AddPlacementInput,
@@ -120,13 +121,14 @@ function DialogBody({
       aria-modal="true"
       aria-labelledby="add-placement-title"
     >
-      <button
+      <Button
+        unstyled
         type="button"
         aria-label="关闭"
         className="absolute inset-0 cursor-default"
         onClick={onClose}
       />
-      <div className="relative flex max-h-[86vh] w-full max-w-[460px] flex-col overflow-hidden rounded-[24px] border border-[#c5c0b1] bg-[#fffdf9]">
+      <div className="relative flex max-h-[86vh] w-full max-w-[460px] flex-col overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffdf9]">
         <Header onClose={onClose} prefilledCreator={prefill?.creatorHandle ?? null} />
         <div className="flex flex-col gap-4 px-5 py-4">
           <UrlField
@@ -168,14 +170,15 @@ function Header({
             : "粘贴博主发帖链接，系统会自动识别博主并建立追踪。"}
         </p>
       </div>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onClose}
         aria-label="关闭"
         className="rounded-full border border-[#c5c0b1] p-1.5 text-[#939084] transition-colors hover:bg-[#fffefb]"
       >
         <X className="h-4 w-4" />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -204,7 +207,7 @@ function UrlField({
       </span>
       <div
         className={cn(
-          "flex items-center gap-2 rounded-2xl border bg-[#fffefb] px-3 py-2 transition-colors",
+          "flex items-center gap-2 rounded-lg border bg-[#fffefb] px-3 py-2 transition-colors",
           invalid ? "border-[#ff4f00]" : "border-[#c5c0b1] focus-within:border-[#ff4f00]",
         )}
       >
@@ -254,7 +257,7 @@ function SpendField({
       </span>
       <div
         className={cn(
-          "flex items-center gap-2 rounded-2xl border bg-[#fffefb] px-3 py-2 transition-colors",
+          "flex items-center gap-2 rounded-lg border bg-[#fffefb] px-3 py-2 transition-colors",
           invalid ? "border-[#ff4f00]" : "border-[#c5c0b1] focus-within:border-[#ff4f00]",
         )}
       >
@@ -277,7 +280,7 @@ function SpendField({
 
 function ProjectHint({ projectName }: { projectName: string }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-[#eceae3] bg-[#fffefb] px-3 py-2 text-[11px]">
+    <div className="flex items-center justify-between rounded-lg border border-[#eceae3] bg-[#fffefb] px-3 py-2 text-[11px]">
       <span className="text-[#939084]">归属项目</span>
       <span className="font-medium text-[#201515]">{projectName}</span>
     </div>
@@ -299,14 +302,16 @@ function Footer({
         <ExternalLink className="h-3 w-3" aria-hidden /> 抓取后曝光 / 互动数据自动回填
       </span>
       <div className="flex items-center gap-2">
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onClose}
           className="rounded-full border border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5 text-[12px] font-medium text-[#36342e] transition-colors hover:bg-[#fffdf9]"
         >
           取消
-        </button>
-        <button
+        </Button>
+        <Button
+          unstyled
           type="button"
           disabled={!canSubmit}
           onClick={onSubmit}
@@ -318,7 +323,7 @@ function Footer({
           )}
         >
           添加追踪
-        </button>
+        </Button>
       </div>
     </div>
   );

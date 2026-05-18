@@ -3,6 +3,7 @@
 import { ChevronDown, Table as TableIcon } from "lucide-react";
 import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { TEMPLATE_VAR_LIST } from "@/features/outreach/data/template-vars";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,8 @@ export function ColorDropdown({ title, icon, colors, onPick }: ColorDropdownProp
 
   return (
     <div ref={ref} className="relative flex items-center">
-      <button
+      <Button
+        unstyled
         type="button"
         title={title}
         aria-label={title}
@@ -48,11 +50,12 @@ export function ColorDropdown({ title, icon, colors, onPick }: ColorDropdownProp
       >
         {icon}
         <ChevronDown className="h-3 w-3" />
-      </button>
+      </Button>
       {open ? (
         <div className="absolute top-full left-0 z-20 mt-1 grid grid-cols-5 gap-1 rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-2">
           {colors.map((c) => (
-            <button
+            <Button
+              unstyled
               key={c.value}
               type="button"
               title={c.label}
@@ -91,7 +94,8 @@ export function VariableDropdown({ onPick }: VariableDropdownProps) {
 
   return (
     <div ref={ref} className="relative flex items-center">
-      <button
+      <Button
+        unstyled
         type="button"
         title="插入变量"
         onMouseDown={(e) => e.preventDefault()}
@@ -100,7 +104,7 @@ export function VariableDropdown({ onPick }: VariableDropdownProps) {
       >
         插入变量
         <ChevronDown className="h-3 w-3" />
-      </button>
+      </Button>
       {open ? (
         <div className="absolute top-full left-0 z-20 mt-1 w-52 rounded-lg border border-[#c5c0b1] bg-[#fffefb] py-1">
           {(["account", "project", "creator"] as const).map((scope) => {
@@ -112,7 +116,8 @@ export function VariableDropdown({ onPick }: VariableDropdownProps) {
                   {scope === "account" ? "账号级" : scope === "project" ? "项目级" : "博主级"}
                 </div>
                 {vars.map((v) => (
-                  <button
+                  <Button
+                    unstyled
                     key={v.token}
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
@@ -124,7 +129,7 @@ export function VariableDropdown({ onPick }: VariableDropdownProps) {
                   >
                     <span>{v.label}</span>
                     <span className="text-[10px] text-[#939084]">{v.token}</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             );
@@ -150,7 +155,8 @@ export function TableDropdown({ onPick }: TableDropdownProps) {
 
   return (
     <div ref={ref} className="relative flex items-center">
-      <button
+      <Button
+        unstyled
         type="button"
         title="插入表格"
         aria-label="插入表格"
@@ -160,7 +166,7 @@ export function TableDropdown({ onPick }: TableDropdownProps) {
       >
         <TableIcon className="h-3.5 w-3.5" />
         <ChevronDown className="h-3 w-3" />
-      </button>
+      </Button>
       {open ? (
         <div className="absolute top-full left-0 z-20 mt-1 rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-2">
           <div className="grid grid-cols-6 gap-0.5" onMouseLeave={() => setHover(null)}>
@@ -169,7 +175,8 @@ export function TableDropdown({ onPick }: TableDropdownProps) {
               const c = i % max;
               const active = hover && r <= hover.r && c <= hover.c;
               return (
-                <button
+                <Button
+                  unstyled
                   key={i}
                   type="button"
                   onMouseEnter={() => setHover({ r, c })}

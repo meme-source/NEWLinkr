@@ -3,6 +3,7 @@
 import { CalendarDays, Check, Filter, Flag, List, Plus, Rows3 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { CATEGORY_VISUAL } from "@/features/outreach/data/calendar-events";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +88,8 @@ export function ScheduleToolbar({
       </div>
 
       <div className="relative" ref={filterRef}>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={() => setFilterOpen((prev) => !prev)}
           aria-haspopup="menu"
@@ -106,13 +108,13 @@ export function ScheduleToolbar({
               {activeCount}
             </span>
           ) : null}
-        </button>
+        </Button>
 
         {filterOpen ? (
           <div
             role="menu"
             aria-label="分类筛选"
-            className="absolute top-full left-0 z-30 mt-1.5 w-56 overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb] shadow-[0_12px_32px_-16px_rgba(32,21,21,0.25)]"
+            className="absolute top-full left-0 z-30 mt-1.5 w-56 overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] shadow-[0_12px_32px_-16px_rgba(32,21,21,0.25)]"
           >
             <div className="flex items-baseline justify-between border-b border-[#eceae3] px-3 pt-2.5 pb-2">
               <span className="text-[10px] font-medium tracking-wider text-[#939084] uppercase">
@@ -126,7 +128,8 @@ export function ScheduleToolbar({
                 const isOn = enabledFacets.has(opt.id);
                 const visual = CATEGORY_VISUAL[opt.id];
                 return (
-                  <button
+                  <Button
+                    unstyled
                     key={opt.id}
                     type="button"
                     role="menuitemcheckbox"
@@ -161,13 +164,14 @@ export function ScheduleToolbar({
                     >
                       {opt.label}
                     </span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
 
             {!allOn ? (
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => {
                   onResetFacets();
@@ -176,7 +180,7 @@ export function ScheduleToolbar({
                 className="block w-full border-t border-[#eceae3] px-3 py-2 text-left text-[11px] font-medium text-[#939084] transition-colors hover:bg-[#fffdf9] hover:text-[#ff4f00]"
               >
                 重置全部
-              </button>
+              </Button>
             ) : null}
           </div>
         ) : null}
@@ -188,7 +192,8 @@ export function ScheduleToolbar({
             const isActive = view === opt.id;
             const Icon = opt.Icon;
             return (
-              <button
+              <Button
+                unstyled
                 key={opt.id}
                 type="button"
                 onClick={() => onViewChange(opt.id)}
@@ -199,18 +204,19 @@ export function ScheduleToolbar({
               >
                 <Icon size={13} />
                 {opt.label}
-              </button>
+              </Button>
             );
           })}
         </div>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onCreate}
           className="inline-flex h-7 items-center gap-1 rounded-lg bg-[#ff4f00] px-2.5 text-[11px] font-medium text-[#fffefb] hover:bg-[#ff4f00]"
         >
           <Plus size={13} />
           新建事件
-        </button>
+        </Button>
       </div>
     </div>
   );

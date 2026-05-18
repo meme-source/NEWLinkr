@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { AddCountryButton } from "@/features/settings/components/cpm/add-country-button";
 import {
   REGION_ROWS,
@@ -28,7 +29,7 @@ export function RegionSection({ tierCountries, onAdd, onRemove }: RegionSectionP
   }, [tierCountries]);
 
   return (
-    <section className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-6">
+    <section className="rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-6">
       <div className="flex items-center justify-between gap-2">
         <div>
           <h3 className="text-sm font-semibold text-[#201515]">地区分类管理</h3>
@@ -64,7 +65,7 @@ interface RegionTierCardProps {
 
 function RegionTierCard({ row, countries, assignedMap, onAdd, onRemove }: RegionTierCardProps) {
   return (
-    <div className="rounded-2xl border border-[#c5c0b1] bg-[#fffdf9] p-4 transition-colors hover:bg-[#fffefb]">
+    <div className="rounded-lg border border-[#c5c0b1] bg-[#fffdf9] p-4 transition-colors hover:bg-[#fffefb]">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={cn("h-2 w-2 rounded-full", row.dot)} />
@@ -86,14 +87,15 @@ function RegionTierCard({ row, countries, assignedMap, onAdd, onRemove }: Region
             >
               <span aria-hidden>{meta?.flag ?? "🏳️"}</span>
               <span>{c}</span>
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => onRemove(c)}
                 aria-label={`移除 ${c}`}
                 className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-[#939084] transition-colors hover:bg-[#ff4f00]/10 hover:text-[#ff4f00]"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </span>
           );
         })}

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CalendarClock, ChevronDown, Clock3, Mail, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Creator } from "@/types/api";
 import {
   MOCK_SENDER_ACCOUNTS,
@@ -112,7 +113,7 @@ export function LibraryBulkOutreach({ open, creators, onClose, onSend }: Props) 
       onClick={handleClose}
     >
       <div
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]"
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="flex items-center justify-between border-b border-[#c5c0b1] px-4 py-3">
@@ -123,14 +124,15 @@ export function LibraryBulkOutreach({ open, creators, onClose, onSend }: Props) 
               {creators.length} 位博主
             </span>
           </div>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={handleClose}
             aria-label="关闭"
             className="rounded-full p-1 text-[#939084] hover:bg-[#fffdf9]"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </header>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
@@ -187,7 +189,7 @@ export function LibraryBulkOutreach({ open, creators, onClose, onSend }: Props) 
               onChange={(event) => setSubject(event.target.value)}
               disabled={previewOn}
               placeholder="Hi {{handle}}，关于一次合作..."
-              className="w-full rounded-xl border border-[#c5c0b1] bg-[#fffdf9] px-3 py-2 text-[13px] outline-none focus:border-[#ff4f00] disabled:cursor-not-allowed disabled:bg-[#eceae3]"
+              className="w-full rounded-lg border border-[#c5c0b1] bg-[#fffdf9] px-3 py-2 text-[13px] outline-none focus:border-[#ff4f00] disabled:cursor-not-allowed disabled:bg-[#eceae3]"
             />
           </Field>
 
@@ -207,7 +209,7 @@ export function LibraryBulkOutreach({ open, creators, onClose, onSend }: Props) 
 
           {/* Schedule (only when scheduled mode) */}
           {sendMode === "scheduled" && (
-            <div className="rounded-xl border border-[#c5c0b1] bg-[#fffdf9] p-3">
+            <div className="rounded-lg border border-[#c5c0b1] bg-[#fffdf9] p-3">
               <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-[#939084]">
                 <CalendarClock className="h-3.5 w-3.5 text-[#ff4f00]" />
                 定时发送
@@ -232,13 +234,14 @@ export function LibraryBulkOutreach({ open, creators, onClose, onSend }: Props) 
             {sender ? ` · 发件 ${sender.address}` : ""}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={handleClose}
               className="rounded-full border border-[#c5c0b1] bg-[#fffefb] px-3.5 py-1.5 text-[12px] text-[#36342e] hover:bg-[#fffdf9]"
             >
               取消
-            </button>
+            </Button>
             <BulkOutreachSendButton
               ready={ready}
               sendMode={sendMode}

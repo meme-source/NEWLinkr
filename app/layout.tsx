@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Inter, Source_Serif_4 } from "next/font/google";
 
+import { GooeyFilter } from "@/components/ui/toggle";
+
 import "./globals.css";
 
 // next/font picks up the CSS variables referenced by --font-sans / --font-display /
@@ -48,6 +50,7 @@ export default function RootLayout({
       className={`h-full antialiased ${inter.variable} ${geist.variable} ${sourceSerif.variable}`}
     >
       <body suppressHydrationWarning className="m-0 min-h-full font-sans">
+        <GooeyFilter />
         {children}
       </body>
     </html>

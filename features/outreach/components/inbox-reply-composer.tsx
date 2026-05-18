@@ -3,8 +3,10 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Reply, Sparkles } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { RichEmailEditor } from "@/features/outreach/components/inbox-rich-editor";
 import { TEMPLATES } from "@/features/outreach/data/templates";
+import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
 
 // §3.4.4: Auto follow-up is embedded in the inbox composer rather than a
@@ -69,13 +71,14 @@ export function InboxReplyComposer() {
       ) : null}
 
       <div className="flex items-center justify-end border-t border-[#eceae3] px-4 py-3">
-        <button
+        <Button
+          unstyled
           type="button"
-          className="flex items-center gap-1.5 rounded-xl bg-[#ff4f00] px-4 py-2 text-sm font-medium text-[#fffefb] hover:bg-[#ff4f00]"
+          className="flex items-center gap-1.5 rounded-lg bg-[#ff4f00] px-4 py-2 text-sm font-medium text-[#fffefb] hover:bg-[#ff4f00]"
         >
           <Reply className="h-3.5 w-3.5" />
           {followUp.enabled ? "发送并安排跟进" : "发送回复"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -99,27 +102,17 @@ function FollowUpRow({
   return (
     <div className="flex items-center justify-between gap-3 border-t border-[#eceae3] bg-[#fffdf9] px-4 py-2.5">
       <div className="flex min-w-0 items-center gap-2.5">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={followUp.enabled}
-          onClick={onToggleEnabled}
-          className={cn(
-            "relative h-4 w-7 shrink-0 rounded-full transition-colors",
-            followUp.enabled ? "bg-[#ff4f00]" : "bg-[#b5b2aa]",
-          )}
-        >
-          <span
-            className={cn(
-              "absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-[#fffefb] transition-transform",
-              followUp.enabled ? "translate-x-3.5" : "translate-x-0",
-            )}
-          />
-        </button>
+        <Toggle
+          checked={followUp.enabled}
+          onCheckedChange={onToggleEnabled}
+          size="sm"
+          aria-label="自动跟进开关"
+        />
         <span className="shrink-0 text-xs font-medium text-[#201515]">自动跟进</span>
         <span className="min-w-0 truncate text-[11px] text-[#939084]">{summary}</span>
       </div>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onToggleExpanded}
         disabled={!followUp.enabled}
@@ -132,7 +125,7 @@ function FollowUpRow({
       >
         {expanded ? "收起" : "配置"}
         <ChevronDown className={cn("h-3 w-3 transition-transform", expanded ? "rotate-180" : "")} />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -217,7 +210,8 @@ function PillButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
       className={cn(
@@ -228,6 +222,6 @@ function PillButton({
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }

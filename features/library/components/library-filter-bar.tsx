@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, Filter, X } from "lucide-react";
 import type { Creator, CreatorCategory, Rating } from "@/types/api";
 import { CREATOR_CATEGORY_LABEL, CREATOR_SOURCE_LABEL } from "@/lib/creator";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   COLUMN_BY_FILTER_DIMENSION,
@@ -193,28 +194,29 @@ export function LibraryFilterBar(props: Props) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <div className="relative">
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={() => setOpen((v) => !v)}
           disabled={noDimensions}
           title={noDimensions ? "请在字段配置中开启至少一个可筛选列" : undefined}
           className={cn(
-            "inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[12px] transition-colors",
+            "inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-[13px] transition-colors",
             noDimensions && "cursor-not-allowed opacity-50",
             !noDimensions && totalSelected > 0
-              ? "border-[#ff4f00] bg-[#fff7f4] text-[#ff4f00]"
-              : "border-[#c5c0b1] bg-[#fffefb] text-[#36342e] hover:bg-[#fffdf9]",
+              ? "bg-[#fff7f4] text-[#ff4f00]"
+              : "bg-transparent text-[#36342e] hover:bg-[#fffdf9]",
           )}
         >
           <Filter className="h-3.5 w-3.5" />
           <span>筛选</span>
           {totalSelected > 0 && <span className="font-semibold">· {totalSelected}</span>}
           <ChevronDown className="h-3 w-3" />
-        </button>
+        </Button>
         {open && active && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} aria-hidden="true" />
-            <div className="absolute z-20 mt-1.5 flex w-[480px] overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb]">
+            <div className="absolute z-20 mt-1.5 flex w-[480px] overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
               <div className="max-h-[320px] w-[140px] shrink-0 overflow-y-auto border-r border-[#c5c0b1] bg-[#fffdf9] py-1.5">
                 <div className="px-3 pt-1 pb-1 text-[10px] tracking-wide text-[#939084] uppercase">
                   筛选维度
@@ -222,7 +224,8 @@ export function LibraryFilterBar(props: Props) {
                 {dimensions.map((dim) => {
                   const isActive = dim.id === active.id;
                   return (
-                    <button
+                    <Button
+                      unstyled
                       key={dim.id}
                       type="button"
                       onClick={() => setActiveDimension(dim.id)}
@@ -246,7 +249,7 @@ export function LibraryFilterBar(props: Props) {
                           {dim.selected.length}
                         </span>
                       )}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -256,13 +259,14 @@ export function LibraryFilterBar(props: Props) {
                     {active.label}
                   </span>
                   {totalSelected > 0 && (
-                    <button
+                    <Button
+                      unstyled
                       type="button"
                       onClick={props.onReset}
                       className="text-[11px] text-[#939084] hover:text-[#ff4f00]"
                     >
                       清空全部
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <div className="max-h-[280px] overflow-y-auto">
@@ -281,7 +285,8 @@ export function LibraryFilterBar(props: Props) {
                         {section.options.map((option) => {
                           const selected = active.selected.includes(option.value);
                           return (
-                            <button
+                            <Button
+                              unstyled
                               key={option.value}
                               type="button"
                               onClick={() => props.onToggleDimension(active.id, option.value)}
@@ -297,7 +302,7 @@ export function LibraryFilterBar(props: Props) {
                                 {option.label}
                               </span>
                               {selected && <span aria-hidden="true">✓</span>}
-                            </button>
+                            </Button>
                           );
                         })}
                       </div>
@@ -318,14 +323,15 @@ export function LibraryFilterBar(props: Props) {
           <span className="text-[#939084]">{chip.dimensionLabel}</span>
           <span>·</span>
           <span className="font-medium">{chip.valueLabel}</span>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={chip.onRemove}
             className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[#ff4f00] hover:bg-[#c5c0b1]"
             aria-label={`移除筛选 ${chip.dimensionLabel}: ${chip.valueLabel}`}
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </span>
       ))}
     </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   cpeOf,
   fmtCount,
@@ -52,27 +54,47 @@ function rOf(spend: number): number {
 }
 
 export function BoardPerformanceScatter({ placements }: { placements: Placement[] }) {
+  // SSR 阶段不画点 —— 散点位置是浮点计算结果，<title> 文案带 handle / 数字格式，
+  // 一旦 placements 列表在水合时与服务器的不严格相等（顺序、内容、过滤都可能略
+  // 差），React 会判定 hydration mismatch 并整棵树重渲染。把渲染推到挂载之后，
+  // 服务器先发出空骨架，避免任何潜在不一致。可视化组件在 SSR 阶段本来也没意义。
+  //
+  // 此处 setState-in-effect 是 SSR-safe 挂载门控的标准模式（与
+  // features/project/components/project-context.tsx 的 localStorage hydration
+  // 一脉相承），因此局部允许 react-hooks/set-state-in-effect。
+  /* eslint-disable react-hooks/set-state-in-effect */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   return (
-    <div className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-5">
-      <div className="mb-4 flex items-end justify-between gap-4">
+    <div className="flex h-full flex-col rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-[22px] py-[18px]">
+      <div className="mb-[18px] flex items-end justify-between gap-6">
         <div>
-          <div className="text-xs font-medium tracking-wider text-[#939084] uppercase">
-            CPE × 曝光
+          <div className="text-[11px] font-medium tracking-[0.12em] text-[#939084] uppercase">
+            EFFICIENCY
           </div>
-          <p className="mt-1 text-[11px] text-[#939084]">
-            右上 = 曝光高且单互动成本低 · 左下需复核
-          </p>
+          <h3 className="mt-1.5 text-[17px] font-semibold tracking-tight text-[#201515]">
+            CPE × 曝光
+          </h3>
         </div>
-        <div className="flex items-center gap-3 text-[10px] text-[#939084]">
-          {TIER_ORDER.map((t) => (
-            <span key={t} className="flex items-center gap-1">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: TIER_META[t].color }}
-              />
-              {TIER_META[t].label}
-            </span>
-          ))}
+        <div className="flex flex-col items-end gap-2">
+          <p className="max-w-[280px] text-right text-[12px] leading-snug text-[#939084]">
+            右下 = 曝光高 · CPE 低 · 左上区需复核
+          </p>
+          <div className="flex items-center gap-3 text-[10px] text-[#939084]">
+            {TIER_ORDER.map((t) => (
+              <span key={t} className="flex items-center gap-1">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: TIER_META[t].color }}
+                />
+                {TIER_META[t].label}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -127,25 +149,27 @@ export function BoardPerformanceScatter({ placements }: { placements: Placement[
           曝光 →
         </text>
 
-        {placements.map((p) => {
-          const x = xPos(p.views);
-          const y = yPos(cpeOf(p));
-          const r = rOf(p.spendUsd);
-          const color = TIER_META[tierOf(p.creatorFollowers)].color;
-          const needsReview = p.status === "下降中";
-          return (
-            <g key={p.id}>
-              {needsReview ? (
-                <circle cx={x} cy={y} r={r + 4} fill="none" stroke="#ff4f00" strokeWidth="1" />
-              ) : null}
-              <circle cx={x} cy={y} r={r} fill={color} fillOpacity={0.85}>
-                <title>
-                  {p.creatorHandle} · {fmtCount(p.views)} 曝光 · {fmtMoney(cpeOf(p), 3)} CPE
-                </title>
-              </circle>
-            </g>
-          );
-        })}
+        {mounted
+          ? placements.map((p) => {
+              const x = xPos(p.views);
+              const y = yPos(cpeOf(p));
+              const r = rOf(p.spendUsd);
+              const color = TIER_META[tierOf(p.creatorFollowers)].color;
+              const needsReview = p.status === "下降中";
+              return (
+                <g key={p.id}>
+                  {needsReview ? (
+                    <circle cx={x} cy={y} r={r + 4} fill="none" stroke="#ff4f00" strokeWidth="1" />
+                  ) : null}
+                  <circle cx={x} cy={y} r={r} fill={color} fillOpacity={0.85}>
+                    <title>
+                      {p.creatorHandle} · {fmtCount(p.views)} 曝光 · {fmtMoney(cpeOf(p), 3)} CPE
+                    </title>
+                  </circle>
+                </g>
+              );
+            })
+          : null}
       </svg>
     </div>
   );

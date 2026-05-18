@@ -41,42 +41,55 @@ export function InfluencerCardMetrics({ metrics }: InfluencerCardMetricsProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {slots.map((metric, idx) => {
-        const Icon = metric ? pickIcon(metric.label) : Activity;
-        return (
-          <div
-            key={idx}
-            className="flex flex-col gap-1 rounded-lg bg-[#eceae3] px-3 py-2.5"
-            title={metric?.hint}
-          >
+    <div className="flex flex-col gap-1">
+      <span
+        style={{
+          color: TEXT.heading,
+          fontSize: TYPE.analysisHeading.size,
+          lineHeight: `${TYPE.analysisHeading.lineHeight}px`,
+          fontWeight: TYPE.analysisHeading.weight,
+          letterSpacing: TYPE.analysisHeading.tracking,
+        }}
+      >
+        核心数据
+      </span>
+      <div className="grid grid-cols-2 gap-1.5">
+        {slots.map((metric, idx) => {
+          const Icon = metric ? pickIcon(metric.label) : Activity;
+          return (
             <div
-              className="flex items-center gap-1"
-              style={{
-                color: TEXT.muted,
-                fontSize: TYPE.metricLabel.size,
-                lineHeight: `${TYPE.metricLabel.lineHeight}px`,
-                letterSpacing: TYPE.metricLabel.tracking,
-              }}
+              key={idx}
+              className="flex flex-col gap-0.5 rounded-lg bg-[#eceae3] px-3 py-2"
+              title={metric?.hint}
             >
-              <Icon className="h-3 w-3 shrink-0" />
-              <span className="truncate">{metric?.label ?? "—"}</span>
+              <div
+                className="flex items-center gap-1"
+                style={{
+                  color: TEXT.muted,
+                  fontSize: TYPE.metricLabel.size,
+                  lineHeight: `${TYPE.metricLabel.lineHeight}px`,
+                  letterSpacing: TYPE.metricLabel.tracking,
+                }}
+              >
+                <Icon className="h-3 w-3 shrink-0" />
+                <span className="truncate">{metric?.label ?? "—"}</span>
+              </div>
+              <span
+                className="truncate"
+                style={{
+                  color: metric?.highlight ? TEXT.highlight : TEXT.primary,
+                  fontSize: 16,
+                  lineHeight: "20px",
+                  fontWeight: TYPE.metricValue.weight,
+                  letterSpacing: TYPE.metricValue.tracking,
+                }}
+              >
+                {metric?.value ?? "—"}
+              </span>
             </div>
-            <span
-              className="truncate"
-              style={{
-                color: metric?.highlight ? TEXT.highlight : TEXT.primary,
-                fontSize: 16,
-                lineHeight: "20px",
-                fontWeight: TYPE.metricValue.weight,
-                letterSpacing: TYPE.metricValue.tracking,
-              }}
-            >
-              {metric?.value ?? "—"}
-            </span>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -28,6 +28,7 @@ export const DEFAULT_TIME_DAYS: StructuredEditorState["timeDays"] = {
   competitor: 90,
   scenario: null,
   trending: 14,
+  lowFollower: 14,
 };
 
 export const DEFAULT_EDITOR_STATE: StructuredEditorState = {

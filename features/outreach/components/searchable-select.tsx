@@ -3,6 +3,7 @@
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // 一个最小可用的可搜索下拉框：trigger 是一颗按钮，点开会展开搜索框 + 选项
@@ -94,7 +95,8 @@ export function SearchableSelect({
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
-      <button
+      <Button
+        unstyled
         type="button"
         disabled={disabled}
         aria-haspopup="listbox"
@@ -113,7 +115,7 @@ export function SearchableSelect({
           <span className="shrink-0 text-[10px] text-[#939084]">{selected.description}</span>
         ) : null}
         <ChevronsUpDown size={13} className="shrink-0 text-[#939084]" aria-hidden />
-      </button>
+      </Button>
 
       {open ? (
         <div
@@ -138,7 +140,8 @@ export function SearchableSelect({
               filtered.map((opt) => {
                 const isActive = opt.value === value;
                 return (
-                  <button
+                  <Button
+                    unstyled
                     key={opt.value || "__empty__"}
                     type="button"
                     role="option"
@@ -159,7 +162,7 @@ export function SearchableSelect({
                     {opt.description ? (
                       <span className="shrink-0 text-[10px] text-[#939084]">{opt.description}</span>
                     ) : null}
-                  </button>
+                  </Button>
                 );
               })
             )}

@@ -5,36 +5,36 @@ import {
   CalendarClock,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  CircleCheck,
   Clock3,
+  Eye,
   FileText,
   Mail,
   Paperclip,
   Send,
-  Sparkles,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type {
-  CreatorProfile,
-  EmailSendOptions,
-  EmailTemplateKey,
-  EmailTemplateSegment,
-} from "@/features/plugin/types";
+import type { CreatorProfile, EmailSendOptions, EmailTemplateKey } from "@/features/plugin/types";
 import { emailTemplates } from "@/features/plugin/data/email-templates";
+import type { EmailAccount, EmailTemplateGroup } from "@/features/email/types";
+import { Button } from "@/components/ui/button";
 import {
   EMAIL_PERSONALIZED_BADGE_CLASSES,
   SIDEBAR_CARD_RADIUS,
-  formatFileSize,
   formatScheduleLabel,
 } from "../shared";
-import { HighlightedEmailPreview } from "../primitives";
+import { EmailBodyEditor } from "./EmailBodyEditor";
 
 const EMAIL_COMPACT_CONTROL_CLASSES =
-  "h-10 w-full appearance-none rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-9 text-sm text-[#201515] outline-none transition-colors focus:border-[#ff4f00]/35";
+  "h-9 w-full appearance-none rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-9 text-sm text-[#201515] outline-none transition-colors focus:border-[#ff4f00]/35";
 const EMAIL_COMPACT_BUTTON_CLASSES =
-  "inline-flex h-10 items-center justify-center rounded-full px-3 text-sm font-semibold transition-all active:scale-[0.99]";
+  "inline-flex h-9 items-center justify-center rounded-[8px] px-3 text-sm font-semibold transition-all active:scale-[0.99]";
 
-export type SenderEmail = { id: string; label: string; address: string };
+// 发送账号沿用共享层的 EmailAccount —— 与 Web 工作台「邮箱绑定」同一形状。
+export type SenderEmail = EmailAccount;
 
 export function EmailComposerCard({
   senderEmails,
@@ -47,7 +47,14 @@ export function EmailComposerCard({
   emailAttachments,
   onChangeEmailAttachments,
   previewCreator,
-  emailTemplateSegments,
+  previewIndex,
+  onPreviewPrev,
+  onPreviewNext,
+  unconfirmedRecipientCount,
+  isPreviewConfirmed,
+  onToggleConfirmPreview,
+  bodyHtml,
+  onChangeBody,
   personalizedSegmentCount,
   emailRecipientCount,
   canOpenEmailReview,
@@ -69,7 +76,14 @@ export function EmailComposerCard({
   emailAttachments: File[];
   onChangeEmailAttachments: (files: File[]) => void;
   previewCreator: CreatorProfile;
-  emailTemplateSegments: EmailTemplateSegment[];
+  previewIndex: number;
+  onPreviewPrev: () => void;
+  onPreviewNext: () => void;
+  unconfirmedRecipientCount: number;
+  isPreviewConfirmed: boolean;
+  onToggleConfirmPreview: () => void;
+  bodyHtml: string;
+  onChangeBody: (html: string) => void;
   personalizedSegmentCount: number;
   emailRecipientCount: number;
   canOpenEmailReview: boolean;
@@ -83,7 +97,7 @@ export function EmailComposerCard({
 }) {
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const activeEmailTemplate =
-    emailTemplates.find((template) => template.key === selectedEmailTemplate) ?? null;
+    emailTemplates.find((template) => template.id === selectedEmailTemplate) ?? null;
 
   const handleAttachmentFiles = (files: FileList | null) => {
     if (!files?.length) return;
@@ -121,12 +135,13 @@ export function EmailComposerCard({
         <div>
           <div className="mb-1.5 text-xs font-medium text-zinc-500">发送账号</div>
           {senderEmails.length === 0 ? (
-            <button
+            <Button
+              unstyled
               type="button"
               className={`${EMAIL_COMPACT_BUTTON_CLASSES} w-full border border-dashed border-[#c5c0b1] bg-[#fffdf9] text-left text-[#939084] hover:border-[#ff4f00]/40 hover:text-[#939084]`}
             >
               添加邮件
-            </button>
+            </Button>
           ) : (
             <div className="relative">
               <select
@@ -157,15 +172,23 @@ export function EmailComposerCard({
                 <option value="" className="bg-[#fffefb] text-[#939084]">
                   请选择模板
                 </option>
-                {emailTemplates.map((template) => (
-                  <option
-                    key={template.key}
-                    value={template.key}
-                    className="bg-[#fffefb] text-[#201515]"
-                  >
-                    {template.label}
-                  </option>
-                ))}
+                {(["系统模板", "我的模板"] as EmailTemplateGroup[]).map((group) => {
+                  const items = emailTemplates.filter((template) => template.group === group);
+                  if (items.length === 0) return null;
+                  return (
+                    <optgroup key={group} label={group}>
+                      {items.map((template) => (
+                        <option
+                          key={template.id}
+                          value={template.id}
+                          className="bg-[#fffefb] text-[#201515]"
+                        >
+                          {template.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
               </select>
               <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#36342e]" />
             </div>
@@ -179,7 +202,59 @@ export function EmailComposerCard({
 
         <div>
           <div className="mb-1.5 text-xs font-medium text-zinc-500">邮件内容</div>
-          <div className="overflow-hidden rounded-[22px] border border-[#c5c0b1] bg-[#fffdf9] transition-colors focus-within:border-[#ff4f00]/35">
+
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1">
+              {emailRecipientCount > 1 ? (
+                <Button
+                  unstyled
+                  type="button"
+                  aria-label="上一位博主"
+                  title="上一位博主"
+                  onClick={onPreviewPrev}
+                  className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:border-[#ff4f00]/45 hover:bg-[#fff7f4] hover:text-[#ff4f00]"
+                >
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+              ) : null}
+              <span className="min-w-0 truncate text-[11px] font-semibold text-[#36342e]">
+                {previewCreator.handle}
+              </span>
+              {emailRecipientCount > 1 ? (
+                <>
+                  <span className="shrink-0 rounded-full bg-[#eceae3] px-1.5 py-0.5 text-[10px] font-semibold text-[#36342e] tabular-nums">
+                    {previewIndex >= 0 ? previewIndex + 1 : "–"}/{emailRecipientCount}
+                  </span>
+                  <Button
+                    unstyled
+                    type="button"
+                    aria-label="下一位博主"
+                    title="下一位博主"
+                    onClick={onPreviewNext}
+                    className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:border-[#ff4f00]/45 hover:bg-[#fff7f4] hover:text-[#ff4f00]"
+                  >
+                    <ChevronRight className="h-3 w-3" />
+                  </Button>
+                </>
+              ) : null}
+            </div>
+            <span className="group/highlight relative shrink-0">
+              <span
+                aria-label={`${personalizedSegmentCount} 处高亮。高亮内容仅用于标识 AI 为该博主生成的个性化替换内容，不会显示在最终邮件正文中。`}
+                className={`${EMAIL_PERSONALIZED_BADGE_CLASSES} cursor-default px-2 py-0.5 text-[10px] font-semibold`}
+              >
+                {personalizedSegmentCount} 处高亮
+              </span>
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 transition-opacity group-hover/highlight:opacity-100"
+              >
+                高亮内容仅用于标识 AI 为该博主生成的个性化替换内容，不会显示在最终邮件正文中。
+              </span>
+            </span>
+          </div>
+
+          <div className="overflow-hidden rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] transition-colors focus-within:border-[#ff4f00]/35">
             {selectedEmailTemplate ? (
               <div className="flex items-center gap-2 border-b border-[#c5c0b1] bg-[#fffefb] px-3 py-2">
                 <FileText className="h-3.5 w-3.5 shrink-0 text-[#ff4f00]" />
@@ -193,91 +268,102 @@ export function EmailComposerCard({
             ) : null}
 
             {selectedEmailTemplate ? (
-              <div className="border-b border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5">
-                <input
-                  ref={attachmentInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={(event) => handleAttachmentFiles(event.currentTarget.files)}
-                />
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => attachmentInputRef.current?.click()}
-                    className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-2.5 text-xs font-semibold text-[#36342e] transition-all hover:border-[#ff4f00]/45 hover:bg-[#fff7f4] hover:text-[#ff4f00] active:scale-[0.99]"
-                  >
-                    <Paperclip className="h-3.5 w-3.5" />
-                    附件
-                  </button>
-                  {emailAttachments.length > 0 ? (
-                    <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
-                      {emailAttachments.map((file) => (
-                        <span
-                          key={`${file.name}-${file.size}-${file.lastModified}`}
-                          className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#eceae3] bg-[#fffdf9] px-2 py-1 text-[10.5px] text-[#36342e]"
-                        >
-                          <span className="max-w-[128px] truncate">{file.name}</span>
-                          <span className="shrink-0 text-[#939084]">
-                            {formatFileSize(file.size)}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label={`移除附件 ${file.name}`}
-                            onClick={() =>
-                              onChangeEmailAttachments(
-                                emailAttachments.filter((item) => item !== file),
-                              )
-                            }
-                            className="ml-0.5 text-[#939084] transition-colors hover:text-[#36342e]"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="min-w-0 flex-1 truncate text-xs text-[#939084]">
-                      可添加 brief 或报价单
-                    </span>
-                  )}
+              <EmailBodyEditor
+                key={`${previewCreator.id}::${selectedEmailTemplate}`}
+                valueHtml={bodyHtml}
+                onChange={onChangeBody}
+              />
+            ) : (
+              <div className="bg-[#fffdf9] px-3 py-3">
+                <div className="rounded-[8px] border border-dashed border-[#b5b2aa] bg-[#fffefb] px-3 py-5 text-center text-sm text-[#939084]">
+                  选择模板后生成邮件内容
                 </div>
+              </div>
+            )}
+
+            {selectedEmailTemplate ? (
+              <div className="flex items-center justify-between gap-2 border-t border-[#c5c0b1] bg-[#fffefb] px-3 py-2">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                  <input
+                    ref={attachmentInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => handleAttachmentFiles(event.currentTarget.files)}
+                  />
+                  {emailAttachments.map((file) => (
+                    <span
+                      key={`${file.name}-${file.size}-${file.lastModified}`}
+                      className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#eceae3] bg-[#fffdf9] px-2 py-0.5 text-[10px] text-[#36342e]"
+                    >
+                      <Paperclip className="h-2.5 w-2.5 shrink-0 text-[#939084]" />
+                      <span className="max-w-[120px] truncate">{file.name}</span>
+                      <Button
+                        unstyled
+                        type="button"
+                        aria-label={`移除附件 ${file.name}`}
+                        onClick={() =>
+                          onChangeEmailAttachments(emailAttachments.filter((item) => item !== file))
+                        }
+                        className="text-[#939084] transition-colors hover:text-[#36342e]"
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </Button>
+                    </span>
+                  ))}
+                  <Button
+                    unstyled
+                    type="button"
+                    title="添加附件（brief、报价单等）"
+                    onClick={() => attachmentInputRef.current?.click()}
+                    className="inline-flex h-6 shrink-0 items-center gap-1 rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-2 text-[10px] font-semibold text-[#939084] transition-all hover:border-[#ff4f00]/45 hover:bg-[#fff7f4] hover:text-[#ff4f00] active:scale-[0.99]"
+                  >
+                    <Paperclip className="h-3 w-3" />
+                    {emailAttachments.length > 0 ? `${emailAttachments.length} 个附件` : "附件"}
+                  </Button>
+                </div>
+                {isPreviewConfirmed ? (
+                  <Button
+                    unstyled
+                    type="button"
+                    title="点击撤销确认"
+                    onClick={onToggleConfirmPreview}
+                    className="inline-flex h-7 shrink-0 items-center gap-1 rounded-[8px] border border-[#ff4f00]/40 bg-[#fff1ea] px-3 text-[11px] font-semibold text-[#ff4f00] transition-colors hover:bg-[#ffe7db] active:scale-[0.99]"
+                  >
+                    <CircleCheck className="h-3 w-3" />
+                    已确认
+                  </Button>
+                ) : (
+                  <Button
+                    unstyled
+                    type="button"
+                    onClick={onToggleConfirmPreview}
+                    className="inline-flex h-7 shrink-0 items-center gap-1 rounded-[8px] bg-[#ff4f00] px-3 text-[11px] font-semibold text-[#fffdf9] transition-colors hover:bg-[#ff4f00]/90 active:scale-[0.99]"
+                  >
+                    <Check className="h-3 w-3" />
+                    确认内容
+                  </Button>
+                )}
               </div>
             ) : null}
-
-            <div className="bg-[#fffdf9] px-3 py-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <div className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[#36342e]">
-                  <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#ff4f00]" />
-                  <span className="min-w-0 truncate">{previewCreator.handle}</span>
-                </div>
-                <span className="group/highlight relative shrink-0">
-                  <span
-                    aria-label={`${personalizedSegmentCount} 处高亮。高亮内容仅用于标识 AI 为该博主生成的个性化替换内容，不会显示在最终邮件正文中。`}
-                    className={`${EMAIL_PERSONALIZED_BADGE_CLASSES} cursor-default px-2 py-0.5 text-[10px] font-semibold`}
-                  >
-                    {personalizedSegmentCount} 处高亮
-                  </span>
-                  <span
-                    role="tooltip"
-                    className="pointer-events-none absolute top-full right-0 z-40 mt-1.5 w-56 rounded-[10px] border border-[#c5c0b1] bg-[#fffefb] px-2.5 py-2 text-[11px] leading-[1.55] text-[#36342e] opacity-0 transition-opacity group-hover/highlight:opacity-100"
-                  >
-                    高亮内容仅用于标识 AI 为该博主生成的个性化替换内容，不会显示在最终邮件正文中。
-                  </span>
-                </span>
-              </div>
-              <HighlightedEmailPreview
-                segments={emailTemplateSegments}
-                emptyLabel="选择模板后生成邮件内容"
-              />
-            </div>
           </div>
         </div>
       </div>
 
+      {unconfirmedRecipientCount > 0 ? (
+        <div className="mt-2.5 flex items-start gap-1.5 rounded-[8px] border border-[#ff4f00]/30 bg-[#fff7f4] px-2.5 py-1.5 text-[11px] leading-[1.5] text-[#36342e]">
+          <Eye className="mt-0.5 h-3 w-3 shrink-0 text-[#ff4f00]" />
+          <span>
+            还有 <span className="font-semibold text-[#ff4f00]">{unconfirmedRecipientCount}</span>{" "}
+            位未确认，逐位查看后点「确认这封内容」
+          </span>
+        </div>
+      ) : null}
+
       <div className="relative mt-3">
-        <div className="flex overflow-hidden rounded-full bg-[#ff4f00] text-[#fffdf9]">
-          <button
+        <div className="flex overflow-hidden rounded-[8px] bg-[#ff4f00] text-[#fffdf9]">
+          <Button
+            unstyled
             type="button"
             disabled={!canOpenEmailReview}
             onClick={onSendAction}
@@ -295,8 +381,9 @@ export function EmailComposerCard({
               : emailRecipientCount > 1
                 ? `一键建联 ${emailRecipientCount} 人`
                 : "一键建联"}
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             aria-label="选择发送方式"
             aria-haspopup="menu"
@@ -307,12 +394,13 @@ export function EmailComposerCard({
             <ChevronDown
               className={cn("h-4 w-4 transition-transform", sendMenuOpen && "rotate-180")}
             />
-          </button>
+          </Button>
         </div>
 
         {sendMenuOpen ? (
-          <div className="absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-[18px] border border-[#c5c0b1] bg-[#fffefb]">
-            <button
+          <div className="absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-[8px] border border-[#c5c0b1] bg-[#fffefb]">
+            <Button
+              unstyled
               type="button"
               role="menuitem"
               onClick={() => onChangeSendMode("now")}
@@ -326,8 +414,9 @@ export function EmailComposerCard({
                 立即发送
               </span>
               {sendMode === "now" ? <Check className="h-4 w-4" /> : null}
-            </button>
-            <button
+            </Button>
+            <Button
+              unstyled
               type="button"
               role="menuitem"
               onClick={() => onChangeSendMode("scheduled")}
@@ -341,13 +430,13 @@ export function EmailComposerCard({
                 定时发送
               </span>
               {sendMode === "scheduled" ? <Check className="h-4 w-4" /> : null}
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>
 
       {sendMode === "scheduled" ? (
-        <div className="mt-2.5 rounded-[18px] border border-[#c5c0b1] bg-[#fffdf9] p-2.5">
+        <div className="mt-2.5 rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] p-2.5">
           <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-500">
             <CalendarClock className="h-3.5 w-3.5 text-[#ff4f00]" />
             定时发送
@@ -356,7 +445,7 @@ export function EmailComposerCard({
             type="datetime-local"
             value={scheduledAt}
             onChange={(event) => onChangeScheduledAt(event.target.value)}
-            className="h-9 w-full rounded-full border border-[#c5c0b1] bg-[#fffefb] px-3 text-sm text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35"
+            className="h-9 w-full rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-3 text-sm text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35"
           />
           <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#939084]">
             <Clock3 className="h-3 w-3" />

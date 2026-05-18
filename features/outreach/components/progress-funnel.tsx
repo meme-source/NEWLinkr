@@ -1,24 +1,21 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { OutreachLifecycleStatus } from "@/features/outreach/data/outreach-types";
-import { COLLABORATION_STATUS_LABEL } from "@/lib/creator";
 import { cn } from "@/lib/utils";
 
-// §3.2 建联进度漏斗 ——
-// 与"投放表现"页的漏斗刻意分离：这里画"待建联 → 已发送 → 合作中 → 已完成"
-// 这条主路径，旁路显示已拒绝 / 暂停中。
+// §3.2 建联漏斗 ——
+// 2026-05-11 重构：去掉卡壳，居中氛围分块；coral 家族 4 stage 单色渐变（与
+// 投放表现 BoardFunnel 同源调色板）；上下留白让背景透出，让 pill 自己承担视觉重量。
 //
-// 数值口径：每段显示"累计达到该阶段"，宽度也按累计值递减；这样视觉上才是
-// 真正的漏斗，而不是当前状态的随机柱状。
+// 数值口径：每个 stage 显示「累计达到该阶段」，宽度按累计值递减。第一段标签命名为
+// 「进入流程」而非「待建联」，与下方状态 tab 里 current-state 口径的「待建联」彻底
+// 区分，避免「漏斗写 11、tab 写 2」让人误以为是 bug。
 //
-// 关键指标（建联成功率等聚合数）由左侧的 ProgressKeyMetrics 卡承担，本组件
-// 不重复展示数字 —— 只负责"形态 + 转化率 + 流失"。
-//
-// 颜色与 lib/creator.ts 中各状态的 dot 一致 —— 这样和表格里的状态徽章
-// 在视觉上一一对应：amber / blue / red / purple。
+// transition caption 不再使用「建联成功率」字样（KPI 横条已有同名指标），改为
+// 「建联转化」。
 
 interface ProgressFunnelStageCounts {
-  // cumulative reach for each main-path stage.
   queued: number;
   sent: number;
   collaborating: number;
@@ -40,21 +37,30 @@ interface ProgressFunnelProps {
 interface StageDef {
   key: keyof ProgressFunnelStageCounts;
   status: OutreachLifecycleStatus;
+  label: string;
   bg: string;
   fg: string;
 }
 
-// dot 颜色直接复用 COLLABORATION_STATUS_STYLE.dot（去掉 "bg-[" 包装）。
+// coral 家族 4 段渐变，与 board-performance-shared TIER 调色板 + BoardFunnel 同源。
+// 自上而下加深；第一段最浅，需要深色文字保证对比。
 const STAGES: StageDef[] = [
-  { key: "queued", status: "queued", bg: "#ca8a04", fg: "#fffdf9" },
-  { key: "sent", status: "sent", bg: "#3b82f6", fg: "#fffdf9" },
-  { key: "collaborating", status: "collaborating", bg: "#ef4444", fg: "#fffdf9" },
-  { key: "completed", status: "completed", bg: "#8b5cf6", fg: "#fffdf9" },
+  { key: "queued", status: "queued", label: "进入流程", bg: "#F5C9B3", fg: "#7C4632" },
+  { key: "sent", status: "sent", label: "已发送", bg: "#E8A892", fg: "#fffefb" },
+  { key: "collaborating", status: "collaborating", label: "合作中", bg: "#D88A74", fg: "#fffefb" },
+  { key: "completed", status: "completed", label: "已完成", bg: "#8C543F", fg: "#fffefb" },
 ];
 
 function pct(numerator: number, denominator: number): number {
   if (denominator <= 0) return 0;
   return Math.round((numerator / denominator) * 100);
+}
+
+interface Transition {
+  caption: string;
+  value: string;
+  lossLabel?: string;
+  lossValue?: number;
 }
 
 export function ProgressFunnel({
@@ -64,47 +70,49 @@ export function ProgressFunnel({
   onToggleStage,
 }: ProgressFunnelProps) {
   const max = Math.max(cumulative.queued, 1);
-  const transitions: { caption: string; value: string; lossLabel?: string; lossValue?: number }[] =
-    [
-      { caption: "发送率", value: `${pct(cumulative.sent, cumulative.queued)}%` },
-      {
-        caption: "建联成功率",
-        value: `${pct(cumulative.collaborating, cumulative.sent)}%`,
-        lossLabel: "已拒绝",
-        lossValue: loss.rejected,
-      },
-      {
-        caption: "完成率",
-        value: `${pct(cumulative.completed, cumulative.collaborating)}%`,
-        lossLabel: "暂停中",
-        lossValue: loss.paused,
-      },
-    ];
+  const transitions: Transition[] = [
+    { caption: "发送率", value: `${pct(cumulative.sent, cumulative.queued)}%` },
+    {
+      caption: "建联转化",
+      value: `${pct(cumulative.collaborating, cumulative.sent)}%`,
+      lossLabel: "已拒绝",
+      lossValue: loss.rejected,
+    },
+    {
+      caption: "完成率",
+      value: `${pct(cumulative.completed, cumulative.collaborating)}%`,
+      lossLabel: "暂停中",
+      lossValue: loss.paused,
+    },
+  ];
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-5">
-      <div className="mb-4 text-xs font-medium tracking-wider text-[#939084] uppercase">
-        建联漏斗
+    <section className="flex flex-col items-center pt-5 pb-6">
+      <div className="mb-3.5 text-center">
+        <div className="text-[11px] font-medium tracking-[0.12em] text-[#939084] uppercase">
+          PROGRESS
+        </div>
+        <h3 className="mt-1 text-[15px] font-semibold tracking-tight text-[#201515]">建联漏斗</h3>
       </div>
 
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
+      <div className="flex w-full max-w-[560px] flex-col items-center gap-2">
         {STAGES.map((stage, idx) => {
           const value = cumulative[stage.key];
           const widthPct = Math.max(20, Math.round((value / max) * 100));
           const isActive = selection === stage.status;
           const isFiltered = selection !== null && !isActive;
-          const isLast = idx === STAGES.length - 1;
           const t = transitions[idx];
           return (
-            <div key={stage.key}>
-              <button
+            <div key={stage.key} className="contents">
+              <Button
+                unstyled
                 type="button"
                 onClick={() => onToggleStage(stage.status)}
                 aria-pressed={isActive}
                 className={cn(
-                  "mx-auto flex items-center justify-between gap-4 rounded-xl px-4 py-2.5 transition-all",
+                  "flex items-center justify-between gap-2.5 rounded-lg px-[18px] py-2.5 transition-all",
                   "ring-1 ring-transparent",
-                  isActive && "ring-[#201515] ring-offset-2 ring-offset-[#fffefb]",
+                  isActive && "ring-[#201515] ring-offset-2 ring-offset-[#fffdf9]",
                   isFiltered && "opacity-50 hover:opacity-80",
                 )}
                 style={{
@@ -113,34 +121,33 @@ export function ProgressFunnel({
                   color: stage.fg,
                 }}
               >
-                <span className="text-[11px] font-medium tracking-wide opacity-90">
-                  {COLLABORATION_STATUS_LABEL[stage.status]}
+                <span className="text-[12px] font-semibold tracking-wide whitespace-nowrap">
+                  {stage.label}
                 </span>
-                <span className="text-base font-semibold tabular-nums">{value}</span>
-              </button>
-              {!isLast && t ? (
-                <div className="mx-auto flex w-full max-w-md items-center gap-2 px-1 py-1.5">
-                  <div className="h-px flex-1 bg-[#c5c0b1]" />
-                  <span className="text-[10px] tracking-wide text-[#939084]">{t.caption}</span>
-                  <span className="text-[11px] font-semibold text-[#36342e] tabular-nums">
+                <span className="text-[14px] font-bold tracking-tight tabular-nums">{value}</span>
+              </Button>
+              {t ? (
+                <div className="flex flex-wrap items-center justify-center gap-[5px] text-[10px] leading-tight">
+                  <span className="font-semibold text-[#939084]">↓</span>
+                  <span className="text-[#36342e]">{t.caption}</span>
+                  <span className="text-[11px] font-bold text-[#201515] tabular-nums">
                     {t.value}
                   </span>
                   {t.lossValue !== undefined && t.lossValue > 0 ? (
                     <>
-                      <span className="text-[#c5c0b1]">·</span>
-                      <span className="text-[10px] text-[#939084]">{t.lossLabel}</span>
-                      <span className="text-[11px] font-semibold text-[#ff4f00] tabular-nums">
+                      <span className="text-[#939084]">·</span>
+                      <span className="text-[#36342e]">{t.lossLabel}</span>
+                      <span className="text-[11px] font-bold text-[#ff4f00] tabular-nums">
                         {t.lossValue}
                       </span>
                     </>
                   ) : null}
-                  <div className="h-px flex-1 bg-[#c5c0b1]" />
                 </div>
               ) : null}
             </div>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

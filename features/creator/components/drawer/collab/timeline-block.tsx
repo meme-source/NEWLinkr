@@ -23,7 +23,7 @@ export function TimelineBlock({ creator }: Props) {
     return (
       <section>
         <Title />
-        <p className="rounded-2xl border border-dashed border-[#c5c0b1] py-6 text-center text-[12px] text-[#939084]">
+        <p className="rounded-lg border border-dashed border-[#c5c0b1] py-6 text-center text-[12px] text-[#939084]">
           尚未产生任何事件
         </p>
       </section>
@@ -41,7 +41,7 @@ export function TimelineBlock({ creator }: Props) {
               </span>
               {idx < events.length - 1 && <span className="w-px flex-1 bg-[#c5c0b1]" />}
             </div>
-            <div className="-mt-0.5 min-w-0 flex-1 rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-3">
+            <div className="-mt-0.5 min-w-0 flex-1 rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-3">
               <p className="text-[12px] text-[#201515]">{event.text}</p>
               <p className="mt-1 text-[11px] text-[#939084]">{event.at}</p>
             </div>

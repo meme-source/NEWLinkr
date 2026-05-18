@@ -49,7 +49,7 @@ export function TabCollaborations({
           <span className="text-[11px] text-[#939084]">{creator.collaborations.length} 个</span>
         </div>
         {creator.collaborations.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-[#c5c0b1] py-6 text-center text-[12px] text-[#939084]">
+          <p className="rounded-lg border border-dashed border-[#c5c0b1] py-6 text-center text-[12px] text-[#939084]">
             尚未参与任何项目
           </p>
         ) : (

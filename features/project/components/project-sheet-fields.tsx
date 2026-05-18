@@ -2,6 +2,10 @@
 
 import { cn } from "@/lib/utils";
 
+// 项目抽屉里共用的小型表单零件 —— 仅服务于「营销方案」Tab 里仍可编辑的字段
+// （产品信息 + 项目头部）。目标市场 / 投放平台 / 目标受众 / 核心卖点已改为
+// 「博主发现」自动回填的只读展示，不再需要多选 chip。
+
 export const CATEGORY_OPTIONS = [
   "美妆护肤",
   "彩妆",
@@ -61,7 +65,7 @@ export function TextInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         className={cn(
-          "w-full rounded-xl border bg-[#fffefb] px-3.5 py-2.5 text-sm text-[#201515] placeholder:text-[#b5b2aa] focus:outline-none",
+          "w-full rounded-lg border bg-[#fffefb] px-3.5 py-2.5 text-sm text-[#201515] placeholder:text-[#b5b2aa] focus:outline-none",
           error ? "border-[#ff4f00]/45" : "border-[#c5c0b1] focus:border-[#ff4f00]/35",
         )}
       />

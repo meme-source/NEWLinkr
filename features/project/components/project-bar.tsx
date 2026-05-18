@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown, MoreHorizontal, Pencil } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   formatProjectBudget,
   getProjectStatusDotClass,
@@ -94,7 +95,8 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
         <div className="flex min-w-0 flex-col gap-1.5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="relative" ref={pickerRef}>
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => setPickerOpen((prev) => !prev)}
                 className="flex min-w-0 items-center gap-1.5 rounded-md text-left transition-colors hover:opacity-80"
@@ -103,12 +105,13 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
                   {isAllProjects ? "全部项目" : currentProject.name}
                 </span>
                 <ChevronDown className="h-4 w-4 shrink-0 text-[#939084]" />
-              </button>
+              </Button>
 
               {pickerOpen ? (
-                <div className="absolute top-full left-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+                <div className="absolute top-full left-0 z-50 mt-2 w-72 overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
                   <div className="max-h-80 overflow-y-auto py-1">
-                    <button
+                    <Button
+                      unstyled
                       type="button"
                       onClick={() => {
                         selectAllProjects();
@@ -130,7 +133,7 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
                           跨项目总览
                         </span>
                       </span>
-                    </button>
+                    </Button>
                     <div className="mx-3 my-1 border-t border-[#eceae3]" aria-hidden />
                     {projects.map((project) => {
                       const dot = getProjectStatusDotClass(project.status);
@@ -138,7 +141,8 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
                       const deadline = project.endDate ? `截止 ${project.endDate}` : "未设截止";
                       const budget = formatProjectBudget(project);
                       return (
-                        <button
+                        <Button
+                          unstyled
                           type="button"
                           key={project.id}
                           onClick={() => {
@@ -161,11 +165,12 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
                               {deadline} · {budget}
                             </span>
                           </span>
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
-                  <button
+                  <Button
+                    unstyled
                     type="button"
                     onClick={() => {
                       setPickerOpen(false);
@@ -174,7 +179,7 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
                     className="flex w-full items-center gap-1.5 border-t border-[#eceae3] px-3 py-2.5 text-[12px] font-medium text-[#ff4f00] hover:bg-[#fffdf9]"
                   >
                     + 新建项目
-                  </button>
+                  </Button>
                 </div>
               ) : null}
             </div>
@@ -206,21 +211,23 @@ export function WorkspaceProjectBar({ pathname }: { pathname: string }) {
 
         {!isAllProjects ? (
           <div className="flex shrink-0 items-center gap-2">
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={() => openEditProject(currentProject.id)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5 text-[13px] font-medium text-[#201515] transition-colors hover:bg-[#fffdf9]"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5 text-[13px] font-medium text-[#201515] transition-colors hover:bg-[#fffdf9]"
             >
               <Pencil className="h-3.5 w-3.5" />
               编辑
-            </button>
-            <button
+            </Button>
+            <Button
+              unstyled
               type="button"
               aria-label="更多操作"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:bg-[#fffdf9]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:bg-[#fffdf9]"
             >
               <MoreHorizontal className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>

@@ -2,6 +2,8 @@
 
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { T } from "../../data/tokens";
 import { InlineChip } from "./inline-chip";
 import { MAX_MANUAL_BRANDS, SUGGESTED_BRANDS, type BrandMode } from "./types";
@@ -106,7 +108,7 @@ function BrandPopover({ brandMode, brands, onCommit, onCancel }: BrandPopoverPro
 
         {draftMode === "manual" ? (
           <div
-            className="flex-1 rounded-[10px] border p-3"
+            className="flex-1 rounded-lg border p-3"
             style={{ borderColor: T.borderLight, backgroundColor: T.ivory }}
           >
             <ManualBrandPanel brands={draftBrands} onAdd={addBrand} onRemove={removeBrand} />
@@ -118,22 +120,24 @@ function BrandPopover({ brandMode, brands, onCommit, onCancel }: BrandPopoverPro
         className="flex items-center justify-end gap-2 border-t px-3 py-2.5"
         style={{ borderColor: T.borderLight }}
       >
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onCancel}
           className="rounded-full px-3 py-1 text-[12px] transition-colors hover:bg-[--hover]"
           style={{ ["--hover" as string]: T.ivory, color: T.charcoal }}
         >
           取消
-        </button>
-        <button
+        </Button>
+        <Button
+          unstyled
           type="button"
           onClick={confirm}
           className="rounded-full px-3.5 py-1 text-[12px] font-medium text-white transition-[filter] hover:brightness-110 active:scale-[0.98]"
           style={{ backgroundColor: T.terracotta }}
         >
           确定
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -151,10 +155,11 @@ function RadioRow({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
-      className="mt-1 flex w-full items-start gap-2.5 rounded-[10px] px-2.5 py-2 text-left transition-colors hover:bg-[--hover]"
+      className="mt-1 flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[--hover]"
       style={{
         ["--hover" as string]: T.ivory,
         backgroundColor: selected ? "rgba(255,79,0,0.06)" : "transparent",
@@ -183,7 +188,7 @@ function RadioRow({
           {hint}
         </span>
       </span>
-    </button>
+    </Button>
   );
 }
 
@@ -235,14 +240,15 @@ function ManualBrandPanel({
               }}
             >
               {b}
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => onRemove(b)}
                 aria-label={`移除 ${b}`}
                 className="inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-[rgba(255,79,0,0.18)]"
               >
                 <X size={10} strokeWidth={2.6} />
-              </button>
+              </Button>
             </span>
           ))}
         </div>
@@ -259,7 +265,8 @@ function ManualBrandPanel({
           const selected = brands.includes(b);
           const disabled = !selected && brands.length >= MAX_MANUAL_BRANDS;
           return (
-            <button
+            <Button
+              unstyled
               key={b}
               type="button"
               disabled={disabled}
@@ -273,7 +280,7 @@ function ManualBrandPanel({
             >
               {!selected ? <Plus size={10} strokeWidth={2.6} /> : null}
               {b}
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -3,6 +3,7 @@
 import { FolderInput, Trash2 } from "lucide-react";
 import type { Creator } from "@/types/api";
 import type { WorkspaceProject } from "@/features/project/components/project-context";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // 两个二级动作弹层共用一个组件：UI 形态相近、状态由 page 持有。
@@ -37,7 +38,7 @@ export function LibraryRowActionDialog({
       role="presentation"
     >
       <div
-        className="w-full max-w-[360px] rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-5"
+        className="w-full max-w-[360px] rounded-lg border border-[#c5c0b1] bg-[#fffefb] p-5"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -82,21 +83,22 @@ function MovePanel({
         subtitle={`将 ${creator.name} 移到下面的项目中`}
       />
       {candidates.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[#c5c0b1] px-3 py-4 text-center text-[12px] text-[#939084]">
+        <div className="rounded-lg border border-dashed border-[#c5c0b1] px-3 py-4 text-center text-[12px] text-[#939084]">
           暂无其他可选项目
         </div>
       ) : (
         <div className="max-h-[260px] space-y-1 overflow-y-auto">
           {candidates.map((project) => (
-            <button
+            <Button
+              unstyled
               key={project.id}
               type="button"
               onClick={() => onPick(project.id)}
-              className="flex w-full items-center justify-between gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-[13px] text-[#36342e] transition-colors hover:border-[#c5c0b1] hover:bg-[#fffdf9]"
+              className="flex w-full items-center justify-between gap-2 rounded-lg border border-transparent px-3 py-2 text-left text-[13px] text-[#36342e] transition-colors hover:border-[#c5c0b1] hover:bg-[#fffdf9]"
             >
               <span className="truncate">{project.name}</span>
               <span className="shrink-0 text-[11px] text-[#939084]">{project.status}</span>
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -128,7 +130,8 @@ function TrashPanel({
       </p>
       <DialogFooter>
         <SecondaryButton onClick={onClose}>取消</SecondaryButton>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onConfirm}
           className={cn(
@@ -138,7 +141,7 @@ function TrashPanel({
         >
           <Trash2 className="h-3.5 w-3.5" />
           移到回收站
-        </button>
+        </Button>
       </DialogFooter>
     </>
   );
@@ -178,12 +181,13 @@ function SecondaryButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
       className="rounded-full border border-[#c5c0b1] bg-[#fffefb] px-3.5 py-1.5 text-[12px] text-[#36342e] transition-colors hover:bg-[#fffdf9]"
     >
       {children}
-    </button>
+    </Button>
   );
 }

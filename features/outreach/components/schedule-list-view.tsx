@@ -2,6 +2,7 @@
 
 import { Flag } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import type { CalendarItem } from "@/features/outreach/components/schedule-calendar-grid";
 import { CATEGORY_LABEL, CATEGORY_VISUAL } from "@/features/outreach/data/calendar-events";
 import { cn } from "@/lib/utils";
@@ -117,7 +118,8 @@ function ListRow({ item, onClick }: { item: CalendarItem; onClick: () => void })
       : 1;
   return (
     <li>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onClick}
         className="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[#fffdf9]"
@@ -141,7 +143,7 @@ function ListRow({ item, onClick }: { item: CalendarItem; onClick: () => void })
         {dayCount > 1 ? (
           <span className="shrink-0 text-[11px] text-[#939084]">持续 {dayCount} 天</span>
         ) : null}
-      </button>
+      </Button>
     </li>
   );
 }

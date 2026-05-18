@@ -27,12 +27,21 @@ export function normalizeChipUrl(rawUrl: string): string {
   return rawUrl.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
 }
 
-/** Mock metadata fetch — backend will replace this with a real og:title call. */
+/**
+ * Mock metadata fetch — backend will replace this with a real og:title call.
+ *
+ * Routes the URL to the same fixture set the agent flow uses so the chip
+ * preview ("· 敏感肌修复面霜") stays consistent with what the AI ends up
+ * "seeing" later. Keeping this in sync with `parseProduct` is the whole
+ * point of routing through the fixtures rather than free-form strings.
+ */
 export function mockProductTitle(url: string): string {
   const u = url.toLowerCase();
+  if (u.includes("tabbit")) return "Tabbit · AI 浏览器";
   if (u.includes("cerave")) return "敏感肌修复面霜";
   if (u.includes("larocheposay") || u.includes("laroche")) return "舒缓修护精华";
-  if (u.includes("amazon")) return "亚马逊商品";
-  if (u.includes("shopify") || u.includes("shop")) return "电商商品";
-  return "已识别产品";
+  // Honest fallback: no real og:title fetch happens here, so anything we
+  // don't recognize is flagged as such instead of pretending to be an
+  // identified product. The real fetch lands at S4.
+  return "未识别 · 待 AI 解析";
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bookmark, Eye, Heart, Star, X } from "lucide-react";
+import { Eye, Heart, Star, X } from "lucide-react";
 import Image from "next/image";
+
+import { Button } from "@/components/ui/button";
 import type { Creator, VideoPost } from "./mock-data";
 
 interface Props {
@@ -17,7 +19,7 @@ const BRAND = "#ff4f00";
 
 function VideoTile({ video }: { video: VideoPost }) {
   return (
-    <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-zinc-100">
+    <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-zinc-100">
       <Image
         src={`https://picsum.photos/seed/${video.thumbSeed}/300/400`}
         alt={video.caption}
@@ -79,11 +81,12 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
       animate={{ opacity: isSkipped ? 0.45 : 1, y: 0 }}
       exit={{ opacity: 0, y: -8, scale: 0.98 }}
       transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
-      className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_36px_-12px_rgba(0,0,0,0.12)]"
+      className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition-shadow hover:shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_36px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="flex flex-1 flex-col px-5 pt-5 pb-4">
         <header className="flex items-start gap-3">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => onOpenProfile(creator)}
             className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-white transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand)]"
@@ -98,10 +101,11 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
               className="object-cover"
               unoptimized
             />
-          </button>
+          </Button>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => onOpenProfile(creator)}
                 className="-m-1 min-w-0 flex-1 rounded-md p-1 text-left transition-colors hover:bg-zinc-50 focus:outline-none"
@@ -112,7 +116,7 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
                 <div className="mt-0.5 truncate text-[12px] font-normal text-zinc-400">
                   {creator.handle}
                 </div>
-              </button>
+              </Button>
               <div className="flex flex-shrink-0 items-center gap-1.5">
                 <div className="flex h-6 w-6 items-center justify-center rounded-md bg-pink-50">
                   <svg
@@ -152,12 +156,13 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
             AI 推荐
           </span>
         </div>
-        {/* Fixed 2-line slot regardless of text length — keeps every card the
-            same height in a row. line-clamp-2 + min-height gives us "at most
-            2 lines, at least 2 lines worth of space". */}
+        {/* Reason text gets the soft warm panel; the "AI 推荐" label sits
+            outside it (Linkr DESIGN.md §6.5.2 Soft Surface idiom — tinted
+            background hugs only the body content, not the label). Fixed
+            2-line slot keeps every card the same height in a row. */}
         <p
-          className="mt-2 line-clamp-2 text-[13.5px] leading-relaxed font-medium text-zinc-900"
-          style={{ minHeight: "calc(2 * 1.6em)" }}
+          className="mt-2 line-clamp-2 rounded-[8px] bg-[#F9F4F1] px-3 py-1.5 text-[13.5px] leading-relaxed font-medium text-zinc-900"
+          style={{ minHeight: "calc(2 * 1.6em + 12px)" }}
         >
           {creator.reasons[0]}
         </p>
@@ -183,7 +188,8 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
       </div>
 
       <div className="grid grid-cols-2 border-t border-zinc-100">
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={() => onSkip(creator.id)}
           className="group flex h-12 items-center justify-center gap-1.5 border-r border-zinc-100 text-[13px] font-semibold tracking-wide text-zinc-500 transition-colors hover:bg-red-50 hover:text-red-600"
@@ -191,13 +197,16 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
         >
           <X size={14} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
           {isSkipped ? "已跳过" : "NO"}
-        </button>
+        </Button>
         {/* Save button — three states:
-            · default (unclicked): outline icon + same neutral gray (text-zinc-500)
+            · default (unclicked): outline heart + same neutral gray (text-zinc-500)
               as the NO button so the two actions read as a balanced pair
             · hover: subtle brand tint to telegraph the click target
-            · saved (clicked): filled bookmark + solid brand background */}
-        <button
+            · saved (clicked): filled heart + solid brand background.
+            Heart icon is shared with the drawer header so the favorite
+            affordance reads the same across surfaces. */}
+        <Button
+          unstyled
           type="button"
           onClick={() => onSave(creator.id)}
           className={
@@ -209,15 +218,9 @@ export function CompositeCreatorCard({ creator, status, onSave, onSkip, onOpenPr
           aria-label={isSaved ? "已收藏" : "收藏"}
           aria-pressed={isSaved}
         >
-          <Bookmark
-            size={14}
-            strokeWidth={2.2}
-            // Filled only when saved — outline-only in default + hover so it
-            // never reads as "already pressed" before the user clicks.
-            fill={isSaved ? "white" : "none"}
-          />
+          <Heart size={14} strokeWidth={2.2} fill={isSaved ? "white" : "none"} />
           {isSaved ? "已收藏" : "收藏"}
-        </button>
+        </Button>
       </div>
     </motion.article>
   );

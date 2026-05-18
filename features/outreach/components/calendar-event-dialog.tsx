@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   SearchableSelect,
   type SearchableSelectOption,
@@ -154,7 +155,7 @@ export function CalendarEventDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+      <div className="w-full max-w-md rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
         <div className="flex items-center justify-between border-b border-[#c5c0b1] px-5 py-4">
           <div>
             <div className="text-xs tracking-wider text-[#939084] uppercase">新建事件</div>
@@ -165,14 +166,15 @@ export function CalendarEventDialog({
               {CATEGORY_DESCRIPTION[category]}
             </div>
           </div>
-          <button
+          <Button
+            unstyled
             type="button"
             aria-label="关闭"
             onClick={onClose}
             className="rounded-lg p-1 text-[#939084] hover:bg-[#eceae3] hover:text-[#36342e]"
           >
             <X size={16} />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-4 px-5 py-4">
@@ -296,14 +298,16 @@ export function CalendarEventDialog({
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-[#c5c0b1] px-5 py-3">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onClose}
             className="rounded-lg border border-[#c5c0b1] px-3 py-1.5 text-[11px] font-medium text-[#36342e] hover:bg-[#eceae3]"
           >
             取消
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit}
@@ -315,7 +319,7 @@ export function CalendarEventDialog({
             )}
           >
             创建
-          </button>
+          </Button>
         </div>
       </div>
     </div>

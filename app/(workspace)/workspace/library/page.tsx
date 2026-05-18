@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CollaborationStatus, Creator, Rating } from "@/types/api";
+import type { CollaborationStatus, Creator } from "@/types/api";
 import { useWorkspaceProject } from "@/features/project/components/project-context";
 import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
+import { useCreatorOverrides } from "@/features/creator/components/creator-overrides-context";
 import { LibraryOverview } from "@/features/library/components/library-overview";
 import { LibraryStatusTabs } from "@/features/library/components/library-status-tabs";
 import { LibraryToolbar } from "@/features/library/components/library-toolbar";
@@ -35,6 +36,7 @@ import type { StatusTab } from "@/features/library/types";
 export default function LibraryPage() {
   const { currentProject, isAllProjects, projects, resolveProjectName } = useWorkspaceProject();
   const { openCreatorProfile } = useCreatorProfile();
+  const { deleteCreators } = useCreatorOverrides();
   const router = useRouter();
 
   // §2.3.x library scope is derived from the global ProjectBar selection so
@@ -172,9 +174,17 @@ export default function LibraryPage() {
   const handleRowTrash = () => {
     if (rowDialog?.kind !== "trash") return;
     const { creator } = rowDialog;
-    console.info("library row trash", { creatorId: creator.id });
+    deleteCreators([creator.id]);
     setRowDialog(null);
     setToast({ message: `已将 ${creator.name} 移到回收站` });
+  };
+
+  const handleBulkTrash = () => {
+    const ids = Array.from(selection.ids);
+    if (ids.length === 0) return;
+    deleteCreators(ids);
+    selection.clear();
+    setToast({ message: `已将 ${ids.length} 位博主移到回收站` });
   };
 
   const handleToastAction = () => {
@@ -199,12 +209,8 @@ export default function LibraryPage() {
     selection.clear();
   };
 
-  // 评级 / 状态 / 备注目前都是本地交互（mock 阶段不持久化）。Phase 1+ 接通
-  // 真实后端时改写为 service 调用即可。
-  const handleRate = (creatorId: string, rating: Rating) => {
-    console.info("library rate", { creatorId, rating });
-  };
-
+  // 评级走抽屉的「合作复盘 → 编辑 → 更新」路径，通过 CreatorOverridesContext
+  // 同步到表格；状态 / 备注目前仍是本地交互（mock 阶段不持久化）。
   const handleChangeStatus = (creatorId: string, status: CollaborationStatus) => {
     console.info("library status", { creatorId, projectId: currentProject.id, status });
   };
@@ -259,56 +265,71 @@ export default function LibraryPage() {
   };
 
   return (
-    <div className="space-y-5">
+    // 28px 垂直间距把「数据总览」与下方博主列表卡片分隔开（pt-7 = 28px）。
+    <div>
       <LibraryOverview creators={filteredCreators} />
 
-      <LibraryStatusTabs active={statusTab} counts={counts} onChange={setStatusTab} />
+      {/* 博主列表卡片：把 Tab、工具栏、表格三块合并为同一张卡片。
+          内部三块之间不再用整宽硬分隔线，全部用留白和浅底色分组。
+          底部不留 padding，由最后一行的 py-3 自然兜底，避免视觉空旷。 */}
+      <section className="mt-7 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-4 pt-4 pb-0">
+        <div className="mb-[18px]">
+          <LibraryStatusTabs active={statusTab} counts={counts} onChange={setStatusTab} />
+        </div>
 
-      <LibraryToolbar
-        search={filter.state.search}
-        filter={filter.state}
-        availableTopics={topicOptions}
-        availableUserTags={userTagOptions}
-        availableCollaborationYears={collaborationYearOptions}
-        visibleColumns={columns.visible}
-        onSearch={filter.setSearch}
-        onToggleDimension={filter.toggleDimension}
-        onToggleColumn={columns.toggle}
-        onAddCreator={() => setImportOpen(true)}
-        onReset={filter.reset}
-        hasAny={filter.hasAny}
-      />
+        <div>
+          <LibraryToolbar
+            search={filter.state.search}
+            filter={filter.state}
+            availableTopics={topicOptions}
+            availableUserTags={userTagOptions}
+            availableCollaborationYears={collaborationYearOptions}
+            visibleColumns={columns.visible}
+            onSearch={filter.setSearch}
+            onToggleDimension={filter.toggleDimension}
+            onToggleColumn={columns.toggle}
+            onAddCreator={() => setImportOpen(true)}
+            onReset={filter.reset}
+            hasAny={filter.hasAny}
+            middleSlot={
+              selection.count > 0 ? (
+                <LibraryBulkBar
+                  count={selection.count}
+                  selected={selectedCreators}
+                  availableUserTags={userTagOptions}
+                  projects={projects}
+                  currentProjectId={currentProject.id}
+                  isAllProjectsScope={isAllProjects}
+                  onOutreach={() => setBulkOutreachOpen(true)}
+                  onAddUserTags={handleBulkAddUserTags}
+                  onMoveToProject={handleBulkMoveToProject}
+                  onChangeStatus={handleBulkChangeStatus}
+                  onAddToTracking={handleBulkAddToTracking}
+                  onOpenTrackingBoard={handleOpenTrackingBoard}
+                  onTrash={handleBulkTrash}
+                  onClear={selection.clear}
+                />
+              ) : null
+            }
+          />
+          {/* 工具栏与表格之间的分级线，强化「操作行 / 数据行」的视觉分组 */}
+          <hr className="mt-[14px] mb-[14px] border-t border-[#eceae3]" />
+        </div>
 
-      <LibraryTable
-        rows={visibleRows}
-        scope={scope}
-        selectedIds={selection.ids}
-        visibleColumns={columns.visible}
-        resolveProjectName={resolveProjectName}
-        onToggleAll={selection.setAll}
-        onToggle={selection.toggle}
-        onOpen={handleOpen}
-        onAction={handleAction}
-        onRate={handleRate}
-        onChangeStatus={handleChangeStatus}
-        onChangeNotes={handleChangeNotes}
-      />
-
-      <LibraryBulkBar
-        count={selection.count}
-        availableUserTags={userTagOptions}
-        projects={projects}
-        currentProjectId={currentProject.id}
-        isAllProjectsScope={isAllProjects}
-        onOutreach={() => setBulkOutreachOpen(true)}
-        onAddUserTags={handleBulkAddUserTags}
-        onMoveToProject={handleBulkMoveToProject}
-        onChangeStatus={handleBulkChangeStatus}
-        onAddToTracking={handleBulkAddToTracking}
-        onOpenTrackingBoard={handleOpenTrackingBoard}
-        onTrash={() => console.info("bulk trash", { creatorIds: selectedIds })}
-        onClear={selection.clear}
-      />
+        <LibraryTable
+          rows={visibleRows}
+          scope={scope}
+          selectedIds={selection.ids}
+          visibleColumns={columns.visible}
+          resolveProjectName={resolveProjectName}
+          onToggleAll={selection.setAll}
+          onToggle={selection.toggle}
+          onOpen={handleOpen}
+          onAction={handleAction}
+          onChangeStatus={handleChangeStatus}
+          onChangeNotes={handleChangeNotes}
+        />
+      </section>
 
       <LibraryImportFlow
         open={importOpen}

@@ -1,5 +1,6 @@
 // 仅开发/演示阶段使用。生产通过 NEXT_PUBLIC_USE_MOCK=false 关闭，可整文件删除。
 // 所有 import 必须经过 features/creator/data/index.ts。
+import { pickCredibilitySummaries } from "@/features/creator/components/drawer/audience/credibility-summary";
 import type {
   AudienceProfile,
   Collaboration,
@@ -144,6 +145,7 @@ const SEEDS: MockCreatorSeed[] = [
         method: "paid",
         budget: 600,
         finalPrice: 550,
+        notes: "档期偏紧但交付准时，配合度高。完成视频 ER 6.4%，比账号均值高 1.2pp。",
       },
     ],
   },
@@ -271,6 +273,8 @@ const SEEDS: MockCreatorSeed[] = [
         method: "paid",
         budget: 1500,
         finalPrice: 1300,
+        notes:
+          "出品质量很高，2 月内容上线后 ER 8.2%，上线 24h 内自然分享带来 +3.4k 二次曝光。已申请合作 Q3 续作。",
       },
     ],
   },
@@ -332,7 +336,7 @@ const SEEDS: MockCreatorSeed[] = [
       },
     ],
   },
-  // ── 单项目：holiday-2026 待评估 ───────────────────────────────────────────
+  // ── 单项目：holiday-2026 候选 ─────────────────────────────────────────────
   {
     id: "winter_will",
     handle: "@winter.will",
@@ -369,6 +373,161 @@ const SEEDS: MockCreatorSeed[] = [
     events: [],
     participations: [{ projectId: "unassigned", status: "pending", joinedAt: "2026-04-25" }],
   },
+  // ── 已完成 #1：高评级（优秀） + 完整复盘备注 ──────────────────────────────
+  {
+    id: "luxe_lena",
+    handle: "@luxe.lena",
+    name: "Luxe Lena",
+    region: "🇫🇷",
+    followers: 142000,
+    medianViews: 68000,
+    engagementRate: 7.1,
+    estimatedPrice: "$1,500 - $2,200",
+    emailStatus: "verified",
+    recentActiveAt: "2026-04-30",
+    source: "referral",
+    category: "fashion",
+    topics: ["高端穿搭", "巴黎时装周", "古着"],
+    userTags: ["S 级", "Q3 续约"],
+    addedAt: "2026-01-05",
+    emails: [{ address: "lena@luxepartner.fr", verified: true, primary: true }],
+    manager: { name: "Camille Roux", email: "camille@luxepartner.fr", agency: "Luxe Partner" },
+    rating: 3,
+    events: [
+      { kind: "sent", at: "2026-04-08" },
+      { kind: "opened", at: "2026-04-08" },
+      { kind: "replied", at: "2026-04-09" },
+    ],
+    participations: [
+      {
+        projectId: "q2-summer",
+        status: "completed",
+        joinedAt: "2026-04-05",
+        lastContactAt: "2026-05-08",
+        method: "paid",
+        budget: 2000,
+        finalPrice: 1850,
+        notes:
+          "完成 1 条主视频 + 2 条 Story。主视频 4 周累计播放 132k，ER 8.4%。沟通顺畅、交付提前 2 天。强烈建议 Q3 续约并提价至 $2,300。",
+      },
+    ],
+  },
+  // ── 已完成 #2：中评级（良好） + 跨项目（一个完成 + 一个候选） ────────────
+  {
+    id: "kitchen_kai",
+    handle: "@kitchen.kai",
+    name: "Kitchen Kai",
+    region: "🇸🇬",
+    followers: 56000,
+    medianViews: 18000,
+    engagementRate: 4.8,
+    estimatedPrice: "$400 - $700",
+    emailStatus: "verified",
+    recentActiveAt: "2026-04-27",
+    source: "search",
+    category: "food",
+    topics: ["东南亚菜", "家庭料理", "厨房好物"],
+    userTags: ["性价比"],
+    addedAt: "2026-02-12",
+    emails: [{ address: "kai@kitchenkai.sg", verified: true, primary: true }],
+    rating: 2,
+    events: [
+      { kind: "sent", at: "2026-02-14" },
+      { kind: "opened", at: "2026-02-14" },
+      { kind: "replied", at: "2026-02-15" },
+    ],
+    participations: [
+      {
+        projectId: "q2-summer",
+        status: "completed",
+        joinedAt: "2026-04-12",
+        lastContactAt: "2026-05-05",
+        method: "gifted",
+        budget: 0,
+        finalPrice: 0,
+        notes: "寄样合作，按时出片但脚本与 brief 偏离。后续合作建议加付费 + 更紧的脚本对齐。",
+      },
+      {
+        projectId: "beauty-pool",
+        status: "pending",
+        joinedAt: "2026-04-20",
+      },
+    ],
+  },
+  // ── 已完成 #3：低评级（普通） + 失败案例 ──────────────────────────────────
+  {
+    id: "tech_theo",
+    handle: "@techtheo",
+    name: "Tech Theo",
+    region: "🇩🇪",
+    followers: 88000,
+    medianViews: 24000,
+    engagementRate: 3.1,
+    estimatedPrice: "$700 - $1,100",
+    emailStatus: "found",
+    recentActiveAt: "2026-04-19",
+    source: "manual",
+    category: "tech",
+    topics: ["数码评测", "智能家居"],
+    userTags: ["谨慎合作"],
+    addedAt: "2026-01-22",
+    emails: [{ address: "theo@techtheo.de" }],
+    rating: 1,
+    events: [
+      { kind: "sent", at: "2026-01-25" },
+      { kind: "replied", at: "2026-01-29" },
+    ],
+    participations: [
+      {
+        projectId: "holiday-2026",
+        status: "completed",
+        joinedAt: "2026-01-22",
+        lastContactAt: "2026-03-04",
+        method: "paid",
+        budget: 1000,
+        finalPrice: 950,
+        notes: "出片质量一般，互动率 2.1% 低于账号均值。回复慢、二修不接。建议短期内不再续约。",
+      },
+    ],
+  },
+  // ── 已完成 #4：高评级 + 单完成（最直观的演示用） ──────────────────────────
+  {
+    id: "sunset_sasha",
+    handle: "@sunset.sasha",
+    name: "Sunset Sasha",
+    region: "🇦🇺",
+    followers: 73000,
+    medianViews: 32000,
+    engagementRate: 6.4,
+    estimatedPrice: "$800 - $1,200",
+    emailStatus: "verified",
+    recentActiveAt: "2026-04-29",
+    source: "plugin",
+    category: "travel",
+    topics: ["海岛", "度假穿搭"],
+    userTags: ["可续约"],
+    addedAt: "2026-02-25",
+    emails: [{ address: "sasha@sunset.travel", verified: true, primary: true }],
+    rating: 3,
+    events: [
+      { kind: "sent", at: "2026-02-26" },
+      { kind: "opened", at: "2026-02-27" },
+      { kind: "replied", at: "2026-02-27" },
+    ],
+    participations: [
+      {
+        projectId: "holiday-2026",
+        status: "completed",
+        joinedAt: "2026-02-25",
+        lastContactAt: "2026-04-08",
+        method: "paid",
+        budget: 1100,
+        finalPrice: 1000,
+        notes:
+          "海岛实景拍摄完成度极高，brief 还原度 95%+。视频上线 2 周累计 41k 播放，CPM 优于历史均值。Q3 holiday-2026 续作首选。",
+      },
+    ],
+  },
 ];
 
 function buildAvatar(id: string): string {
@@ -400,20 +559,174 @@ function buildCollaborations(seed: MockCreatorSeed): Collaboration[] {
 // 真实数据来自后端后会替换。mock 阶段按 (followers, engagementRate) 生成
 // 一组带轻微抖动的近 10 条快照，使中位数 / 平均的差异看起来真实。
 const HASHTAG_BANK_BY_CATEGORY: Partial<Record<CreatorCategory, string[]>> = {
-  beauty: ["#beauty", "#makeup", "#skincare", "#tutorial", "#grwm"],
-  skincare: ["#skincare", "#glowup", "#dermtok", "#sunscreen", "#routine"],
-  fashion: ["#fashion", "#ootd", "#styletok", "#summer", "#thrift"],
-  travel: ["#travel", "#wanderlust", "#hiddengems", "#destination", "#vlog"],
-  food: ["#food", "#recipe", "#easyrecipe", "#foodie", "#mealprep"],
-  vlog: ["#vlog", "#dayinmylife", "#routine", "#aesthetic", "#cozy"],
-  fitness: ["#fitness", "#workout", "#gymtok", "#stretch", "#mobility"],
-  parenting: ["#parenting", "#momlife", "#toddler", "#momhack", "#dadlife"],
-  tech: ["#tech", "#gadgets", "#review", "#unboxing", "#productivity"],
-  home: ["#home", "#interior", "#cleantok", "#organize", "#diy"],
-  review: ["#review", "#testing", "#honestreview", "#tryout", "#sponsored"],
-  education: ["#learn", "#study", "#productivity", "#tips", "#hack"],
-  comedy: ["#comedy", "#funny", "#fyp", "#viral", "#meme"],
-  other: ["#fyp", "#tiktok", "#trending", "#viral", "#daily"],
+  beauty: [
+    "#beauty",
+    "#makeup",
+    "#skincare",
+    "#tutorial",
+    "#grwm",
+    "#mua",
+    "#fall",
+    "#routine",
+    "#tips",
+    "#bridal",
+  ],
+  skincare: [
+    "#skincare",
+    "#glowup",
+    "#dermtok",
+    "#sunscreen",
+    "#routine",
+    "#serum",
+    "#acneprone",
+    "#hydration",
+    "#review",
+    "#cleanbeauty",
+  ],
+  fashion: [
+    "#fashion",
+    "#ootd",
+    "#styletok",
+    "#summer",
+    "#thrift",
+    "#streetstyle",
+    "#capsule",
+    "#styling",
+    "#trend",
+    "#fit",
+  ],
+  travel: [
+    "#travel",
+    "#wanderlust",
+    "#hiddengems",
+    "#destination",
+    "#vlog",
+    "#roadtrip",
+    "#cityguide",
+    "#solotravel",
+    "#asia",
+    "#europe",
+  ],
+  food: [
+    "#food",
+    "#recipe",
+    "#easyrecipe",
+    "#foodie",
+    "#mealprep",
+    "#dinner",
+    "#baking",
+    "#viralfood",
+    "#snack",
+    "#brunch",
+  ],
+  vlog: [
+    "#vlog",
+    "#dayinmylife",
+    "#routine",
+    "#aesthetic",
+    "#cozy",
+    "#study",
+    "#morning",
+    "#weekend",
+    "#nyc",
+    "#lifestyle",
+  ],
+  fitness: [
+    "#fitness",
+    "#workout",
+    "#gymtok",
+    "#stretch",
+    "#mobility",
+    "#running",
+    "#hiit",
+    "#yoga",
+    "#strength",
+    "#pilates",
+  ],
+  parenting: [
+    "#parenting",
+    "#momlife",
+    "#toddler",
+    "#momhack",
+    "#dadlife",
+    "#newborn",
+    "#schoolrun",
+    "#tantrum",
+    "#bedtime",
+    "#mealideas",
+  ],
+  tech: [
+    "#tech",
+    "#gadgets",
+    "#review",
+    "#unboxing",
+    "#productivity",
+    "#ai",
+    "#iphone",
+    "#android",
+    "#wfh",
+    "#desktour",
+  ],
+  home: [
+    "#home",
+    "#interior",
+    "#cleantok",
+    "#organize",
+    "#diy",
+    "#smallspace",
+    "#renovation",
+    "#hometour",
+    "#minimal",
+    "#decor",
+  ],
+  review: [
+    "#review",
+    "#testing",
+    "#honestreview",
+    "#tryout",
+    "#sponsored",
+    "#vsbattle",
+    "#worthit",
+    "#wasteofmoney",
+    "#firstimpression",
+    "#deepdive",
+  ],
+  education: [
+    "#learn",
+    "#study",
+    "#productivity",
+    "#tips",
+    "#hack",
+    "#career",
+    "#interview",
+    "#notion",
+    "#booktok",
+    "#languagelearning",
+  ],
+  comedy: [
+    "#comedy",
+    "#funny",
+    "#fyp",
+    "#viral",
+    "#meme",
+    "#prank",
+    "#skit",
+    "#satire",
+    "#improv",
+    "#sketch",
+  ],
+  other: [
+    "#fyp",
+    "#tiktok",
+    "#trending",
+    "#viral",
+    "#daily",
+    "#fyp追梦",
+    "#lifestyle",
+    "#community",
+    "#explore",
+    "#story",
+  ],
 };
 
 const BRAND_BANK_BY_CATEGORY: Partial<Record<CreatorCategory, string[]>> = {
@@ -443,6 +756,24 @@ function pseudoRandom(seedString: string, salt: number): number {
   return Math.abs((h >>> 0) % 1_000_000) / 1_000_000;
 }
 
+// Deterministic random subset：用 pseudoRandom 在 (seedId, idx) 命名空间下做不重复采样。
+function pickDeterministicSubset<T>(items: T[], count: number, seedId: string, idx: number): T[] {
+  const n = Math.min(count, items.length);
+  if (n <= 0) return [];
+  const taken = new Set<number>();
+  const result: T[] = [];
+  let attempt = 0;
+  while (result.length < n && attempt < items.length * 4) {
+    const pick = Math.floor(pseudoRandom(seedId, idx * 1000 + attempt) * items.length);
+    if (!taken.has(pick)) {
+      taken.add(pick);
+      result.push(items[pick]);
+    }
+    attempt++;
+  }
+  return result;
+}
+
 function buildRecentPosts(seed: MockCreatorSeed): CreatorRecentPost[] {
   const tags = HASHTAG_BANK_BY_CATEGORY[seed.category] ?? HASHTAG_BANK_BY_CATEGORY.other!;
   const brands = BRAND_BANK_BY_CATEGORY[seed.category] ?? [];
@@ -457,7 +788,8 @@ function buildRecentPosts(seed: MockCreatorSeed): CreatorRecentPost[] {
     const dayOffset = idx * 2 + Math.floor(pseudoRandom(seed.id, idx + 400) * 3);
     const postedDate = new Date(2026, 3, 30 - dayOffset);
     const tagCount = 2 + Math.floor(pseudoRandom(seed.id, idx + 500) * 3);
-    const hashtags = tags.slice(0, Math.min(tagCount, tags.length));
+    // 每条帖子随机选不重复的 tag 子集（确定性），让 10 条内容里出现多种 hashtag。
+    const hashtags = pickDeterministicSubset(tags, Math.min(tagCount, tags.length), seed.id, idx);
     const mentionBrand =
       brands.length > 0 && pseudoRandom(seed.id, idx + 600) > 0.65
         ? [brands[Math.floor(pseudoRandom(seed.id, idx + 700) * brands.length)]]
@@ -533,6 +865,7 @@ function buildAudienceAnalysis(seed: MockCreatorSeed): AudienceProfile | null {
       trustScore: 4.5,
       professionalismScore: 4,
       affinityScore: 5,
+      summaries: pickCredibilitySummaries(seed.id),
     },
   };
 }
@@ -594,7 +927,8 @@ function buildCreatorFromSeed(seed: MockCreatorSeed): Creator {
     collaborations: buildCollaborations(seed),
     recentPosts: buildRecentPosts(seed),
     audienceAnalysis: buildAudienceAnalysis(seed),
-    favorited: AUDIENCE_PRESET_IDS.has(seed.id),
+    // 博主库里的人都是用户「收藏」过的 —— 红心默认亮起。
+    favorited: true,
     lastRefreshedAt: seed.recentActiveAt ? `${seed.recentActiveAt}T08:30:00Z` : null,
   };
 }

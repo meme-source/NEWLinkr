@@ -25,9 +25,9 @@ export function tierOf(followers: number): CreatorTier {
 export const TIER_ORDER: readonly CreatorTier[] = ["head", "mid", "tail"];
 
 export const TIER_META: Record<CreatorTier, { label: string; range: string; color: string }> = {
-  head: { label: "头部", range: "≥ 200K", color: "#36342e" },
-  mid: { label: "腰部", range: "50K – 200K", color: "#ff4f00" },
-  tail: { label: "尾部 / KOC", range: "< 50K", color: "#c5c0b1" },
+  head: { label: "头部", range: "≥ 200K", color: "#8C543F" },
+  mid: { label: "腰部", range: "50K – 200K", color: "#D88A74" },
+  tail: { label: "尾部 / KOC", range: "< 50K", color: "#F5C9B3" },
 };
 
 // 类别中文显示（与 types/api.ts 中的 CreatorCategory 对齐）。

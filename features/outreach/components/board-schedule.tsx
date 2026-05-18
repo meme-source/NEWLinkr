@@ -314,7 +314,7 @@ export function BoardSchedule({ projectId }: BoardScheduleProps) {
       {/* §3.7 Schedule shell — toolbar + (calendar | day panel) live in a single
           card so they read as one surface. The calendar row is height-locked at
           lg+ via lg:h-[720px]; list view scrolls internally when it overflows. */}
-      <div className="overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+      <div className="overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
         <ScheduleToolbar
           view={view}
           onViewChange={setView}

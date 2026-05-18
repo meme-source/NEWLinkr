@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { CPM_CURRENCY_OPTIONS, type CpmCurrency } from "@/features/settings/data/cpm-countries";
 import { cn } from "@/lib/utils";
 
@@ -28,21 +29,23 @@ export function CurrencySelect({ value, onChange }: CurrencySelectProps) {
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5 text-xs text-[#36342e] shadow-sm transition-colors hover:border-[#ff4f00]/40 hover:text-[#201515]"
+        className="flex items-center gap-2 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-3 py-1.5 text-xs text-[#36342e] shadow-sm transition-colors hover:border-[#ff4f00]/40 hover:text-[#201515]"
       >
         <span className="text-[#939084]">货币</span>
         <span className="font-medium text-[#201515]">{current.label}</span>
         <ChevronDown
           className={cn("h-3.5 w-3.5 text-[#939084] transition-transform", open && "rotate-180")}
         />
-      </button>
+      </Button>
       {open ? (
-        <div className="absolute right-0 z-20 mt-1.5 w-44 overflow-hidden rounded-xl border border-[#c5c0b1] bg-[#fffefb] shadow-lg">
+        <div className="absolute right-0 z-20 mt-1.5 w-44 overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb] shadow-lg">
           {CPM_CURRENCY_OPTIONS.map((c) => (
-            <button
+            <Button
+              unstyled
               key={c.code}
               type="button"
               onClick={() => {
@@ -56,7 +59,7 @@ export function CurrencySelect({ value, onChange }: CurrencySelectProps) {
             >
               <span>{c.label}</span>
               <span className="text-[#939084]">{c.symbol}</span>
-            </button>
+            </Button>
           ))}
         </div>
       ) : null}

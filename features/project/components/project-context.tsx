@@ -3,47 +3,42 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { ProjectSheet } from "@/features/project/components/project-sheet";
+import {
+  createProject,
+  withProjectDefaults,
+  type Project,
+  type ProjectCollaborationType,
+  type ProjectCurrency,
+  type ProjectProduct,
+  type ProjectStatus,
+} from "@/features/project/lib/project-model";
 
 export type ProjectDrawerMode = "create" | "edit";
-export type ProjectCurrency = "USD" | "EUR" | "GBP" | "CNY";
 
-export type WorkspaceProjectStatus = "draft" | "running" | "paused" | "completed";
-
-export interface WorkspaceProject {
-  id: string;
-  name: string;
-  productName: string;
-  category: string;
-  brand: string;
-  productLink: string;
-  startDate: string;
-  endDate: string;
-  budgetAmount: string;
-  budgetCurrency: ProjectCurrency;
-  // §3.1.1 project status (auto-computed, user can override)
-  status: WorkspaceProjectStatus;
-  // §3.6.3 CPM project-level coefficient. null === 1.0 (no adjustment).
-  cpmMultiplier: number | null;
-  // §3.1 目标建联人数 — 选填的"想联系到多少位博主"目标。
-  // 设了之后概览卡片用 `已建联 / 目标` 替代默认的 `已建联 / 总名单`。
-  outreachTarget: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
+// 项目实体已收敛到统一模型 features/project/lib/project-model.ts。
+// 这里只保留网页端历史沿用的别名，避免一次性改动所有 import 点。
+export type { ProjectCollaborationType, ProjectCurrency, ProjectProduct };
+export type WorkspaceProject = Project;
+export type WorkspaceProjectStatus = ProjectStatus;
 
 export interface WorkspaceProjectDraft {
   name: string;
-  productName: string;
-  category: string;
-  brand: string;
-  productLink: string;
+  // 一个项目绑定一个产品（1:1）；productName / category / brand / productLink 不进
+  // 草稿，由 normalizeDraft 在保存时从 product 镜像回 Project。
+  product: ProjectProduct;
   startDate: string;
   endDate: string;
   budgetAmount: string;
   budgetCurrency: ProjectCurrency;
   status?: WorkspaceProjectStatus;
   cpmMultiplier?: number | null;
+  // 目标建联人数由用户在「产品信息」里自填。
   outreachTarget?: number | null;
+  // 目标市场 / 投放平台 / 目标受众 / 核心卖点由「博主发现」自动回填，只读展示。
+  targetMarkets: string[];
+  platforms: string[];
+  sellingPoints: string;
+  targetAudience: string;
 }
 
 interface WorkspaceProjectContextValue {
@@ -69,6 +64,9 @@ interface WorkspaceProjectContextValue {
   // Only the fields that the calendar surface can change are accepted; full
   // edits still flow through the project drawer.
   updateProjectDates: (projectId: string, dates: { startDate?: string; endDate?: string }) => void;
+  // 删除一个项目；如果是当前选中项目，自动切到剩下的第一个。
+  // 不允许删除最后一个项目（必须至少留一个，否则 currentProject 拿不到值）。
+  deleteProject: (projectId: string) => void;
 }
 
 interface DrawerState {
@@ -87,7 +85,20 @@ export const DEFAULT_WORKSPACE_PROJECTS: WorkspaceProject[] = [
   {
     id: "q2-summer",
     name: "Q2夏季 Campaign",
+    products: [
+      {
+        id: "q2-summer-p0",
+        name: "防蓝光护眼面霜",
+        category: "美妆护肤",
+        brand: "MyBrand",
+        link: "https://www.mybrand.com/product",
+        imageUrl: "",
+        briefName: "",
+        briefUrl: "",
+      },
+    ],
     productName: "防蓝光护眼面霜",
+    productDescription: "防蓝光护眼面霜新品夏季推广",
     category: "美妆护肤",
     brand: "MyBrand",
     productLink: "https://www.mybrand.com/product",
@@ -98,13 +109,48 @@ export const DEFAULT_WORKSPACE_PROJECTS: WorkspaceProject[] = [
     status: "running",
     cpmMultiplier: null,
     outreachTarget: 30,
+    targetMarkets: ["美国", "加拿大"],
+    platforms: ["TikTok", "Instagram"],
+    collaborationType: "mixed",
+    contentFormats: ["短视频", "开箱测评"],
+    sellingPoints: "防蓝光 + 持久保湿，主打通勤护肤场景。",
+    targetAudience: "18-34 岁都市女性，关注护肤成分与性价比。",
+    contentBrief: {
+      deliverablesPerCreator: 1,
+      publishWindow: { start: "2026-05-01", end: "2026-06-15" },
+      requiredHashtags: ["#防蓝光护肤", "#通勤护肤"],
+      mentionAccounts: ["@mybrand"],
+      needsWhitelisting: true,
+      bannedWords: [],
+    },
+    targetMetrics: {
+      impressions: 800000,
+      engagementRate: 0.04,
+      conversions: 1200,
+      gmv: 60000,
+      roi: 12,
+    },
+    uploadedListNames: [],
     createdAt: "2026-04-01T08:00:00.000Z",
     updatedAt: "2026-04-16T08:00:00.000Z",
   },
   {
     id: "beauty-pool",
     name: "美妆博主池",
+    products: [
+      {
+        id: "beauty-pool-p0",
+        name: "持久遮瑕粉底液",
+        category: "彩妆",
+        brand: "GlowLab",
+        link: "https://www.glowlab.com/product",
+        imageUrl: "",
+        briefName: "",
+        briefUrl: "",
+      },
+    ],
     productName: "持久遮瑕粉底液",
+    productDescription: "持久遮瑕粉底液达人种草",
     category: "彩妆",
     brand: "GlowLab",
     productLink: "https://www.glowlab.com/product",
@@ -115,12 +161,51 @@ export const DEFAULT_WORKSPACE_PROJECTS: WorkspaceProject[] = [
     status: "running",
     cpmMultiplier: null,
     outreachTarget: null,
+    targetMarkets: ["美国"],
+    platforms: ["TikTok"],
+    collaborationType: "gifted",
+    contentFormats: ["短视频", "图文帖"],
+    sellingPoints: "持妆 12 小时不脱妆，遮瑕力强。",
+    targetAudience: "20-30 岁彩妆爱好者。",
+    contentBrief: {
+      deliverablesPerCreator: 1,
+      publishWindow: { start: "", end: "" },
+      requiredHashtags: [],
+      mentionAccounts: [],
+      needsWhitelisting: false,
+      bannedWords: [],
+    },
+    targetMetrics: {
+      impressions: null,
+      engagementRate: null,
+      conversions: null,
+      gmv: null,
+      roi: null,
+    },
+    uploadedListNames: [],
     createdAt: "2026-04-08T08:00:00.000Z",
     updatedAt: "2026-04-15T08:00:00.000Z",
   },
 ];
 
 const WorkspaceProjectContext = createContext<WorkspaceProjectContextValue | null>(null);
+
+// 项目抽屉的挂载契约 —— ProjectSheet 不再由 Provider 内联渲染，而是抽成
+// <ProjectSheetHost/>，由布局挂在更深的位置（CreatorProfileProvider 之内）。
+// 这样项目抽屉里点达人，才能通过 useCreatorProfile 弹出博主信息卡。
+interface ProjectSheetMountValue {
+  sheetKey: string;
+  open: boolean;
+  mode: ProjectDrawerMode;
+  project?: WorkspaceProject;
+  existingProjects: WorkspaceProject[];
+  canDelete: boolean;
+  onClose: () => void;
+  onSave: (draft: WorkspaceProjectDraft) => void;
+  onDelete?: () => void;
+}
+
+const ProjectSheetMountContext = createContext<ProjectSheetMountValue | null>(null);
 
 function isWorkspaceProject(value: unknown): value is WorkspaceProject {
   if (!value || typeof value !== "object") {
@@ -138,29 +223,28 @@ function isWorkspaceProject(value: unknown): value is WorkspaceProject {
   );
 }
 
-// Hydrated localStorage entries from previous app versions may be missing
-// optional fields like `status` / `cpmMultiplier` / `outreachTarget`. Backfill
-// defaults so the rest of the surface can trust the type.
+// 旧版 localStorage 数据可能缺字段；交给统一模型的 withProjectDefaults 补齐。
+// 唯一与统一默认值的差异：历史数据缺 status 时回落到 "running"——统一模型新建
+// 项目默认 "draft"，但已存档的旧项目大多已经在跑。
 function withDefaults(project: WorkspaceProject): WorkspaceProject {
-  return {
-    ...project,
-    status: (project.status ?? "running") as WorkspaceProjectStatus,
-    cpmMultiplier: project.cpmMultiplier ?? null,
-    outreachTarget: project.outreachTarget ?? null,
-  };
+  const status: ProjectStatus = project.status ?? "running";
+  return withProjectDefaults({ ...project, status });
 }
 
 function normalizeDraft(draft: WorkspaceProjectDraft): WorkspaceProjectDraft {
   return {
     ...draft,
     name: draft.name.trim(),
-    productName: draft.productName.trim(),
-    category: draft.category.trim(),
-    brand: draft.brand.trim(),
-    productLink: draft.productLink.trim(),
-    startDate: draft.startDate,
-    endDate: draft.endDate,
+    product: {
+      ...draft.product,
+      name: draft.product.name.trim(),
+      category: draft.product.category.trim(),
+      brand: draft.product.brand.trim(),
+      link: draft.product.link.trim(),
+    },
     budgetAmount: draft.budgetAmount.trim(),
+    sellingPoints: draft.sellingPoints.trim(),
+    targetAudience: draft.targetAudience.trim(),
   };
 }
 
@@ -200,10 +284,9 @@ export function formatProjectDeadline(project: WorkspaceProject) {
 }
 
 // §3.1.1 项目状态 — 全局唯一调色板，ProjectBar / 下拉 / 抽屉头部 / 概览卡片都从这里取。
-// 在四态语义里用 Linkr Orange 标记"进行中"，让品牌主色直接服务于 portfolio 焦点；
-// 暖琥珀给"暂停中"做一个 caution 信号，仍在暖色温内。
+// 四态都落在 Zapier 暖色温家族内：橄榄绿 / 暖琥珀 / 深棕 共享黄调，不会和奶油底打架。
 //   draft     沙色      未启动 / 占位
-//   running   品牌橙    进行中 —— 主焦点
+//   running   橄榄绿    进行中 —— 偏暖中性绿，避开亮绿和森林绿
 //   paused    暖琥珀    暂停 / 提醒
 //   completed 深棕      已完结 / 沉淀
 // 用 border 而不是 ring，保持和 DESIGN.md 的"边线优先"基调一致。
@@ -222,10 +305,10 @@ const STATUS_STYLE: Record<WorkspaceProjectStatus, ProjectStatusStyle> = {
     pillBorder: "border-[#c5c0b1]",
   },
   running: {
-    dot: "bg-[#ff4f00]",
-    pillBg: "bg-[#fff7f4]",
-    pillText: "text-[#ff4f00]",
-    pillBorder: "border-[#ffd9c8]",
+    dot: "bg-[#5a8f3d]",
+    pillBg: "bg-[#f1f4e8]",
+    pillText: "text-[#3f6b29]",
+    pillBorder: "border-[#cfdcb6]",
   },
   paused: {
     dot: "bg-[#c89e4f]",
@@ -391,24 +474,8 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
   }, []);
 
   const quickCreateProject = useCallback((): WorkspaceProject => {
-    const now = new Date().toISOString();
-    const next: WorkspaceProject = {
-      id: `project-${Date.now()}`,
-      name: "未命名项目",
-      productName: "",
-      category: "",
-      brand: "",
-      productLink: "",
-      startDate: "",
-      endDate: "",
-      budgetAmount: "",
-      budgetCurrency: "USD",
-      status: "draft",
-      cpmMultiplier: null,
-      outreachTarget: null,
-      createdAt: now,
-      updatedAt: now,
-    };
+    // 走统一创建核心 —— 与插件「新建项目」、抽屉「创建项目」同一条路径。
+    const next = createProject({ name: "未命名项目" });
     setProjects((current) => [...current, next]);
     setSelectedProjectId(next.id);
     setIsAllProjects(false);
@@ -419,6 +486,16 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     (draft: WorkspaceProjectDraft) => {
       const normalizedDraft = normalizeDraft(draft);
       const now = new Date().toISOString();
+      // draft 持有单个 product；保存时回写 products 数组 + 旧的单产品字段，
+      // 保持插件端 ProjectSummary / 概览卡兼容。
+      const { product, ...rest } = normalizedDraft;
+      const productMirror = {
+        products: [product],
+        productName: product.name,
+        category: product.category,
+        brand: product.brand,
+        productLink: product.link,
+      };
 
       if (drawerState.mode === "edit" && drawerState.projectId) {
         setProjects((current) =>
@@ -426,7 +503,8 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
             project.id === drawerState.projectId
               ? {
                   ...project,
-                  ...normalizedDraft,
+                  ...rest,
+                  ...productMirror,
                   updatedAt: now,
                 }
               : project,
@@ -436,21 +514,31 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
         return;
       }
 
-      const nextProject: WorkspaceProject = {
-        id: `project-${Date.now()}`,
-        ...normalizedDraft,
-        status: normalizedDraft.status ?? "draft",
-        cpmMultiplier: normalizedDraft.cpmMultiplier ?? null,
-        outreachTarget: normalizedDraft.outreachTarget ?? null,
-        createdAt: now,
-        updatedAt: now,
-      };
+      // 走统一创建核心 —— 默认值（status / cpmMultiplier / 数组字段等）由
+      // createProject 统一补齐，不再在这里逐字段兜底。
+      const nextProject = createProject({ ...rest, ...productMirror });
 
       setProjects((current) => [nextProject, ...current]);
       setSelectedProjectId(nextProject.id);
       closeProjectDrawer();
     },
     [drawerState.mode, drawerState.projectId, closeProjectDrawer],
+  );
+
+  const deleteProject = useCallback(
+    (projectId: string) => {
+      setProjects((current) => {
+        // 至少保留一个项目，避免 currentProject 落到 undefined。
+        if (current.length <= 1) return current;
+        return current.filter((project) => project.id !== projectId);
+      });
+      setSelectedProjectId((current) => {
+        if (current !== projectId) return current;
+        const next = projects.find((project) => project.id !== projectId);
+        return next ? next.id : current;
+      });
+    },
+    [projects],
   );
 
   const updateProjectDates = useCallback(
@@ -500,6 +588,7 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
       resolveProjectName,
       getProject,
       updateProjectDates,
+      deleteProject,
     }),
     [
       currentProject,
@@ -515,6 +604,7 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
       resolveProjectName,
       getProject,
       updateProjectDates,
+      deleteProject,
     ],
   );
 
@@ -522,22 +612,62 @@ export function WorkspaceProjectProvider({ children }: { children: React.ReactNo
     ? stableProjects.find((project) => project.id === drawerState.projectId)
     : undefined;
 
+  // ProjectSheet 的挂载数据 —— 交给 <ProjectSheetHost/> 在更深的位置渲染。
+  const sheetMount = useMemo<ProjectSheetMountValue>(
+    () => ({
+      // sheetKey 让 ProjectSheet 在「开关 / 切换编辑目标」时重新挂载，draft 干净重置。
+      sheetKey: drawerState.open ? (drawerState.projectId ?? "new") : "_closed",
+      open: drawerState.open,
+      mode: drawerState.mode,
+      project: editingProject,
+      existingProjects: stableProjects,
+      canDelete: stableProjects.length > 1,
+      onClose: closeProjectDrawer,
+      onSave: handleSaveProject,
+      onDelete:
+        drawerState.mode === "edit" && drawerState.projectId
+          ? () => {
+              deleteProject(drawerState.projectId!);
+              closeProjectDrawer();
+            }
+          : undefined,
+    }),
+    [
+      drawerState,
+      editingProject,
+      stableProjects,
+      closeProjectDrawer,
+      handleSaveProject,
+      deleteProject,
+    ],
+  );
+
   return (
     <WorkspaceProjectContext.Provider value={value}>
-      {children}
-      {/* The `key` here intentionally re-mounts ProjectSheet each time the
-          drawer transitions from closed→open or the editing target changes,
-          so its internal draft state resets cleanly without a useEffect. */}
-      <ProjectSheet
-        key={drawerState.open ? (drawerState.projectId ?? "new") : "_closed"}
-        open={drawerState.open}
-        mode={drawerState.mode}
-        project={editingProject}
-        existingProjects={stableProjects}
-        onClose={closeProjectDrawer}
-        onSave={handleSaveProject}
-      />
+      <ProjectSheetMountContext.Provider value={sheetMount}>
+        {children}
+      </ProjectSheetMountContext.Provider>
     </WorkspaceProjectContext.Provider>
+  );
+}
+
+// 项目抽屉的挂载点 —— 布局把它放在 CreatorProfileProvider 之内，
+// 让抽屉里点达人能弹出博主信息卡。drawer 状态仍由 WorkspaceProjectProvider 持有。
+export function ProjectSheetHost() {
+  const mount = useContext(ProjectSheetMountContext);
+  if (!mount) return null;
+  return (
+    <ProjectSheet
+      key={mount.sheetKey}
+      open={mount.open}
+      mode={mount.mode}
+      project={mount.project}
+      existingProjects={mount.existingProjects}
+      canDelete={mount.canDelete}
+      onClose={mount.onClose}
+      onSave={mount.onSave}
+      onDelete={mount.onDelete}
+    />
   );
 }
 

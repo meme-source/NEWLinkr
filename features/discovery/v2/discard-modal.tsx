@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { Button } from "@/components/ui/button";
+
 interface DiscardModalProps {
   open: boolean;
   projectName: string;
@@ -62,7 +64,7 @@ export function DiscardModal({ open, projectName, onCancel, onConfirm }: Discard
         aria-modal="true"
         aria-labelledby="discard-modal-title"
         aria-describedby="discard-modal-body"
-        className="w-[420px] max-w-[calc(100vw-32px)] rounded-2xl bg-white px-6 pt-6 pb-5"
+        className="w-[420px] max-w-[calc(100vw-32px)] rounded-lg bg-white px-6 pt-6 pb-5"
         style={{
           boxShadow: "0 24px 60px rgba(32, 21, 21, 0.25)",
           animation: "linkr-modal-pop 240ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -86,22 +88,24 @@ export function DiscardModal({ open, projectName, onCancel, onConfirm }: Discard
         </p>
 
         <div className="mt-5 flex items-center justify-end gap-2">
-          <button
+          <Button
+            unstyled
             ref={cancelButtonRef}
             type="button"
             onClick={onCancel}
             className="rounded-lg px-3.5 py-2 text-[13px] font-medium text-[var(--dark-charcoal)] transition-colors hover:bg-[var(--background-alt)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:outline-none"
           >
             取消
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             onClick={onConfirm}
             className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:outline-none"
             style={{ background: "var(--primary)" }}
           >
             确定离开
-          </button>
+          </Button>
         </div>
       </div>
 

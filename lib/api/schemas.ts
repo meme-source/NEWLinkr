@@ -13,6 +13,8 @@ import { z } from "zod";
 import type {
   CompetitorDiscoveryRequest,
   CreateProjectInput,
+  DiscoveryChatRequest,
+  FindSimilarRequest,
   LibraryListRequest,
   OutreachSendRequest,
   ScenarioMatchRequest,
@@ -78,6 +80,30 @@ export const ScenarioRequestSchema = z
     },
   );
 
+// /api/discovery/chat — v3 SSE 流式接口请求体
+//
+// 文档：博主发现页实现逻辑.md §8.1。注意：响应是 SSE 事件流，不走 ApiResponse
+// 信封；route 自己 new Response(stream, { headers: { ... } })。
+const DiscoveryChipsSchema = z.object({
+  platform: PlatformSchema,
+  country: z.string().min(1),
+  follower_bucket: z.enum(["nano", "micro", "mid", "macro", "mega", "any"]),
+  views_bucket: z.enum(["lt_10k", "10k_100k", "100k_500k", "gte_500k", "any"]),
+  contactable_only: z.boolean(),
+});
+
+export const DiscoveryChatRequestSchema = z.object({
+  project_id: z.string().min(1),
+  session_id: z.string().min(1),
+  round: z.number().int().positive(),
+  message: z.object({
+    intent_hint: z.enum(["competitor_creators", "scenario_creators", "trending_creators"]),
+    text: z.string().min(1),
+    chips: DiscoveryChipsSchema,
+  }),
+  previous_result_id: z.string().min(1).nullable(),
+}) satisfies z.ZodType<DiscoveryChatRequest>;
+
 // /api/projects POST
 export const CreateProjectInputSchema = z.object({
   name: z.string().min(1),
@@ -107,7 +133,7 @@ export const OutreachSendRequestSchema = z
     subject: z.string().min(1).optional(),
     content: z.string().min(1).optional(),
     projectId: z.string().min(1).optional(),
-    templateKey: z.enum(["intro", "followup", "gifted", "custom"]).optional(),
+    templateKey: z.string().min(1).optional(),
     senderAddress: z.string().email().optional(),
     mode: z.enum(["now", "scheduled"]).optional(),
     scheduledAt: z.string().min(1).optional(),
@@ -139,3 +165,36 @@ export const UpdateCollaborationStatusRequestSchema = z.object({
   projectId: z.string().min(1),
   status: CollaborationStatusSchema,
 }) satisfies z.ZodType<UpdateCollaborationStatusRequest>;
+
+// /api/creator-search/find — 找相似 / 找平替统一入口（spec §8.2）
+//
+// 校验完成后由 lib/services/find-similar.ts 接管业务逻辑。schema 同时是 API
+// 入参的可机读契约：前端 fetch 时按这份结构传参即可。
+const SimilarFiltersSchema = z.object({
+  hasEmail: z.boolean().optional(),
+  excludeRejected: z.boolean().optional(),
+  excludeSaved: z.boolean().optional(),
+  activeRecently: z.boolean().optional(),
+  language: z.string().min(1).nullable().optional(),
+  country: z.string().min(1).nullable().optional(),
+  minFollowers: z.number().int().nonnegative().optional(),
+  minMedianViews: z.number().int().nonnegative().optional(),
+});
+
+export const FindSimilarRequestSchema = z
+  .object({
+    projectId: z.string().min(1).nullable().optional(),
+    platform: PlatformSchema,
+    seedHandle: z.string().min(1).optional(),
+    seedCreatorId: z.string().min(1).optional(),
+    mode: z.enum(["comprehensive", "budget", "seed"]),
+    postSampleSize: z.union([z.literal(5), z.literal(10), z.literal(15)]),
+    coverSampleSize: z.union([z.literal(3), z.literal(5)]),
+    minSimilarityForAlt: z.number().int().min(0).max(100).optional(),
+    limit: z.number().int().positive().max(50).optional(),
+    filters: SimilarFiltersSchema.optional(),
+  })
+  .refine((input) => Boolean(input.seedHandle ?? input.seedCreatorId), {
+    path: ["seedHandle"],
+    message: "seedHandle 或 seedCreatorId 至少给一个",
+  }) satisfies z.ZodType<FindSimilarRequest>;

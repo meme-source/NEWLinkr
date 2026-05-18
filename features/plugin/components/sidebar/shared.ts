@@ -12,6 +12,7 @@ import type {
   SocialPlatformKey,
   TagTone,
 } from "@/features/plugin/types";
+import type { TiktokVideoCategory } from "@/features/plugin/components/tiktok-video-tile/types";
 import {
   COUNTRY_CPM_OVERRIDE_USD,
   COUNTRY_OPTIONS,
@@ -22,9 +23,13 @@ import {
   REGION_TIER_OPTIONS,
 } from "@/features/plugin/data/countries";
 import { noteTagPresets, tagToneOrder } from "@/features/plugin/data/projects";
+import { findEmailTemplate } from "@/features/email/data/templates";
+import { renderTemplateSegments } from "@/features/email/render";
+import type { TemplateVarMap } from "@/features/email/types";
+import { DEFAULT_ACCOUNT_VARS } from "@/features/outreach/data/template-vars";
 
-export const SIDEBAR_CARD_RADIUS = "rounded-[24px]";
-export const SIDEBAR_CONTROL_RADIUS = "rounded-[20px]";
+export const SIDEBAR_CARD_RADIUS = "rounded-[8px]";
+export const SIDEBAR_CONTROL_RADIUS = "rounded-[8px]";
 export const SIDEBAR_COLLAPSED_WIDTH = 44;
 export const SIDEBAR_MIN_WIDTH = 396;
 export const SIDEBAR_MAX_WIDTH = 640;
@@ -65,18 +70,39 @@ export const DEFAULT_INLINE_DATA_KEYS: InlineDataKey[] = [
   "engagement",
   "publishedAt",
 ];
+export const DEFAULT_ENABLED_BADGE_CATEGORIES: TiktokVideoCategory[] = [
+  "viral",
+  "flop",
+  "paid",
+  "shop",
+];
+export const DEFAULT_VIRAL_RATIO_THRESHOLD = 1.5;
+export const DEFAULT_FLOP_RATIO_THRESHOLD = 0.7;
+export const BADGE_CATEGORY_OPTIONS: ReadonlyArray<{
+  key: TiktokVideoCategory;
+  label: string;
+  swatch: string;
+}> = [
+  { key: "viral", label: "爆款", swatch: "#ff5a3d" },
+  { key: "flop", label: "扑街", swatch: "#3a8dff" },
+  { key: "paid", label: "广告", swatch: "#1f6feb" },
+  { key: "shop", label: "带货", swatch: "#16a34a" },
+  { key: "normal", label: "普通", swatch: "#54514a" },
+];
 
+// 话题词云配色：Linkr 暖色家族，由橙主色延伸到珊瑚 / 铜棕 / 暖金 / 暖近黑，
+// 避免一片灰黑，让词云有层次但不跳出品牌调性。
 export const WORD_CLOUD_COLORS = [
-  "#201515",
-  "#36342e",
-  "#54514a",
-  "#6e6b62",
-  "#8a877e",
-  "#939084",
-  "#a39f95",
-  "#b5b2aa",
-  "#c5c0b1",
-  "#36342e",
+  "#ff4f00",
+  "#e0651f",
+  "#3a3431",
+  "#ff8a5c",
+  "#b87333",
+  "#7a6e5c",
+  "#c08a3e",
+  "#ff4f00",
+  "#9a7a52",
+  "#5b5347",
 ];
 
 export function formatPlays(n: number): string {
@@ -208,6 +234,90 @@ export function getCreatorMetricSnapshot(creator: CreatorProfile, scrapeCount?: 
   };
 }
 
+// 「中位数分享」：插件 mock 没有逐条分享数据，按账号点赞量派生
+// （分享量级低于评论，取 likes 的 ~5%），与 medianComments 同一套合成口径。
+export function getCreatorMedianShares(creator: CreatorProfile) {
+  const likes = parseMetricToNumber(creator.likes);
+  if (likes <= 0) return "—";
+  return formatLikes(likes * 0.05);
+}
+
+// 核心指标取值：观看 / 点赞 / 评论 / 分享 各自支持「中位数 ↔ 平均数」切换。
+// 平均数派生倍率沿用 metric-items.ts 既有口径（likes ×1.08、comments ×1.16），
+// 保证悬浮卡与「博主分析」侧栏的同一指标数值一致。
+export function getCreatorCoreMetricValue(
+  creator: CreatorProfile,
+  key: "plays" | "likes" | "comments" | "shares",
+  mode: MetricAggregation,
+  scrapeCount?: number,
+): string {
+  if (key === "plays") {
+    return mode === "median"
+      ? getCreatorMedianPlays(creator, scrapeCount)
+      : getCreatorAveragePlays(creator, scrapeCount);
+  }
+  if (key === "likes") {
+    if (mode === "average") return formatLikes(parseMetricToNumber(creator.likes) * 1.08);
+    return creator.likes || "—";
+  }
+  if (key === "comments") {
+    const median = getCreatorMedianComments(creator);
+    if (mode === "average") return formatComments(parseMetricToNumber(median) * 1.16);
+    return median;
+  }
+  const median = getCreatorMedianShares(creator);
+  if (mode === "average") return formatLikes(parseMetricToNumber(median) * 1.12);
+  return median;
+}
+
+// 户外品牌池：插件 mock 创作者均为露营 / 户外赛道，品牌提及从该池按 id 派生。
+const OUTDOOR_BRAND_POOL = [
+  "Patagonia",
+  "The North Face",
+  "REI Co-op",
+  "Coleman",
+  "YETI",
+  "Columbia",
+  "Osprey",
+  "Salomon",
+  "Decathlon",
+  "MSR",
+  "Hydro Flask",
+  "Arc'teryx",
+] as const;
+
+function hashString(seed: string) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    h = (h << 5) - h + seed.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+// 「合作次数」：插件端没有真实合作记录，按 creator id 派生一个 0–5 的稳定值，
+// 取代旧的「作品」字段，与 Web 端博主库信息卡口径对齐。
+export function getCreatorCollaborationCount(creator: CreatorProfile) {
+  return hashString(creator.id) % 6;
+}
+
+// 「品牌提及」：插件 mock 无逐条 brandMention，按 id 稳定地从户外品牌池抽 2–4 个，
+// 每个品牌附一个 1–4 的提及次数，对齐 Web 端博主库信息卡的品牌提及区块。
+export function getCreatorBrandMentions(
+  creator: CreatorProfile,
+): Array<{ brand: string; count: number }> {
+  const rand = seededRandom(hashString(creator.id) + 1);
+  const total = 2 + Math.floor(rand() * 3);
+  const pool = [...OUTDOOR_BRAND_POOL];
+  const picked: Array<{ brand: string; count: number }> = [];
+  for (let i = 0; i < total && pool.length > 0; i += 1) {
+    const idx = Math.floor(rand() * pool.length);
+    const [brand] = pool.splice(idx, 1);
+    picked.push({ brand, count: 1 + Math.floor(rand() * 4) });
+  }
+  return picked.sort((a, b) => b.count - a.count);
+}
+
 export function getCreatorTopicSummary(
   topics: Array<{ label: string; weight: number }>,
   scrapeCount: number,
@@ -332,11 +442,11 @@ export function getCreatorType(creator: CreatorProfile) {
 
   const profileText = `${creator.bio} ${creator.statBadges.join(" ")}`.toLowerCase();
   if (/(科技|数码|3c|tech|gadget|gear|评测)/.test(profileText)) return "科技类博主";
-  if (/(露营|户外|徒步|公路旅行|outdoor|camp)/.test(profileText)) return "户外类";
-  if (/(家庭|亲子|family)/.test(profileText)) return "家庭类";
-  if (/(旅行|travel)/.test(profileText)) return "旅行类";
-  if (/(美妆|护肤|彩妆|beauty)/.test(profileText)) return "美妆类";
-  if (/(健身|运动|fitness)/.test(profileText)) return "运动类";
+  if (/(露营|户外|徒步|公路旅行|outdoor|camp)/.test(profileText)) return "户外类博主";
+  if (/(家庭|亲子|family)/.test(profileText)) return "家庭类博主";
+  if (/(旅行|travel)/.test(profileText)) return "旅行类博主";
+  if (/(美妆|护肤|彩妆|beauty)/.test(profileText)) return "美妆类博主";
+  if (/(健身|运动|fitness)/.test(profileText)) return "运动类博主";
   return "科技类博主";
 }
 
@@ -367,62 +477,32 @@ export function getCreatorPersonalizationSummary(
   };
 }
 
+// 把当前博主 / 项目 / 账号信息映射成模板变量值。
+// account 级变量对所有收件人相同 → 不算个性化；creator 级变量逐人不同 →
+// personalized: true，在预览里高亮，也是「N 处高亮」的计数来源。
+function buildTemplateVarMap(creator: CreatorProfile, project?: ProjectSummary): TemplateVarMap {
+  return {
+    my_name: { value: DEFAULT_ACCOUNT_VARS.my_name, personalized: false },
+    my_role: { value: DEFAULT_ACCOUNT_VARS.my_role, personalized: false },
+    brand_name: { value: DEFAULT_ACCOUNT_VARS.brand_name, personalized: false },
+    brand_url: { value: DEFAULT_ACCOUNT_VARS.brand_url, personalized: false },
+    project_name: { value: project?.name ?? "本次项目", personalized: false },
+    product_name: { value: project?.name ?? "新品", personalized: false },
+    product_link: { value: DEFAULT_ACCOUNT_VARS.brand_url, personalized: false },
+    creator_name: { value: creator.name, personalized: true },
+    creator_handle: { value: creator.handle, personalized: true },
+    platform: { value: "TikTok", personalized: false },
+  };
+}
+
 export function getEmailTemplateSegments(
   template: EmailTemplateKey,
   creator: CreatorProfile,
   project?: ProjectSummary,
 ): EmailTemplateSegment[] {
-  if (!template) return [];
-
-  const info = getCreatorPersonalizationSummary(creator, project);
-
-  if (template === "followup") {
-    return [
-      { text: "Hi " },
-      { text: info.greetingName, personalized: true },
-      { text: ",\n\n上次已经和你简单同步过合作方向，这边补充一下我们这轮的最新窗口。\n\n" },
-      { text: "我重新看了一下你的账号，" },
-      { text: info.creatorProof, personalized: true },
-      { text: "。\n\n" },
-      { text: "- 合作方向：" },
-      { text: info.projectAngle, personalized: true },
-      { text: "\n- 内容切入：" },
-      { text: `${info.primaryTopic} / ${info.secondaryTopic}`, personalized: true },
-      {
-        text: "\n- 希望确认：近期档期、报价区间、可接受的合作形式\n\n如果方便的话，也可以直接回复到 ",
-      },
-      { text: info.email, personalized: true },
-      { text: "，我们会尽快跟进。\n\n谢谢！\n2Linkr 团队" },
-    ];
-  }
-
-  if (template === "gifted") {
-    return [
-      { text: "Hi " },
-      { text: info.greetingName, personalized: true },
-      { text: ",\n\n我们正在为 " },
-      { text: info.projectAngle, personalized: true },
-      { text: " 寻找适合先体验、再决定合作形式的创作者。\n\n" },
-      { text: "AI 觉得你很适合这轮寄样，是因为 " },
-      { text: info.aiReason, personalized: true },
-      {
-        text: "。\n\n如果你愿意，我们可以先寄一份样品给你，等你体验后再一起确认是否做短视频、图文或长期合作。\n\n期待听听你的想法。\n2Linkr 团队",
-      },
-    ];
-  }
-
-  return [
-    { text: "Hi " },
-    { text: info.greetingName, personalized: true },
-    { text: ",\n\n我们最近在筛选一批适合 " },
-    { text: info.projectAngle, personalized: true },
-    { text: " 的创作者，看到你的账号后觉得内容调性、受众画像和互动氛围都很匹配。\n\n" },
-    { text: "尤其是 " },
-    { text: info.creatorProof, personalized: true },
-    {
-      text: "，这部分非常适合做第一轮合作沟通。\n\n想先和你确认三件事：\n- 你最近是否方便接合作\n- 当前的大致报价区间\n- 更适合的合作形式（短视频 / 组合发布 / 长期合作）\n\n如果方便的话，可以直接回复这封邮件，我们会把更具体的 brief 发给你。\n\n谢谢！\n2Linkr 团队",
-    },
-  ];
+  const option = findEmailTemplate(template);
+  if (!option) return [];
+  return renderTemplateSegments(option.body, buildTemplateVarMap(creator, project));
 }
 
 export function getEmailTemplateDraft(
@@ -440,20 +520,9 @@ export function getEmailSubjectSegments(
   creator: CreatorProfile,
   project?: ProjectSummary,
 ): EmailTemplateSegment[] {
-  if (template === "followup") {
-    return [{ text: "跟进 " }, { text: creator.name, personalized: true }, { text: " 的合作档期" }];
-  }
-  if (template === "gifted") {
-    return [
-      { text: creator.name, personalized: true },
-      { text: "，想寄样给你体验 " },
-      { text: project?.name ?? "这轮新品", personalized: true },
-    ];
-  }
-  if (template === "intro") {
-    return [{ text: creator.name, personalized: true }, { text: " x 2Linkr 内容合作邀约" }];
-  }
-  return [];
+  const option = findEmailTemplate(template);
+  if (!option) return [];
+  return renderTemplateSegments(option.subject, buildTemplateVarMap(creator, project));
 }
 
 export function getEmailTemplateSubject(
@@ -464,6 +533,37 @@ export function getEmailTemplateSubject(
   return getEmailSubjectSegments(template, creator, project)
     .map((segment) => segment.text)
     .join("");
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// 把模板生成的 segments 转成可编辑的 HTML：个性化片段加黄色高亮，换行转 <br>。
+// 用于初始化逐人草稿的正文编辑器。
+export function segmentsToHtml(segments: EmailTemplateSegment[]): string {
+  return segments
+    .map((segment) => {
+      const html = escapeHtml(segment.text).replace(/\n/g, "<br>");
+      return segment.personalized
+        ? `<span style="background:#fff3a3;border-radius:4px;padding:0 2px;">${html}</span>`
+        : html;
+    })
+    .join("");
+}
+
+// 把富文本 HTML 还原成纯文本，用于发送 payload 与日志记录。
+export function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<\s*br\s*\/?>/gi, "\n")
+    .replace(/<\/(div|p|li)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export function getDefaultScheduleAt() {

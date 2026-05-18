@@ -1,13 +1,16 @@
 // Adapter from the carousel's loose `CardItem` shape to the strict
 // `InfluencerCardData` the new card consumes.
 
-import { ACCENT } from "./tokens";
+import { audienceByCreatorId } from "@/features/plugin/data/creator-audience";
+
+import { type AnalysisSeedComparison, deriveAnalysis } from "./analysis";
+import { flagFromCode } from "./flag";
 import type {
   CoverCount,
   EmailStatus,
+  FilterMode,
   InfluencerCardData,
   InfluencerCardMetric,
-  InfluencerCardRadarAxis,
   InfluencerCardSampleConfig,
   ScrapeCount,
 } from "./types";
@@ -27,20 +30,20 @@ export interface CardItemLike {
   medianLikes?: string;
   medianComments?: string;
   visualPending?: boolean;
-  subscores?: {
-    topic: number;
-    format: number;
-    visual: number;
-    data: number;
-    activity: number;
-    contact: number;
-  };
-  altSubscores?: {
-    similarity: number;
-    costAdvantage: number;
-    dataPerformance: number;
-    contactabilityRisk: number;
-  };
+  /** 整卡推荐理由(一句话)。深度分析在数据极少时兜底用它。 */
+  reason?: string;
+  /** 逐条推荐理由 —— 深度分析的主要内容来源。 */
+  reasons?: string[];
+  /** 需要权衡的取舍点 —— 深度分析里标成「需权衡」。 */
+  tradeoffs?: string[];
+  /** 后台产出的「受众人群」维度特征(性别 / 年龄段 / 地域人群…)。 */
+  audience?: string[];
+  /** 后台产出的「内容主题」维度特征。 */
+  topics?: Array<{ label: string }>;
+  /** 「找平替」相对种子博主的省钱比例,如 "55%"。 */
+  savingPct?: string;
+  /** 「找平替」种子↔候选的指标对比(报价 / CPM / CPE…)。 */
+  seedComparison?: AnalysisSeedComparison;
 }
 
 const COUNTRY_CODE_MAP: Record<string, string> = {
@@ -78,18 +81,6 @@ const COUNTRY_LABEL_MAP: Record<string, string> = {
   AU: "澳大利亚",
   SG: "新加坡",
 };
-
-// Seed features used when the card has no usable tags. Mirrors the legacy
-// radar's static feature set so the card stays useful even when subscores
-// are absent — preferable to showing nothing.
-const SEED_FEATURES = [
-  "报价更低",
-  "受众重合",
-  "沉浸式 Vlog",
-  "极少口播",
-  "全景 B-roll",
-  "低饱和度",
-];
 
 function normalizeCountry(country?: string): string | undefined {
   if (!country) return undefined;
@@ -135,69 +126,29 @@ function metricsFor(card: CardItemLike): InfluencerCardMetric[] {
   ];
 }
 
-function defaultFeatures(card: CardItemLike): string[] {
-  const fromCard = (card.tags ?? []).filter((t) => !/%$/.test(t.trim()));
-  const merged = [...fromCard, ...SEED_FEATURES];
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const tag of merged) {
-    if (!seen.has(tag)) {
-      seen.add(tag);
-      out.push(tag);
-    }
-    if (out.length >= 6) break;
-  }
-  return out;
-}
-
-function radarFor(card: CardItemLike): InfluencerCardRadarAxis[] {
-  const accent = ACCENT.terracotta;
-  const s = card.subscores;
-  if (s) {
-    return [
-      { subject: "主题", value: s.topic, color: accent },
-      { subject: "形式", value: s.format, color: accent },
-      { subject: "视觉", value: s.visual, color: accent },
-      { subject: "活跃", value: s.activity, color: accent },
-      { subject: "数据", value: s.data, color: accent },
-    ];
-  }
-  const a = card.altSubscores;
-  if (a) {
-    // 找平替 only has 4 dimensions; pad to 5 by re-using similarity as
-    // activity so the radar shape stays visually consistent.
-    return [
-      { subject: "相似", value: a.similarity, color: accent },
-      { subject: "成本", value: a.costAdvantage, color: accent },
-      { subject: "数据", value: a.dataPerformance, color: accent },
-      { subject: "风险", value: a.contactabilityRisk, color: accent },
-      { subject: "活跃", value: a.similarity, color: accent },
-    ];
-  }
-  return [
-    { subject: "主题", value: 92, color: accent },
-    { subject: "形式", value: 78, color: accent },
-    { subject: "视觉", value: 86, color: accent },
-    { subject: "活跃", value: 100, color: accent },
-    { subject: "数据", value: 82, color: accent },
-  ];
-}
-
 export interface MapCardItemOptions {
   scrapeCount: ScrapeCount;
   coverCount: CoverCount;
   perspective: boolean;
   userTags: string[];
+  isSaved: boolean;
+  /** 当前筛选模式 —— 「找平替」时深度分析会先摆「平替依据」。 */
+  filterMode?: FilterMode;
 }
 
 export function mapCardItemToInfluencerCard(
   card: CardItemLike,
-  { scrapeCount, coverCount, perspective, userTags }: MapCardItemOptions,
+  { scrapeCount, coverCount, perspective, userTags, isSaved, filterMode }: MapCardItemOptions,
 ): InfluencerCardData {
   const handle = card.name.replace(/^@/, "");
   const initials = (handle.charAt(0) || "?").toUpperCase();
   const countryCode = normalizeCountry(card.country);
   const countryLabel = localiseCountry(countryCode, card.country);
+  const flag = countryCode ? flagFromCode(countryCode) : undefined;
+  const email = emailStatusFor(card);
+  const emailAddress =
+    email.kind === "found" ? email.address : email.kind === "verified" ? (email.address ?? "") : "";
+  const hasEmail = emailAddress.length > 0;
   const sample: InfluencerCardSampleConfig = {
     scrapeCount,
     coverCount,
@@ -206,15 +157,29 @@ export function mapCardItemToInfluencerCard(
   return {
     id: card.id,
     handle,
+    name: handle,
     initials,
     countryCode,
     countryLabel,
+    flag,
     creatorType: card.creatorType,
-    email: emailStatusFor(card),
+    email,
+    emailAddress,
+    hasEmail,
+    isSaved,
     tags: userTags,
-    features: defaultFeatures(card),
     metrics: metricsFor(card),
-    radar: radarFor(card),
+    // 深度分析的维度来源:卡片自带 audience/topics(后台维度化产出)优先,缺
+    // 失时由 mock 受众表按 id 兜底;tags/tradeoffs 走关键词归类。「找平替」模
+    // 式额外把 seedComparison 的逐项对比算成「平替依据」摆在最前。
+    analysis: deriveAnalysis({
+      tags: card.tags,
+      tradeoffs: card.tradeoffs,
+      audience: card.audience ?? audienceByCreatorId[card.id],
+      topics: card.topics,
+      filterMode,
+      seedComparison: card.seedComparison,
+    }),
     sample,
   };
 }

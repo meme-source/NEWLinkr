@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EMAIL_PERSONALIZED_HIGHLIGHT_CLASSES, SIDEBAR_CARD_RADIUS } from "./shared";
 import type { EmailTemplateSegment } from "@/features/plugin/types";
+import { Button } from "@/components/ui/button";
 
 export function SidebarMetricInline({
   icon: Icon,
@@ -40,7 +41,8 @@ export function SidebarCollapsibleSection({
 }) {
   return (
     <div className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#c5c0b1] bg-[#fffefb]`}>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onToggle}
         aria-expanded={open}
@@ -58,63 +60,9 @@ export function SidebarCollapsibleSection({
             open && "rotate-180",
           )}
         />
-      </button>
+      </Button>
       {open ? <div className="border-t border-[#eceae3] px-3 py-3">{children}</div> : null}
     </div>
-  );
-}
-
-export function SidebarLocationInline({
-  flag,
-  country,
-  compact = false,
-}: {
-  flag: string;
-  country: string;
-  compact?: boolean;
-}) {
-  return (
-    <span
-      aria-label={`地区 ${country}`}
-      title={country}
-      className={cn(
-        "inline-flex items-center rounded-full border border-[#c5c0b1] bg-[linear-gradient(180deg,#fffefb_0%,#fffdf9_100%)] text-[#36342e]",
-        compact ? "h-5 gap-1 px-2" : "h-[22px] gap-1.5 px-2.5",
-      )}
-    >
-      <span className={cn("leading-none", compact ? "text-[11px]" : "text-[12px]")}>{flag}</span>
-      <span
-        className={cn(
-          "leading-none font-medium text-[#36342e]",
-          compact ? "text-[10px]" : "text-[11px]",
-        )}
-      >
-        {country}
-      </span>
-    </span>
-  );
-}
-
-export function SidebarCreatorTypeTag({
-  type,
-  compact = false,
-}: {
-  type: string;
-  compact?: boolean;
-}) {
-  return (
-    <span
-      aria-label={`博主类型 ${type}`}
-      title={type}
-      className={cn(
-        "inline-flex items-center rounded-full border border-[#c5c0b1] bg-[linear-gradient(180deg,#fffdf9_0%,#fffdf9_100%)] text-[#36342e]",
-        compact ? "h-5 px-2" : "h-[22px] px-2.5",
-      )}
-    >
-      <span className={cn("leading-none font-medium", compact ? "text-[10px]" : "text-[11px]")}>
-        {type}
-      </span>
-    </span>
   );
 }
 
@@ -130,7 +78,8 @@ export function SidebarContentTabButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
       className={cn(
@@ -140,7 +89,7 @@ export function SidebarContentTabButton({
     >
       <Icon className={cn("h-4 w-4", active ? "text-[#ff4f00]" : "text-[#939084]")} />
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -201,7 +150,7 @@ export function HighlightedEmailPreview({
 }) {
   if (segments.length === 0) {
     return (
-      <div className="rounded-[16px] border border-dashed border-[#b5b2aa] bg-[#fffefb] px-3 py-5 text-center text-sm text-[#939084]">
+      <div className="rounded-[8px] border border-dashed border-[#b5b2aa] bg-[#fffefb] px-3 py-5 text-center text-sm text-[#939084]">
         {emptyLabel}
       </div>
     );
@@ -210,7 +159,7 @@ export function HighlightedEmailPreview({
   return (
     <div
       className={cn(
-        "rounded-[16px] border border-[#eceae3] bg-[#fffefb] break-words whitespace-pre-wrap text-[#201515]",
+        "rounded-[8px] border border-[#eceae3] bg-[#fffefb] break-words whitespace-pre-wrap text-[#201515]",
         compact ? "px-3 py-2.5 text-[12px] leading-5" : "min-h-[140px] px-3 py-3 text-sm leading-6",
       )}
     >

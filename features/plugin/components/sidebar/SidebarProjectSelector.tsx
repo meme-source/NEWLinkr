@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, CircleHelp, FolderOpen, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProjectSummary } from "@/features/plugin/types";
+import { Button } from "@/components/ui/button";
 
 export function SidebarProjectSelector({
   projects,
@@ -43,7 +44,8 @@ export function SidebarProjectSelector({
         </span>
 
         <div className="relative min-w-0 flex-1" ref={menuRef}>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => setMenuOpen((value) => !value)}
             aria-haspopup="listbox"
@@ -60,10 +62,10 @@ export function SidebarProjectSelector({
               )}
               strokeWidth={2.2}
             />
-          </button>
+          </Button>
 
           {menuOpen ? (
-            <div className="absolute top-[calc(100%+6px)] right-0 left-0 z-40 overflow-hidden rounded-[14px] border border-[#c5c0b1] bg-[#fffefb] p-1.5">
+            <div className="absolute top-[calc(100%+6px)] right-0 left-0 z-40 overflow-hidden rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] p-1.5">
               <div role="listbox" aria-label="项目列表" className="space-y-1">
                 {projects.map((project) => {
                   const isSelected = project.id === selectedProject.id;
@@ -71,11 +73,12 @@ export function SidebarProjectSelector({
                     <div
                       key={project.id}
                       className={cn(
-                        "flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-colors",
+                        "flex items-center gap-2 rounded-[8px] px-2 py-1.5 transition-colors",
                         isSelected ? "bg-[#eceae3]" : "hover:bg-[#fffdf9]",
                       )}
                     >
-                      <button
+                      <Button
+                        unstyled
                         type="button"
                         role="option"
                         aria-selected={isSelected}
@@ -93,8 +96,9 @@ export function SidebarProjectSelector({
                             当前
                           </span>
                         ) : null}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        unstyled
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
@@ -114,7 +118,7 @@ export function SidebarProjectSelector({
                         )}
                       >
                         <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
-                      </button>
+                      </Button>
                     </div>
                   );
                 })}
@@ -124,34 +128,36 @@ export function SidebarProjectSelector({
         </div>
 
         <div className="group/help relative">
-          <button
+          <Button
+            unstyled
             type="button"
             aria-label="项目说明"
             className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[#939084] transition-colors hover:bg-[#eceae3] hover:text-[#36342e]"
           >
             <CircleHelp className="h-[14px] w-[14px]" strokeWidth={2} />
-          </button>
-          <span className="pointer-events-none absolute top-[calc(100%+6px)] right-0 z-50 block w-[220px] rounded-[10px] bg-[#201515] px-3 py-2 text-[11px] leading-5 text-[#fffefb] opacity-0 transition-opacity group-hover/help:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-[calc(100%+6px)] right-0 z-50 block w-[220px] rounded-[8px] bg-[#201515] px-3 py-2 text-[11px] leading-5 text-[#fffefb] opacity-0 transition-opacity group-hover/help:opacity-100">
             收藏、No、标签和后续匹配分析都会归属到当前项目
           </span>
         </div>
 
         <div className="group/new relative">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onQuickCreateProject}
             aria-label="新建项目"
             className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[#ff4f00] transition-colors hover:bg-[#eceae3]"
           >
             <Plus className="h-[14px] w-[14px]" strokeWidth={2.4} />
-          </button>
-          <span className="pointer-events-none absolute top-[calc(100%+6px)] right-0 z-30 rounded-[10px] bg-[#201515] px-2.5 py-1 text-[10px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover/new:opacity-100">
+          </Button>
+          <span className="pointer-events-none absolute top-[calc(100%+6px)] right-0 z-30 rounded-[8px] bg-[#201515] px-2.5 py-1 text-[10px] whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover/new:opacity-100">
             新建项目
           </span>
         </div>
       </div>
 
-      <div className="pointer-events-none h-[6px] rounded-b-[10px] border-t border-[#c5c0b1] bg-[linear-gradient(180deg,#eceae3_0%,rgba(241,237,226,0)_100%)]" />
+      <div className="pointer-events-none h-[6px] rounded-b-[8px] border-t border-[#c5c0b1] bg-[linear-gradient(180deg,#eceae3_0%,rgba(241,237,226,0)_100%)]" />
     </div>
   );
 }

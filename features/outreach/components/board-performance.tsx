@@ -1,8 +1,9 @@
 "use client";
 
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { AddPlacementDialog } from "@/features/outreach/components/add-placement-dialog";
 import { BoardFunnel } from "@/features/outreach/components/board-funnel";
 import { PlacementCard } from "@/features/outreach/components/board-performance-card";
@@ -58,17 +59,17 @@ export function BoardPerformance() {
   const totalExposureViews = placements.reduce((s, p) => s + p.views, 0);
 
   return (
-    <div className="space-y-5">
-      <KpiRow placements={placements} />
-      <div className="grid items-stretch gap-5 lg:grid-cols-2">
-        <CategoryBreakdownCard placements={placements} />
+    <div className="space-y-[18px]">
+      <KpiRow placements={placements} successCount={successCount} />
+      <div className="grid items-stretch gap-[18px] lg:grid-cols-[1fr_1.5fr]">
         <BoardFunnel
           successCount={successCount}
           placedCount={placements.length}
           totalExposureViews={totalExposureViews}
         />
+        <CategoryBreakdownCard placements={placements} />
       </div>
-      <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.25fr)]">
+      <div className="grid items-stretch gap-[18px] lg:grid-cols-[1fr_1.5fr]">
         <TierBreakdownCard placements={placements} />
         <BoardPerformanceScatter placements={placements} />
       </div>
@@ -80,68 +81,70 @@ export function BoardPerformance() {
   );
 }
 
-function KpiRow({ placements }: { placements: Placement[] }) {
+// 2026-05-11 KPI 行与 mock 的 kpi-strip 对齐：5 列，上下边线 + 列间右边线，
+// 无独立卡片圆角；本周增量统一使用 ↗ ↘ unicode 字符，避免 lucide 图标 stroke
+// 在 12px 高度上明显偏粗。
+function KpiRow({ placements, successCount }: { placements: Placement[]; successCount: number }) {
   const total = placements.length;
   const totalEng = placements.reduce((s, p) => s + engOf(p), 0);
   const totalSpend = placements.reduce((s, p) => s + p.spendUsd, 0);
   const totalViews = placements.reduce((s, p) => s + p.views, 0);
   const avgCpe = totalEng > 0 ? totalSpend / totalEng : 0;
   const avgCpm = totalViews > 0 ? (totalSpend / totalViews) * 1000 : 0;
+  const placedCreators = new Set(placements.map((p) => p.creatorHandle)).size;
+  const pendingCreators = Math.max(0, successCount - placedCreators);
 
-  const kpis = [
-    { label: "投放条数", value: String(total), trend: "本周 +4", up: true },
+  type Tone = "up" | "down" | "flat";
+  interface Kpi {
+    label: string;
+    value: string;
+    sub: string;
+    tone: Tone;
+  }
+  const kpis: Kpi[] = [
+    { label: "累计曝光", value: fmtCount(totalViews), sub: "+180K 本周", tone: "up" },
+    { label: "投放条数", value: String(total), sub: "+4 本周", tone: "up" },
+    { label: "平均 CPM", value: fmtMoney(avgCpm, 2), sub: "-$0.18", tone: "down" },
+    { label: "平均 CPE", value: fmtMoney(avgCpe, 3), sub: "-$0.02", tone: "down" },
     {
-      label: "总曝光",
-      value: fmtCount(totalViews),
-      trend: "本周 +180K",
-      up: true,
-      good: true,
-    },
-    {
-      label: "平均 CPM",
-      value: fmtMoney(avgCpm, 2),
-      trend: "本周 -$0.18",
-      up: false,
-      good: true,
-    },
-    {
-      label: "平均 CPE",
-      value: fmtMoney(avgCpe, 3),
-      trend: "本周 -$0.02",
-      up: false,
-      good: true,
+      label: "合作达人",
+      value: String(successCount),
+      sub: `${placedCreators} 已发布 · ${pendingCreators} 待发`,
+      tone: "flat",
     },
   ];
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <div key={k.label} className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-4">
-            <div className="text-[11px] text-[#939084]">{k.label}</div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight text-[#201515] tabular-nums">
-              {k.value}
-            </div>
-            <div
-              className={cn(
-                "mt-1 flex items-center gap-1 text-[10px]",
-                k.good ? "text-[#36342e]" : "text-[#939084]",
-              )}
-            >
-              {k.up !== undefined ? (
-                k.up ? (
-                  <ArrowUpRight className="h-3 w-3" />
-                ) : (
-                  <ArrowDownRight className="h-3 w-3" />
-                )
-              ) : (
-                <AlertTriangle className="h-3 w-3" />
-              )}
-              <span>{k.trend}</span>
-            </div>
+    <div className="grid grid-cols-2 border-y border-[#c5c0b1] lg:grid-cols-5">
+      {kpis.map((k, idx) => (
+        <div
+          key={k.label}
+          className={cn(
+            "px-7 py-[22px]",
+            idx < kpis.length - 1 && "lg:border-r lg:border-[#c5c0b1]",
+          )}
+        >
+          <div className="text-[12px] text-[#939084]">{k.label}</div>
+          <div className="mt-3.5 text-[40px] leading-none font-semibold tracking-tight text-[#201515] tabular-nums">
+            {k.value}
           </div>
-        ))}
-      </div>
+          <div
+            className={cn(
+              "mt-3.5 flex items-center gap-1 text-[12px]",
+              k.tone === "up" && "text-[#3f7a55]",
+              k.tone === "down" && "text-[#ff4f00]",
+              k.tone === "flat" && "text-[#36342e]",
+            )}
+          >
+            {k.tone === "up" ? (
+              <span aria-hidden>↗</span>
+            ) : k.tone === "down" ? (
+              <span aria-hidden>↘</span>
+            ) : null}
+            <span>{k.sub}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -182,7 +185,8 @@ function PlacementGrid({
             <span className="tabular-nums">{fmtRefreshedAt(lastRefreshedAt)} 更新</span>
           ) : null}
           <span>{visible.length} 条</span>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => setAddOpen(true)}
             aria-label="添加追踪"
@@ -190,8 +194,9 @@ function PlacementGrid({
             className="inline-flex items-center gap-1 rounded-full border border-[#c5c0b1] bg-[#fffefb] px-2 py-0.5 text-[11px] font-medium text-[#36342e] transition-colors hover:border-[#ff4f00] hover:text-[#ff4f00]"
           >
             <Plus className="h-3 w-3" aria-hidden /> 添加追踪
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             onClick={onRefresh}
             aria-label="刷新所有投放卡片"
@@ -202,7 +207,7 @@ function PlacementGrid({
             )}
           >
             <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
-          </button>
+          </Button>
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">

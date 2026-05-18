@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import { T } from "../../data/tokens";
 import { InlineChip } from "./inline-chip";
 
@@ -39,7 +41,8 @@ export function TimeChip({ value, defaultDays, onChange }: TimeChipProps) {
             {TIME_OPTIONS.map((opt) => {
               const selected = opt.days === value;
               return (
-                <button
+                <Button
+                  unstyled
                   key={opt.days}
                   type="button"
                   onClick={() => {
@@ -56,7 +59,7 @@ export function TimeChip({ value, defaultDays, onChange }: TimeChipProps) {
                   }}
                 >
                   {opt.label}
-                </button>
+                </Button>
               );
             })}
           </div>

@@ -9,6 +9,7 @@ import {
   MessageCircle,
   Pencil,
   Play,
+  Radio,
   ThumbsUp,
   DollarSign,
 } from "lucide-react";
@@ -27,6 +28,8 @@ import type {
   RegionTierKey,
   SocialPlatformKey,
 } from "@/features/plugin/types";
+import type { TiktokVideoCategory } from "@/features/plugin/components/tiktok-video-tile/types";
+import { Button } from "@/components/ui/button";
 import {
   DEFAULT_HOVER_METRIC_MODES,
   HOVER_CARD_MAX_METRICS,
@@ -65,6 +68,8 @@ export function QuickSettingsPanel({
   onRecordQuickSettingsChange,
   pluginStatus,
   onTogglePluginStatus,
+  enabledBadgeCategories,
+  onToggleBadgeCategory,
 }: {
   creator: CreatorProfile;
   location: { country: string; flag: string };
@@ -84,6 +89,8 @@ export function QuickSettingsPanel({
   onRecordQuickSettingsChange: (message: string) => void;
   pluginStatus: "working" | "idle";
   onTogglePluginStatus: () => void;
+  enabledBadgeCategories: ReadonlySet<TiktokVideoCategory>;
+  onToggleBadgeCategory: (category: TiktokVideoCategory) => void;
 }) {
   const [selectedCountry, setSelectedCountry] = useState(location.country);
   const [regionTier, setRegionTier] = useState<RegionTierKey>(
@@ -117,10 +124,12 @@ export function QuickSettingsPanel({
   const currencySymbol = CURRENCY_SYMBOLS[currencyUnit];
   const draftCurrencySymbol = CURRENCY_SYMBOLS[draftCurrencyUnit];
   const draftCountryFlag = getCountryFlag(draftCountry);
+  const quotaPlanName = "专业版";
+  const quotaRenewDate = "2026-06-12";
   const quotaTotal = 1200;
   const quotaUsed = 376;
   const quotaRemaining = quotaTotal - quotaUsed;
-  const quotaRemainingPct = Math.round((quotaRemaining / quotaTotal) * 100);
+  const quotaUsedPct = Math.round((quotaUsed / quotaTotal) * 100);
 
   const setDraftCountryWithTier = (value: string) => {
     const nextTier = getRegionTierForCountry(value);
@@ -277,14 +286,13 @@ export function QuickSettingsPanel({
       <div
         className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#c5c0b1] bg-[#fffefb]`}
       >
-        <div className="flex items-center justify-between border-b border-[#eceae3] px-3 py-2.5">
+        <div className="flex items-center justify-between border-b border-[#eceae3] px-3 py-2">
           <div className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#201515]">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#201515] text-[13px] font-semibold text-[#fffefb]">
-              ♪
-            </span>
+            <Radio className="h-4 w-4 text-[#ff4f00]" />
             社媒与 CPM
           </div>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={isEditingSettings ? saveSettingsEdit : beginEditSettings}
             aria-label={isEditingSettings ? "确认保存设置" : "编辑设置"}
@@ -295,19 +303,19 @@ export function QuickSettingsPanel({
             ) : (
               <Pencil className="h-3.5 w-3.5" />
             )}
-          </button>
+          </Button>
         </div>
 
-        <div className="space-y-3 px-3 py-3">
+        <div className="space-y-2.5 px-3 py-2.5">
           <div>
-            <div className="mb-1.5 text-xs font-medium text-zinc-500">社媒识别</div>
+            <div className="mb-1 text-xs font-medium text-zinc-500">社媒识别</div>
             <div className="relative">
               <select
                 value={draftPlatform}
                 onChange={(event) => setDraftPlatform(event.target.value as SocialPlatformKey)}
                 disabled={!isEditingSettings}
                 className={cn(
-                  "h-9 w-full appearance-none rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-8 pl-9 text-sm font-semibold text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
+                  "h-8 w-full appearance-none rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-8 pl-9 text-sm font-semibold text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
                   !isEditingSettings && "cursor-not-allowed opacity-60",
                 )}
               >
@@ -327,14 +335,14 @@ export function QuickSettingsPanel({
 
           <div className="grid grid-cols-[1.05fr_0.95fr] gap-2">
             <div>
-              <div className="mb-1.5 text-xs font-medium text-zinc-500">国家与地区</div>
+              <div className="mb-1 text-xs font-medium text-zinc-500">国家与地区</div>
               <div className="relative">
                 <select
                   value={draftCountry}
                   onChange={(event) => setDraftCountryWithTier(event.target.value)}
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full appearance-none rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-8 pl-9 text-sm text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
+                    "h-8 w-full appearance-none rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-8 pl-9 text-sm text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
                     !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -356,7 +364,7 @@ export function QuickSettingsPanel({
             </div>
 
             <div>
-              <div className="mb-1.5 text-xs font-medium text-zinc-500">地区</div>
+              <div className="mb-1 text-xs font-medium text-zinc-500">地区</div>
               <div className="relative">
                 <select
                   value={draftRegionTier}
@@ -368,7 +376,7 @@ export function QuickSettingsPanel({
                   }}
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full appearance-none rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-8 text-sm text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
+                    "h-8 w-full appearance-none rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-8 text-sm text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
                     !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -384,7 +392,7 @@ export function QuickSettingsPanel({
           </div>
 
           <div>
-            <div className="mb-1.5 text-xs font-medium text-zinc-500">CPM 设定</div>
+            <div className="mb-1 text-xs font-medium text-zinc-500">CPM 设定</div>
             <div className="grid grid-cols-[1fr_92px] gap-2">
               <div className="relative">
                 <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm font-semibold text-[#939084]">
@@ -398,7 +406,7 @@ export function QuickSettingsPanel({
                   onChange={(event) => setDraftCpmAmount(event.target.value)}
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-3 pl-7 text-sm font-semibold text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
+                    "h-8 w-full rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] px-3 pl-7 text-sm font-semibold text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
                     !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 />
@@ -411,7 +419,7 @@ export function QuickSettingsPanel({
                   }
                   disabled={!isEditingSettings}
                   className={cn(
-                    "h-9 w-full appearance-none rounded-full border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-7 text-sm font-semibold text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
+                    "h-8 w-full appearance-none rounded-[8px] border border-[#c5c0b1] bg-[#fffdf9] px-3 pr-7 text-sm font-semibold text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35",
                     !isEditingSettings && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -424,7 +432,7 @@ export function QuickSettingsPanel({
                 <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[#939084]" />
               </div>
             </div>
-            <div className="mt-1.5 inline-flex rounded-full bg-[#eceae3] px-2 py-1 text-[11px] font-medium text-[#939084]">
+            <div className="mt-1.5 inline-flex rounded-[8px] bg-[#eceae3] px-2 py-1 text-[11px] font-medium text-[#939084]">
               {draftCountryFlag} {draftCountry || "未指定"} · {getRegionTierLabel(draftRegionTier)}{" "}
               · CPM {CURRENCY_SYMBOLS[draftCurrencyUnit]}
               {draftCpmAmount || "0"}
@@ -447,21 +455,24 @@ export function QuickSettingsPanel({
         inlineDataKeys={inlineDataKeys}
         toggleInlineDataKey={toggleInlineDataKey}
         inlineDataOptions={inlineDataOptions}
+        enabledBadgeCategories={enabledBadgeCategories}
+        toggleBadgeCategory={onToggleBadgeCategory}
       />
 
       <div
         className={`${SIDEBAR_CARD_RADIUS} overflow-hidden border border-[#c5c0b1] bg-[#fffefb]`}
       >
-        <div className="flex items-center justify-between border-b border-[#eceae3] px-3 py-2.5">
+        <div className="flex items-center justify-between border-b border-[#eceae3] px-3 py-2">
           <div className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#201515]">
             <Activity className="h-4 w-4 text-[#ff4f00]" />
             额度与状态
           </div>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onTogglePluginStatus}
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold transition-colors",
+              "inline-flex items-center gap-1 rounded-[8px] px-2 py-1 text-[11px] font-semibold transition-colors",
               pluginStatus === "working"
                 ? "bg-emerald-50 text-emerald-700"
                 : "bg-[#eceae3] text-[#939084]",
@@ -474,28 +485,32 @@ export function QuickSettingsPanel({
               )}
             />
             {pluginStatus === "working" ? "工作中" : "闲置"}
-          </button>
+          </Button>
         </div>
 
-        <div className="px-3 py-3">
-          <div className="flex items-center gap-3">
+        <div className="space-y-2 px-3 py-2.5">
+          <div className="flex items-baseline justify-between">
+            <div className="text-[13px] font-semibold text-[#201515]">
+              已用 {quotaUsed}
+              <span className="ml-0.5 text-[11px] font-medium text-[#939084]">
+                / 总额度 {quotaTotal} 次
+              </span>
+            </div>
+            <div className="text-[11px] font-semibold text-[#2f9e7e]">剩余 {quotaRemaining} 次</div>
+          </div>
+          <div
+            role="img"
+            aria-label={`已用 ${quotaUsed} 次，共 ${quotaTotal} 次`}
+            className="h-2 w-full overflow-hidden rounded-full bg-[#eceae3]"
+          >
             <div
-              className="relative h-[86px] w-[86px] shrink-0 rounded-full p-2"
-              style={{
-                background: `conic-gradient(#2f9e7e 0 ${quotaRemainingPct}%, #c5c0b1 ${quotaRemainingPct}% 100%)`,
-              }}
-              aria-label={`剩余额度 ${quotaRemainingPct}%`}
-            >
-              <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-[#fffefb] text-center">
-                <div className="text-lg leading-none font-semibold text-[#201515]">
-                  {quotaRemainingPct}%
-                </div>
-                <div className="mt-1 text-[10px] text-[#939084]">剩余</div>
-              </div>
-            </div>
-            <div className="min-w-0 flex-1 text-[11px] leading-5 text-[#939084]">
-              总额度 {quotaTotal}，有颜色部分代表剩余，无颜色部分代表已使用。
-            </div>
+              className="h-full rounded-full bg-[#ff4f00]"
+              style={{ width: `${quotaUsedPct}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-[#939084]">
+            <span className="font-medium text-[#36342e]">{quotaPlanName}</span>
+            <span>有效期至 {quotaRenewDate}</span>
           </div>
         </div>
       </div>

@@ -4,15 +4,22 @@
 
 import type { PlatformId } from "./types";
 
-export type ChatIntent = "competitor" | "scenario" | "trending";
+// `lowFollower` 暂时是 trending 的 UI 别名 —— 入口卡片单独展示「找低粉爆款
+// 达人」，点击后下游 agent 流程沿用 trending 分支（详见 intent-hero.ts、
+// agent-steps.ts 里的 lowFollower → trending 映射）。
+export type ChatIntent = "competitor" | "scenario" | "trending" | "lowFollower";
 
 export type FollowerBucket = "any" | "nano" | "micro" | "mid" | "macro" | "mega";
 // Multi-select country codes. Empty array = 全球 (no country constraint).
 export type CountryCode = "us" | "gb" | "ca" | "au" | "sea" | "me";
 
-// Views slider: 0 = 不限, otherwise a step index 1..6 mapping to thresholds
-// (1k, 10k, 50k, 100k, 500k, 1m). The slider lives in the bottom chip strip.
-export type ViewsStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+// Inclusive numeric range. `null` on either side means unbounded on that side
+// (i.e. `{ min: 1000, max: null }` reads as "≥ 1000", `{ min: null, max: null }`
+// reads as "不限"). Used by both the 粉丝量 and 均播 chip filters.
+export interface NumRange {
+  min: number | null;
+  max: number | null;
+}
 
 export interface ChatChips {
   platform: PlatformId;
@@ -20,8 +27,12 @@ export interface ChatChips {
   countries: CountryCode[];
   // Empty array = 任意语言; otherwise final filter is the union over selected languages.
   languages: string[];
-  follower: FollowerBucket;
-  viewsStep: ViewsStep;
+  followers: NumRange;
+  views: NumRange;
+  // v3 §4.4：「仅可建联」开关。默认开启 → 隐式过滤掉无邮箱、不活跃、已被 No
+  // 的达人。关闭时保留全部候选（也包括未验证邮箱）。文档把 v2 的「证据强度」
+  // 二级筛选下沉到了系统内部，对外只暴露这一个可建联开关。
+  contactableOnly: boolean;
 }
 
 export interface ChatProductMemory {

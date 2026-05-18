@@ -45,6 +45,7 @@ Thumbs.db
 
 # claude / ide
 .claude/launch.json
+.claude/worktrees/
 
 # scratch
 .tmp

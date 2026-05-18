@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check, ChevronDown, ChevronUp, X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 const FAQS = [
   {
     q: "Linkr 和手动找博主有什么本质区别？",
@@ -33,7 +35,8 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   const panelId = `faq-${q}`;
   return (
     <article className="landing-faq-item">
-      <button
+      <Button
+        unstyled
         type="button"
         className="landing-faq-question"
         onClick={() => setOpen((v) => !v)}
@@ -46,7 +49,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         ) : (
           <ChevronDown aria-hidden="true" className="h-4 w-4" />
         )}
-      </button>
+      </Button>
       {open && (
         <p id={panelId} className="landing-faq-answer">
           {a}

@@ -2,6 +2,7 @@
 
 import { Calendar, X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { CollaborationStatusCell } from "@/features/creator/components/collaboration-status-cell";
 import { useCreatorProfile } from "@/features/creator/components/creator-profile-context";
 import { DayItemRow } from "@/features/outreach/components/schedule-day-item-row";
@@ -17,6 +18,9 @@ import type { CollaborationStatus } from "@/types/api";
 // Lists every event landing on the selected date (publish / followup /
 // other / milestone) and lets the user edit dates, clear / delete, change
 // project (其他 only), or assign unscheduled cooperated creators to today.
+//
+// Visual: Zaiper Design — eyebrow + 大号日期 + 副标题三层 header；body 用
+// cream `#FFFDF9` + surface-1 `#F5F3EB` 自然分层，不堆 shadow。
 
 export type DayItemKind = CalendarEventCategory | "milestone-start" | "milestone-end";
 
@@ -85,10 +89,10 @@ export function ScheduleDayPanel({
 }: ScheduleDayPanelProps) {
   if (!selectedDate) {
     return (
-      <div className="flex h-full flex-col items-center justify-center bg-[#fffdf9] px-6 py-16 text-center">
-        <Calendar size={20} className="text-[#c5c0b1]" aria-hidden />
-        <p className="mt-3 text-sm font-medium text-[#36342e]">选择日历上的任意一天</p>
-        <p className="mt-1 text-xs text-[#939084]">查看 / 编辑当天事件，或为未排期博主指派日期</p>
+      <div className="flex h-full flex-col items-center justify-center bg-[#FFFDF9] px-6 py-16 text-center">
+        <Calendar size={20} className="text-[#B5B0A8]" aria-hidden />
+        <p className="mt-3 text-sm font-semibold text-[#201515]">选择日历上的任意一天</p>
+        <p className="mt-1 text-xs text-[#88827E]">查看 / 编辑当天事件，或为未排期博主指派日期</p>
       </div>
     );
   }
@@ -97,27 +101,42 @@ export function ScheduleDayPanel({
   const weekday = formatWeekday(selectedDate);
   const sortedItems = sortItems(items);
 
+  const isToday = selectedDate === todayIso();
+  const eyebrow = isToday ? `TODAY · ${weekday}` : weekday;
+  const subtitleParts: string[] = [];
+  if (sortedItems.length === 0) {
+    subtitleParts.push("今日暂无事件");
+  } else {
+    subtitleParts.push(`${sortedItems.length} 项事件`);
+  }
+  if (unscheduledCreators.length > 0) {
+    subtitleParts.push(`${unscheduledCreators.length} 待指派`);
+  }
+
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#fffefb]">
-      <div className="flex items-start justify-between border-b border-[#c5c0b1] px-5 py-4">
-        <div>
-          <div className="text-xs tracking-wider text-[#939084] uppercase">{weekday}</div>
-          <div className="mt-1 text-base font-semibold text-[#201515] tabular-nums">{heading}</div>
-          <div className="mt-1 text-[11px] text-[#939084]">
-            {sortedItems.length === 0 ? "今日暂无事件" : `共 ${sortedItems.length} 项`}
+    <div className="flex h-full min-h-0 flex-col bg-[#FFFDF9]">
+      <header className="flex items-start justify-between gap-3 border-b border-[#ECE9DF] bg-[#F5F3EB] px-5 py-5">
+        <div className="min-w-0">
+          <div className="text-[11px] font-medium tracking-[0.12em] text-[#88827E] uppercase">
+            {eyebrow}
           </div>
+          <div className="mt-2 text-[22px] leading-tight font-bold tracking-[-0.015em] text-[#201515] tabular-nums">
+            {heading}
+          </div>
+          <div className="mt-1 text-xs text-[#88827E]">{subtitleParts.join(" · ")}</div>
         </div>
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onClose}
           aria-label="关闭"
-          className="rounded-lg p-1 text-[#939084] hover:bg-[#eceae3] hover:text-[#36342e]"
+          className="rounded-lg p-1.5 text-[#88827E] transition-colors hover:bg-[#ECE9DF] hover:text-[#201515] focus-visible:ring-2 focus-visible:ring-[#FF4F00]/30 focus-visible:outline-none"
         >
           <X size={16} />
-        </button>
-      </div>
+        </Button>
+      </header>
 
-      <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+      <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
         <DayItemsSection
           items={sortedItems}
           creatorsById={creatorsById}
@@ -166,8 +185,10 @@ function DayItemsSection({
 
   return (
     <section>
-      <h3 className="text-xs font-medium tracking-wider text-[#939084] uppercase">当日事件</h3>
-      <ul className="mt-2 space-y-2">
+      <h3 className="text-[11px] font-medium tracking-[0.12em] text-[#88827E] uppercase">
+        当日事件
+      </h3>
+      <ul className="mt-3 space-y-2.5">
         {items.map((item) => (
           <DayItemRow
             key={item.id}
@@ -207,61 +228,99 @@ function UnscheduledAssign({
   };
   return (
     <section>
-      <h3 className="text-xs font-medium tracking-wider text-[#939084] uppercase">
+      <h3 className="text-[11px] font-medium tracking-[0.12em] text-[#88827E] uppercase">
         未排期 · 可指派至本日
       </h3>
-      <p className="mt-1 text-[11px] text-[#939084]">以下博主已进入合作但还没有约定发文日期</p>
-      <ul className="mt-2 space-y-1.5">
+      <p className="mt-1 text-[11px] text-[#88827E]">以下博主已进入合作但还没有约定发文日期</p>
+      <ul className="mt-3 space-y-2">
         {unscheduled.map((c) => {
           const projectName = projectsById[c.projectId]?.name ?? null;
           return (
             <li
               key={c.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-[#c5c0b1] bg-[#fffdf9] px-3 py-2"
+              className="flex items-center gap-3 rounded-lg border border-dashed border-[#D9D5C7] bg-[#F5F3EB] px-3 py-3 transition-colors hover:border-solid hover:border-[#FF4F00] hover:bg-[#FFFDF9]"
             >
-              <div className="min-w-0">
+              <CreatorAvatar handle={c.handle} seed={c.id} />
+              <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
+                  <Button
+                    unstyled
                     type="button"
                     onClick={() => handleOpen(c)}
                     aria-label={`查看 ${c.handle} 详情`}
-                    className="truncate text-left text-sm font-medium text-[#36342e] underline-offset-2 hover:text-[#ff4f00] hover:underline focus-visible:text-[#ff4f00] focus-visible:underline focus-visible:outline-none"
+                    className="truncate text-left text-[13px] font-bold tracking-[-0.005em] text-[#201515] underline-offset-2 hover:text-[#FF4F00] hover:underline focus-visible:rounded-sm focus-visible:text-[#FF4F00] focus-visible:underline focus-visible:ring-2 focus-visible:ring-[#FF4F00]/30 focus-visible:outline-none"
                   >
                     {c.handle}
-                  </button>
+                  </Button>
                   <CollaborationStatusCell
                     value={c.status}
                     onChange={(next) => onChangeCreatorStatus(c.id, next)}
                     allowedStatuses={OUTREACH_ALLOWED_STATUSES}
                     compact
                   />
+                </div>
+                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-[#88827E]">
+                  <span>{c.platform}</span>
+                  <span aria-hidden>·</span>
+                  <span>{(c.followers / 1000).toFixed(0)}K</span>
                   {projectName ? (
-                    <span
-                      title={`所属项目：${projectName}`}
-                      className="inline-flex max-w-[120px] items-center gap-1 truncate rounded-full border border-[#eceae3] bg-[#fffefb] px-1.5 py-0.5 text-[10px] font-medium text-[#36342e]"
-                    >
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#c5c0b1]" />
-                      <span className="truncate">{projectName}</span>
-                    </span>
+                    <>
+                      <span aria-hidden>·</span>
+                      <span
+                        title={`所属项目：${projectName}`}
+                        className="inline-flex max-w-[140px] items-center gap-1 truncate rounded-full bg-[#F5F3EB] px-2 py-0.5 text-[10px] font-medium text-[#201515] ring-1 ring-[#ECE9DF]"
+                      >
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF4F00]" />
+                        <span className="truncate">{projectName}</span>
+                      </span>
+                    </>
                   ) : null}
                 </div>
-                <div className="text-[10px] text-[#939084]">
-                  {c.platform} · {(c.followers / 1000).toFixed(0)}K
-                </div>
               </div>
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => onAssign(c.id, selectedDate)}
-                className="shrink-0 rounded-lg border border-[#ff4f00] bg-[#fff7f4] px-2.5 py-1 text-[11px] font-medium text-[#ff4f00] hover:bg-[#fff7f4]"
+                className="shrink-0 rounded-lg bg-[#FF4F00] px-3 py-1.5 text-[11px] font-semibold text-[#FFFDF9] transition-colors hover:bg-[#E64700] focus-visible:ring-2 focus-visible:ring-[#FF4F00]/30 focus-visible:outline-none"
               >
                 指派到本日
-              </button>
+              </Button>
             </li>
           );
         })}
       </ul>
     </section>
   );
+}
+
+// 头像首字母 + 简单 hash 配色（espresso / plum / orange）。
+const AVATAR_COLORS = [
+  { bg: "#201515", fg: "#FFFDF9" },
+  { bg: "#503EBD", fg: "#FFFDF9" },
+  { bg: "#FF4F00", fg: "#FFFDF9" },
+];
+
+function CreatorAvatar({ handle, seed }: { handle: string; seed: string }) {
+  const initials = handle.replace(/^@/, "").slice(0, 2).toUpperCase() || "··";
+  const idx = hashString(seed) % AVATAR_COLORS.length;
+  const { bg, fg } = AVATAR_COLORS[idx];
+  return (
+    <div
+      aria-hidden
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[12px] font-bold tracking-tight"
+      style={{ backgroundColor: bg, color: fg }}
+    >
+      {initials}
+    </div>
+  );
+}
+
+function hashString(value: string): number {
+  let h = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    h = (h * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return h;
 }
 
 function sortItems(items: DayItem[]): DayItem[] {
@@ -283,4 +342,12 @@ function formatHeading(iso: string): string {
 function formatWeekday(iso: string): string {
   const date = new Date(`${iso}T00:00:00`);
   return ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()];
+}
+
+function todayIso(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }

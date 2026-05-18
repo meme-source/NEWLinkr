@@ -1,5 +1,10 @@
-import type { CountryCode, FollowerBucket, ViewsStep } from "../chat-types";
+import type { CountryCode, FollowerBucket, NumRange } from "../chat-types";
 import type { PlatformId } from "../types";
+
+// Default starting range applied to both 粉丝量 and 均播 — gates out the long
+// tail of <1K creators that almost never represent serious collab candidates.
+// Users can dial either side down to null ("不限") manually.
+export const DEFAULT_RANGE: NumRange = { min: 1_000, max: null };
 
 export const PLATFORM_OPTIONS: { id: PlatformId; label: string; available: boolean }[] = [
   { id: "tiktok", label: "TikTok", available: true },
@@ -35,30 +40,6 @@ export const LANGUAGE_OPTIONS: string[] = [
   "土耳其语",
 ];
 
-export const FOLLOWER_OPTIONS: {
-  id: FollowerBucket;
-  label: string;
-  range?: string;
-}[] = [
-  { id: "any", label: "不限" },
-  { id: "nano", label: "Nano", range: "1K–10K" },
-  { id: "micro", label: "Micro", range: "10K–100K" },
-  { id: "mid", label: "Mid", range: "100K–500K" },
-  { id: "macro", label: "Macro", range: "500K–1M" },
-  { id: "mega", label: "Mega", range: "1M+" },
-];
-
-// Slider stops shown to the user. Index 0 = 不限.
-export const VIEWS_STEPS: { step: ViewsStep; label: string; short: string }[] = [
-  { step: 0, label: "不限", short: "不限" },
-  { step: 1, label: "≥ 1 千", short: "1K+" },
-  { step: 2, label: "≥ 1 万", short: "10K+" },
-  { step: 3, label: "≥ 5 万", short: "50K+" },
-  { step: 4, label: "≥ 10 万", short: "100K+" },
-  { step: 5, label: "≥ 50 万", short: "500K+" },
-  { step: 6, label: "≥ 100 万", short: "1M+" },
-];
-
 export const PLATFORM_LABEL: Record<PlatformId, string> = {
   tiktok: "TikTok",
   instagram: "Instagram",
@@ -83,9 +64,32 @@ export const FOLLOWER_LABEL: Record<FollowerBucket, string> = {
   mega: "Mega · 1M+",
 };
 
-export function viewsLabel(step: ViewsStep): string {
-  const found = VIEWS_STEPS.find((v) => v.step === step);
-  return found?.short ?? "不限";
+// Compact human-readable number formatter for chip summaries and input
+// placeholders. Drops the trailing `.0` so 1000 → "1K" not "1.0K".
+export function formatNum(n: number): string {
+  if (n >= 10_000) return `${trimZero(n / 10_000)}万`;
+  if (n >= 1_000) return `${trimZero(n / 1_000)}K`;
+  return String(n);
+}
+
+function trimZero(n: number): string {
+  return n.toFixed(1).replace(/\.0$/, "");
+}
+
+export function isDefaultRange(range: NumRange): boolean {
+  return range.min === DEFAULT_RANGE.min && range.max === DEFAULT_RANGE.max;
+}
+
+export function isUnboundedRange(range: NumRange): boolean {
+  return range.min === null && range.max === null;
+}
+
+// chip 关闭态文案：min/max 全 null = 不限；仅 min = "≥X"；仅 max = "≤X"；都有 = "X–Y"。
+export function summarizeRange(range: NumRange): string {
+  if (isUnboundedRange(range)) return "不限";
+  if (range.min !== null && range.max === null) return `≥${formatNum(range.min)}`;
+  if (range.min === null && range.max !== null) return `≤${formatNum(range.max)}`;
+  return `${formatNum(range.min!)}–${formatNum(range.max!)}`;
 }
 
 // chip 关闭态文案：≤2 列出、>2 折叠为「首项 +N」。

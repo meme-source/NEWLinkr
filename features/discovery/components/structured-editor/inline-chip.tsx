@@ -3,6 +3,8 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+
+import { Button } from "@/components/ui/button";
 import { T } from "../../data/tokens";
 
 /**
@@ -122,7 +124,8 @@ export function InlineChip({
 
   return (
     <>
-      <button
+      <Button
+        unstyled
         ref={triggerRef}
         type="button"
         title={title}
@@ -143,12 +146,12 @@ export function InlineChip({
           style={{ color: active ? T.terracotta : T.stone }}
           aria-hidden
         />
-      </button>
+      </Button>
       {open && portalTarget
         ? createPortal(
             <div
               ref={popRef}
-              className="bg-background fixed z-50 flex flex-col overflow-hidden rounded-[14px] border shadow-[0_18px_44px_-26px_rgba(20,20,19,0.32)]"
+              className="bg-background fixed z-50 flex flex-col overflow-hidden rounded-lg border shadow-[0_18px_44px_-26px_rgba(20,20,19,0.32)]"
               style={{
                 borderColor: T.border,
                 width: popSize?.width ?? popoverWidth,

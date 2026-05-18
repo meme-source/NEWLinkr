@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BarChart3, GripVertical, Layers, NotebookPen, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { CollaborationStatus, Creator } from "@/types/api";
 import { cn } from "@/lib/utils";
 import { useResizableDrawer } from "@/lib/hooks/use-resizable-drawer";
+import { useCreatorOverrides } from "@/features/creator/components/creator-overrides-context";
 import type { DrawerTabId } from "./drawer-types";
 import { DrawerHeader } from "./drawer-header";
 import { TabContent } from "./tab-content";
@@ -32,9 +34,18 @@ const TABS: { id: DrawerTabId; label: string; Icon: typeof BarChart3 }[] = [
   { id: "notes", label: "备注", Icon: NotebookPen },
 ];
 
-export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Props) {
+export function DrawerShell({ data: rawData, onClose, onChangeCollaborationStatus }: Props) {
   const [tab, setTab] = useState<DrawerTabId>("content");
-  const { width, startResize } = useResizableDrawer({ defaultWidth: DEFAULT_WIDTH });
+  const [toast, setToast] = useState<string | null>(null);
+  const { width, startResize } = useResizableDrawer({
+    defaultWidth: DEFAULT_WIDTH,
+    maxWidthVw: 70,
+  });
+
+  // 应用 override 后的最新博主数据。表格 + 抽屉共享 store，
+  // 抽屉「合作复盘」点击「更新」后，本地 reopen 也会读到最新值。
+  const { applyOverrides } = useCreatorOverrides();
+  const data = useMemo(() => (rawData ? applyOverrides(rawData) : null), [rawData, applyOverrides]);
 
   useEffect(() => {
     if (!data) return;
@@ -49,6 +60,22 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
     };
   }, [data, onClose]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 2400);
+    return () => window.clearTimeout(id);
+  }, [toast]);
+
+  const handleFavoriteToggle = useCallback(
+    (favorited: boolean) => {
+      if (!favorited || !data) return;
+      setToast(`已收藏 ${data.name} 至博主库`);
+    },
+    [data],
+  );
+
+  const showToast = useCallback((msg: string) => setToast(msg), []);
+
   return (
     <AnimatePresence>
       {data && (
@@ -59,7 +86,7 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[100]"
             style={{ background: "rgba(20,20,19,0.22)", backdropFilter: "blur(3px)" }}
             onClick={onClose}
           />
@@ -69,7 +96,7 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 260 }}
-            className="fixed top-0 right-0 bottom-0 z-50 max-w-[95vw] bg-[#fffdf9]"
+            className="fixed top-0 right-0 bottom-0 z-[110] max-w-[70vw] bg-[#fffdf9]"
             style={{ width, boxShadow: "-30px 0 80px -40px rgba(20,20,19,0.35)" }}
           >
             <div
@@ -77,7 +104,7 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
               aria-orientation="vertical"
               aria-label="拖动调整宽度"
               onMouseDown={startResize}
-              className="group absolute top-0 bottom-0 left-0 z-[60] flex w-2 -translate-x-1/2 cursor-col-resize items-center justify-center"
+              className="group absolute top-0 bottom-0 left-0 z-[120] flex w-2 -translate-x-1/2 cursor-col-resize items-center justify-center"
             >
               <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-transparent transition-colors group-hover:bg-[#ff4f00]/40" />
               <span className="relative flex h-9 w-4 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[#939084] transition-colors group-hover:border-[#ff4f00]/50 group-hover:text-[#ff4f00]">
@@ -90,12 +117,15 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
                   creator={data}
                   onClose={onClose}
                   onChangeCollaborationStatus={onChangeCollaborationStatus}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  onToast={showToast}
                 />
                 <nav className="flex items-center gap-1 border-b border-[#c5c0b1] bg-[rgba(250,249,245,0.92)] px-6 backdrop-blur">
                   {TABS.map((t) => {
                     const active = tab === t.id;
                     return (
-                      <button
+                      <Button
+                        unstyled
                         key={t.id}
                         type="button"
                         onClick={() => setTab(t.id)}
@@ -109,7 +139,7 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
                         {active && (
                           <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-t bg-[#ff4f00]" />
                         )}
-                      </button>
+                      </Button>
                     );
                   })}
                 </nav>
@@ -117,7 +147,7 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
 
               <div className="px-6 py-5">
                 {tab === "content" && <TabContent creator={data} />}
-                {tab === "audience" && <TabAudience creator={data} />}
+                {tab === "audience" && <TabAudience creator={data} onToast={showToast} />}
                 {tab === "collaborations" && (
                   <TabCollaborations
                     creator={data}
@@ -127,6 +157,20 @@ export function DrawerShell({ data, onClose, onChangeCollaborationStatus }: Prop
                 {tab === "notes" && <TabNotes creator={data} />}
               </div>
             </div>
+            <AnimatePresence>
+              {toast && (
+                <motion.div
+                  key={toast}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="pointer-events-none absolute bottom-6 left-1/2 z-[130] -translate-x-1/2 rounded-full bg-zinc-900 px-4 py-2 text-[12px] font-medium whitespace-nowrap text-white shadow-lg ring-1 ring-black/10"
+                >
+                  {toast}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.aside>
         </>
       )}

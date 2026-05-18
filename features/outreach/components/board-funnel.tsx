@@ -1,10 +1,13 @@
 "use client";
 
 // §3.3 投放漏斗 ——
-// 2026-05-06 重新切边界：建联段（待建联→已发送→合作中→已完成）由
-// "建联进度"页里的 ProgressFunnel 负责；本页的漏斗只画"投放后"那段：
-//   合作中 → 已投放 → 累计曝光
-// 因此本组件不再需要 sentCount。
+// 2026-05-11 与 docs/REAL-BRIEF-TESTS 投放表现 mock 1:1 对齐：
+//   合作中（100%） → 已投放（78%） → 累计曝光（60%） 三层竖直 pill，
+//   pill 之间放 ↓ + "投放密度 / 单条产出" 居中 caption。
+// 颜色来自 board-performance-shared 中的 TIER coral 家族
+// （F5C9B3 / D88A74 / 8C543F），与"量级统计"、散点图同源。
+
+import { fmtCount } from "@/features/outreach/components/board-performance-shared";
 
 interface BoardFunnelProps {
   successCount: number;
@@ -12,80 +15,78 @@ interface BoardFunnelProps {
   totalExposureViews: number;
 }
 
-function formatExposure(n: number): string {
-  if (n >= 1e6) {
-    const v = n / 1e6;
-    return `${v >= 10 ? v.toFixed(0) : v.toFixed(1).replace(/\.0$/, "")}M`;
-  }
-  if (n >= 1e3) {
-    const v = n / 1e3;
-    return `${v >= 10 ? v.toFixed(0) : v.toFixed(1).replace(/\.0$/, "")}K`;
-  }
-  return String(Math.round(n));
+function fmtDensity(n: number): string {
+  if (n <= 0) return "0";
+  if (n >= 10) return n.toFixed(0);
+  return n.toFixed(1).replace(/\.0$/, "");
 }
 
 export function BoardFunnel({ successCount, placedCount, totalExposureViews }: BoardFunnelProps) {
-  const placementRate = successCount > 0 ? Math.round((placedCount / successCount) * 100) : 0;
-  const totalExposure = totalExposureViews > 0 ? formatExposure(totalExposureViews) : "—";
-  const avgExposure = placedCount > 0 ? formatExposure(totalExposureViews / placedCount) : "—";
+  const density = successCount > 0 ? placedCount / successCount : 0;
+  const perPost = placedCount > 0 ? totalExposureViews / placedCount : 0;
 
   const stages = [
-    { label: "合作中", value: String(successCount), width: 100, bg: "#ef4444", fg: "#fffdf9" },
-    { label: "已投放", value: String(placedCount), width: 70, bg: "#ff4f00", fg: "#fffdf9" },
-    { label: "累计曝光", value: totalExposure, width: 50, bg: "#201515", fg: "#fffdf9" },
+    { label: "合作中", value: String(successCount), width: 100, bg: "#F5C9B3", fg: "#7C4632" },
+    { label: "已投放", value: String(placedCount), width: 78, bg: "#D88A74", fg: "#fffefb" },
+    {
+      label: "累计曝光",
+      value: totalExposureViews > 0 ? fmtCount(totalExposureViews) : "—",
+      width: 60,
+      bg: "#8C543F",
+      fg: "#fffefb",
+    },
   ];
 
-  const transitions = [
-    { caption: "投放率", value: `${placementRate}%` },
-    { caption: "平均", value: `${avgExposure}/篇` },
+  const captions = [
+    {
+      label: "投放密度",
+      value: `${fmtDensity(density)} 条/人`,
+      ratio: `${placedCount} / ${successCount}`,
+    },
+    {
+      label: "单条产出",
+      value: `${fmtCount(perPost)} / 篇`,
+      ratio: `${fmtCount(totalExposureViews)} / ${placedCount}`,
+    },
   ];
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-5">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <div className="text-xs font-medium tracking-wider text-[#939084] uppercase">
-            投放漏斗
-          </div>
-          <div className="mt-1 text-[11px] text-[#939084]">合作中 → 已投放 → 累计曝光</div>
+    <div className="flex h-full flex-col rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-[22px] py-[18px]">
+      <div className="mb-[18px]">
+        <div className="text-[11px] font-medium tracking-[0.12em] text-[#939084] uppercase">
+          FUNNEL
         </div>
-        <div className="flex items-baseline gap-1.5 rounded-full border border-[#fff7f4] bg-[#fffdf9] px-3 py-1">
-          <span className="text-[10px] tracking-wide text-[#939084]">投放率</span>
-          <span className="text-sm font-semibold text-[#ff4f00] tabular-nums">
-            {placementRate}%
-          </span>
-        </div>
+        <h3 className="mt-1.5 text-[17px] font-semibold tracking-tight text-[#201515]">投放漏斗</h3>
       </div>
 
-      <div className="mx-auto w-full max-w-md">
+      <div className="flex flex-1 flex-col items-center justify-center gap-3.5">
         {stages.map((stage, idx) => {
-          const isLast = idx === stages.length - 1;
-          const transition = transitions[idx];
+          const caption = captions[idx];
           return (
-            <div key={stage.label}>
+            <div key={stage.label} className="contents">
               <div
-                className="mx-auto flex items-center justify-between gap-4 rounded-xl px-4 py-2.5 transition-[width] duration-300"
+                className="flex items-center justify-between gap-2.5 rounded-lg px-[22px] py-[18px]"
                 style={{
                   width: `${stage.width}%`,
                   backgroundColor: stage.bg,
                   color: stage.fg,
                 }}
               >
-                <span className="text-[11px] font-medium tracking-wide opacity-90">
+                <span className="text-[12.5px] font-semibold tracking-wide whitespace-nowrap">
                   {stage.label}
                 </span>
-                <span className="text-base font-semibold tabular-nums">{stage.value}</span>
+                <span className="text-base font-bold tracking-tight tabular-nums">
+                  {stage.value}
+                </span>
               </div>
-              {!isLast && transition ? (
-                <div className="flex items-center gap-2 px-1 py-1.5">
-                  <div className="h-px flex-1 bg-[#c5c0b1]" />
-                  <span className="text-[10px] tracking-wide text-[#939084]">
-                    {transition.caption}
+              {caption ? (
+                <div className="flex flex-wrap items-center justify-center gap-[5px] text-[10.5px]">
+                  <span className="font-semibold text-[#939084]">↓</span>
+                  <span className="text-[#36342e]">{caption.label}</span>
+                  <span className="text-[11.5px] font-bold text-[#201515] tabular-nums">
+                    {caption.value}
                   </span>
-                  <span className="text-[11px] font-semibold text-[#36342e] tabular-nums">
-                    {transition.value}
-                  </span>
-                  <div className="h-px flex-1 bg-[#c5c0b1]" />
+                  <span className="text-[#939084] tabular-nums">· {caption.ratio}</span>
                 </div>
               ) : null}
             </div>

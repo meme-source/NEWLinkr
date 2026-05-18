@@ -1,5 +1,15 @@
 {
-  "$comment": "Project-level Claude Code settings. Hooks here run only when working in this repo. Edit with care — these are deliberate guardrails to keep AI changes from drifting.",
+  "permissions": {
+    "allow": [
+      "Bash(kill baf9z1lm5 *)",
+      "Bash(unzip -l \"Linkr 5.0.zip\")",
+      "Bash(grep -E \"\\(^|/\\)\\(package\\\\.json|package-lock\\\\.json|HANDOFF\\\\.md|CLAUDE\\\\.md|next\\\\.config\\\\.ts|tsconfig\\\\.json\\)$\")",
+      "Bash(unzip -l \"/Users/meme/Desktop/Linkr 5.0.zip\")",
+      "Bash(grep -E \"^[ 0-9]+\\(package\\\\.json|package-lock\\\\.json|HANDOFF\\\\.md|CLAUDE\\\\.md|next\\\\.config\\\\.ts|tsconfig\\\\.json\\)$\")",
+      "Bash(awk '$4 !~ /\\\\// {print $4}')",
+      "Bash(grep -v '^$')"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -12,5 +22,6 @@
         ]
       }
     ]
-  }
+  },
+  "$comment": "Project-level Claude Code settings. Hooks here run only when working in this repo. Edit with care — these are deliberate guardrails to keep AI changes from drifting."
 }

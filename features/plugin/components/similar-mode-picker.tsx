@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { ReactNode } from "react";
 import type { SimilarSearchModeKey } from "./similar-search-module";
 
+import { Button } from "@/components/ui/button";
+
 type ModeDef = {
   key: SimilarSearchModeKey;
   emoji: string;
@@ -32,7 +34,7 @@ const MODES: ModeDef[] = [
     key: "seed",
     emoji: "🌱",
     label: "找种子达人",
-    desc: "打开后台博主发现，基于当前达人扩展低重合、高潜力的种子。",
+    desc: "打开后台博主发现，从零物色一批适合的种子博主。",
     eta: "跳转",
   },
 ];
@@ -99,7 +101,8 @@ export function SimilarModePicker({
                   根据 {actionSubjectLabel} 搜索
                 </span>
               </div>
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={onClose}
                 aria-label="取消"
@@ -107,7 +110,7 @@ export function SimilarModePicker({
                 style={{ color: "#939084" }}
               >
                 <X className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
 
             {/* Mode list */}
@@ -117,11 +120,12 @@ export function SimilarModePicker({
                 const isSeed = mode.key === "seed";
                 return (
                   <div key={mode.key} className="group relative">
-                    <button
+                    <Button
+                      unstyled
                       type="button"
                       onClick={() => onSelect(mode.key)}
                       className={[
-                        "flex w-full items-center gap-2.5 rounded-[11px] border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.99]",
+                        "flex w-full items-center gap-2.5 rounded-[8px] border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.99]",
                         isActive
                           ? "border-[#c5c0b1] bg-[#fff7f4]"
                           : "border-[#c5c0b1] bg-[#fffdf9] hover:bg-[#eceae3]",
@@ -142,7 +146,7 @@ export function SimilarModePicker({
                       ) : !isSeed ? (
                         <span className="ml-auto text-[10px] text-[#939084]">{mode.eta}</span>
                       ) : null}
-                    </button>
+                    </Button>
 
                     {/* Hover tooltip with description */}
                     <span

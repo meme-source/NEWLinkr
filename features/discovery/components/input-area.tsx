@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowUp, Info, Paperclip, X } from "lucide-react";
-import { useRef, useState, type ReactNode } from "react";
+import { ArrowUp, Paperclip, X } from "lucide-react";
+import { useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import type { ChatChips, ChatIntent } from "../chat-types";
-import { INTENT_HERO, INTENT_ORDER } from "../data/intent-hero";
 import { T } from "../data/tokens";
 import { ChipBar } from "./chip-bar";
 import { isEditorEmpty, StructuredEditor } from "./structured-editor/structured-editor";
@@ -11,65 +12,22 @@ import type { StructuredEditorState } from "./structured-editor/types";
 
 interface InputAreaProps {
   intent: ChatIntent;
-  onIntentChange: (next: ChatIntent) => void;
   editorState: StructuredEditorState;
   onEditorChange: (next: StructuredEditorState) => void;
   chips: ChatChips;
   onChipsChange: (next: ChatChips) => void;
   onSubmit: () => void;
   disabled: boolean;
-  /** When true, surfaces a permanent ⓘ tooltip near the active tab. */
-  showInfoTooltip: boolean;
-  /**
-   * Optional content rendered as the topmost row of the input card. Used to
-   * pin the project context (project switcher) to the same visual unit as
-   * the product input — see discovery-split-view §A.
-   */
-  contextSlot?: ReactNode;
-}
-
-function IntentTooltip({ intent }: { intent: ChatIntent }) {
-  const spec = INTENT_HERO[intent];
-  return (
-    <span className="group relative inline-flex">
-      <span
-        role="img"
-        aria-label="查看说明"
-        className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors"
-        style={{ color: T.stone }}
-      >
-        <Info size={13} />
-      </span>
-      <span
-        role="tooltip"
-        className="bg-background pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-30 w-[260px] -translate-x-1/2 rounded-[12px] border px-3 py-2.5 text-left opacity-0 shadow-[0_18px_44px_-26px_rgba(20,20,19,0.32)] transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100"
-        style={{ borderColor: T.border }}
-      >
-        <span
-          className="block text-[12.5px] leading-[1.4] font-semibold"
-          style={{ color: T.nearBlack }}
-        >
-          {spec.question}
-        </span>
-        <span className="mt-1 block text-[11.5px] leading-[1.55]" style={{ color: T.charcoal }}>
-          {spec.oneLiner}
-        </span>
-      </span>
-    </span>
-  );
 }
 
 export function InputArea({
   intent,
-  onIntentChange,
   editorState,
   onEditorChange,
   chips,
   onChipsChange,
   onSubmit,
   disabled,
-  showInfoTooltip,
-  contextSlot,
 }: InputAreaProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [focused] = useState(false);
@@ -97,48 +55,11 @@ export function InputArea({
   return (
     <div className="w-full">
       <div
-        className="bg-background rounded-[22px] border shadow-[0_24px_60px_-32px_rgba(20,20,19,0.18)] transition-colors"
+        className="bg-background rounded-lg border shadow-[0_24px_60px_-32px_rgba(20,20,19,0.18)] transition-colors"
         style={{
           borderColor: focused ? T.terracotta : T.border,
         }}
       >
-        {/* Tabs + context row — Tab nav (left) and project switcher (right)
-            share a single border-bottom that runs the full width. The
-            context slot renders at the right edge as a ghost-style button
-            so it never competes with the active-tab orange. */}
-        <div
-          className="flex items-center justify-between gap-2 border-b pt-2 pr-3 pl-3"
-          style={{ borderColor: T.borderLight }}
-        >
-          <div className="flex items-center gap-1">
-            {INTENT_ORDER.map((id) => {
-              const active = id === intent;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => onIntentChange(id)}
-                  className="relative inline-flex items-center gap-1.5 px-3 pt-2 pb-2.5 text-[13px] font-medium transition-colors"
-                  style={{
-                    color: active ? T.terracotta : T.stone,
-                  }}
-                >
-                  {INTENT_HERO[id].tabLabel}
-                  {active && showInfoTooltip ? <IntentTooltip intent={id} /> : null}
-                  {active ? (
-                    <span
-                      aria-hidden
-                      className="absolute right-3 bottom-[-1px] left-3 h-[2px] rounded-full"
-                      style={{ backgroundColor: T.terracotta }}
-                    />
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-          {contextSlot ? <div className="flex items-center pb-1.5">{contextSlot}</div> : null}
-        </div>
-
         {/* Attachments */}
         {attachments.length > 0 ? (
           <div className="flex flex-wrap gap-1.5 px-4 pt-3">
@@ -159,7 +80,8 @@ export function InputArea({
                 <span className="shrink-0 text-[10.5px]" style={{ color: T.stone }}>
                   {formatFileSize(file.size)}
                 </span>
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={() => removeAttachment(index)}
                   aria-label={`移除 ${file.name}`}
@@ -167,7 +89,7 @@ export function InputArea({
                   style={{ color: T.stone }}
                 >
                   <X size={11} />
-                </button>
+                </Button>
               </span>
             ))}
           </div>
@@ -188,7 +110,8 @@ export function InputArea({
         <div className="flex items-center justify-between gap-3 px-3 pt-2 pb-3">
           <div className="flex flex-wrap items-center gap-2">
             <input ref={fileInputRef} type="file" multiple hidden onChange={handleFilesSelected} />
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={() => fileInputRef.current?.click()}
               aria-label="添加文件"
@@ -201,10 +124,11 @@ export function InputArea({
               }}
             >
               <Paperclip size={14} />
-            </button>
+            </Button>
             <ChipBar chips={chips} onChange={onChipsChange} />
           </div>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onSubmit}
             disabled={!canSubmit}
@@ -216,7 +140,7 @@ export function InputArea({
             }}
           >
             <ArrowUp size={15} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

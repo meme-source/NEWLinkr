@@ -1,13 +1,14 @@
 export { InfluencerCard } from "./InfluencerCard";
 export type {
+  AnalysisDimension,
   CoverCount,
   EmailStatus,
   FilterMode,
+  InfluencerCardAnalysisTag,
   InfluencerCardCallbacks,
   InfluencerCardData,
   InfluencerCardMetric,
   InfluencerCardProps,
-  InfluencerCardRadarAxis,
   InfluencerCardSampleConfig,
   ScrapeCount,
 } from "./types";

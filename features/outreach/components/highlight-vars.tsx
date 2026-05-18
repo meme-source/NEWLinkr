@@ -3,7 +3,10 @@
 export function highlightVars(text: string) {
   return text.split(/(\{[^}]+\})/).map((p, i) =>
     p.startsWith("{") && p.endsWith("}") ? (
-      <span key={i} className="rounded bg-[#fff7f4] px-0.5 font-mono text-[11px] text-[#ff4f00]">
+      <span
+        key={i}
+        className="rounded bg-[#fff7f4] px-1 font-mono text-[11.5px] font-medium text-[#ff4f00]"
+      >
         {p}
       </span>
     ) : (

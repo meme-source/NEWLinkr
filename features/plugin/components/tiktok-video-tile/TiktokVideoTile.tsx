@@ -6,15 +6,12 @@ import { cn } from "@/lib/utils";
 import { getVideoCoverUrl } from "./cover-pool";
 import type { TiktokVideoCategory, TiktokVideoTileProps } from "./types";
 
-const BADGE_STYLES: Record<
-  TiktokVideoCategory,
-  { className: string; suffix: "" | "-Paid" | "-Shop" }
-> = {
-  viral: { className: "bg-[#ff5a3d] text-[#fffefb]", suffix: "" },
-  flop: { className: "bg-[#3a8dff] text-[#fffefb]", suffix: "" },
-  paid: { className: "bg-[#1f6feb] text-[#fffefb]", suffix: "-Paid" },
-  shop: { className: "bg-[#16a34a] text-[#fffefb]", suffix: "-Shop" },
-  normal: { className: "bg-black/55 text-[#fffefb] backdrop-blur-sm", suffix: "" },
+const BADGE_STYLES: Record<TiktokVideoCategory, { className: string; label: string }> = {
+  viral: { className: "bg-[#ff5a3d] text-[#fffefb]", label: "爆款" },
+  flop: { className: "bg-[#3a8dff] text-[#fffefb]", label: "扑街" },
+  paid: { className: "bg-[#1f6feb] text-[#fffefb]", label: "广告" },
+  shop: { className: "bg-[#16a34a] text-[#fffefb]", label: "带货" },
+  normal: { className: "bg-black/55 text-[#fffefb] backdrop-blur-sm", label: "普通" },
 };
 
 function formatPlays(n: number): string {
@@ -42,18 +39,22 @@ function formatDuration(sec: number): string {
 
 function getBadgeTooltip(
   category: TiktokVideoCategory,
+  ratio: number,
   viralThreshold: number,
   flopThreshold: number,
 ): string | null {
+  const ratioText = `${ratio.toFixed(1)}x`;
   switch (category) {
     case "viral":
-      return `播放倍数 ≥ ${viralThreshold.toFixed(1)}x，表现远超日常中位数`;
+      return `爆款 · ${ratioText}（≥ ${viralThreshold.toFixed(1)}x，远超中位数）`;
     case "flop":
-      return `播放倍数 ≤ ${flopThreshold.toFixed(1)}x，表现低于日常中位数`;
+      return `扑街 · ${ratioText}（≤ ${flopThreshold.toFixed(1)}x，低于中位数）`;
     case "paid":
-      return "识别到平台商业合作标签";
+      return `广告 · ${ratioText}（识别到平台商业合作标签）`;
     case "shop":
-      return "识别到橱窗或商品挂车链接";
+      return `带货 · ${ratioText}（识别到橱窗或商品挂车链接）`;
+    case "normal":
+      return `普通 · ${ratioText}（接近中位数）`;
     default:
       return null;
   }
@@ -72,10 +73,14 @@ export function TiktokVideoTile({
   showStats = true,
   viralThreshold = 1.5,
   flopThreshold = 0.7,
+  enabledCategories,
 }: TiktokVideoTileProps) {
   const badge = BADGE_STYLES[category];
   const coverUrl = getVideoCoverUrl(videoId);
-  const tooltip = getBadgeTooltip(category, viralThreshold, flopThreshold);
+  const showBadge = enabledCategories ? enabledCategories.has(category) : true;
+  const tooltip = showBadge
+    ? getBadgeTooltip(category, ratio, viralThreshold, flopThreshold)
+    : null;
 
   return (
     <div className="group relative aspect-[3/4] overflow-hidden rounded-[8px] border border-[#c5c0b1] bg-[#201515] text-[#fffefb] transition-transform duration-150 hover:-translate-y-0.5">
@@ -91,24 +96,28 @@ export function TiktokVideoTile({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
 
       <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between px-2.5 pt-2.5">
-        <div className="group/badge relative">
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full px-2 py-[3px] text-[11px] leading-none font-semibold",
-              badge.className,
-            )}
-          >
-            {ratio.toFixed(1)}X{badge.suffix}
-          </span>
-          {tooltip ? (
-            <div
-              role="tooltip"
-              className="pointer-events-none absolute top-full left-0 z-20 mt-1.5 w-max max-w-[220px] rounded-md bg-[#201515]/95 px-2 py-1 text-[10.5px] leading-snug font-medium whitespace-normal text-[#fffefb] opacity-0 ring-1 ring-white/10 backdrop-blur-sm transition-opacity duration-150 group-hover/badge:opacity-100"
+        {showBadge ? (
+          <div className="group/badge relative">
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full px-2 py-[3px] text-[11px] leading-none font-semibold",
+                badge.className,
+              )}
             >
-              {tooltip}
-            </div>
-          ) : null}
-        </div>
+              {badge.label}
+            </span>
+            {tooltip ? (
+              <div
+                role="tooltip"
+                className="pointer-events-none absolute top-full left-0 z-20 mt-1.5 w-max max-w-[220px] rounded-md bg-[#201515]/95 px-2 py-1 text-[10.5px] leading-snug font-medium whitespace-normal text-[#fffefb] opacity-0 ring-1 ring-white/10 backdrop-blur-sm transition-opacity duration-150 group-hover/badge:opacity-100"
+              >
+                {tooltip}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <span aria-hidden />
+        )}
         <span className="text-[11px] font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]">
           {formatDuration(durationSec)}
         </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { CollaborationStatus, Creator, Rating } from "@/types/api";
+import type { CollaborationStatus, Creator } from "@/types/api";
 import type { LibraryScope, LibraryViewRow } from "@/features/library/types";
 import type { ToggleableColumnId } from "@/features/library/hooks/use-library-columns";
 import { LibraryRow, buildGridTemplate, type RowAction } from "./library-row";
@@ -16,7 +16,6 @@ interface Props {
   onToggle: (id: string) => void;
   onOpen: (creator: Creator) => void;
   onAction: (action: RowAction, creator: Creator) => void;
-  onRate: (creatorId: string, rating: Rating) => void;
   onChangeStatus: (creatorId: string, status: CollaborationStatus) => void;
   onChangeNotes: (creatorId: string, notes: string) => void;
 }
@@ -31,7 +30,6 @@ export function LibraryTable({
   onToggle,
   onOpen,
   onAction,
-  onRate,
   onChangeStatus,
   onChangeNotes,
 }: Props) {
@@ -40,10 +38,12 @@ export function LibraryTable({
   const showCampaigns = scope === "all";
   const gridTemplate = buildGridTemplate(visibleColumns, showCampaigns);
 
+  // 表格整体作为合并卡片的内层模块：去掉外框；表头淡米色背景 + 圆角；
+  // 表头与数据行之间加一条浅米分隔线作为内容分层；行间用极淡的 divider 区分。
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+    <div>
       <div
-        className="grid items-center gap-3 border-b border-[#c5c0b1] bg-[#fffdf9] px-3 py-2 text-[11px] font-medium tracking-wide text-[#939084] uppercase"
+        className="grid items-center gap-3 rounded-lg border-b border-[#eceae3] bg-[#fffdf9] px-3 py-2.5 text-[12px] font-normal text-[#939084]"
         style={{ gridTemplateColumns: gridTemplate }}
       >
         <input
@@ -87,7 +87,6 @@ export function LibraryTable({
             onToggleSelect={onToggle}
             onOpen={onOpen}
             onAction={onAction}
-            onRate={onRate}
             onChangeStatus={onChangeStatus}
             onChangeNotes={onChangeNotes}
           />

@@ -1,22 +1,7 @@
-import type { EmailTemplateMeta } from "../types";
-
-export const emailTemplates: EmailTemplateMeta[] = [
-  {
-    key: "intro",
-    label: "初次建联",
-    category: "自建模板",
-    summary: "适合首次触达，AI 会补入姓名、内容亮点和合作切入点。",
-  },
-  {
-    key: "followup",
-    label: "二次催促",
-    category: "自建模板",
-    summary: "适合已触达但未回复对象，突出上次沟通与下一步动作。",
-  },
-  {
-    key: "gifted",
-    label: "寄样邀约",
-    category: "自建模板",
-    summary: "适合先寄样再确认合作，AI 会生成更具体的试用理由。",
-  },
-];
+// 插件邮件模板 —— 现在统一从共享层 features/email 取数据，与 Web 工作台
+// 「邮件模板」同源。模板内容、增删改由 outreach 维护，这里只做选择 + 渲染。
+export {
+  EMAIL_TEMPLATE_OPTIONS as emailTemplates,
+  DEFAULT_EMAIL_TEMPLATE_ID,
+  findEmailTemplate,
+} from "@/features/email/data/templates";

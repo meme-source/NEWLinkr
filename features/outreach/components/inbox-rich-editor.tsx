@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   ColorDropdown,
   TableDropdown,
@@ -115,7 +116,7 @@ export function RichEmailEditor({
   }, [exec]);
 
   return (
-    <div className="flex flex-col rounded-xl border border-[#c5c0b1] bg-[#fffefb]">
+    <div className="flex flex-col rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
       <Toolbar
         onCommand={exec}
         onInsertHtml={insertHtml}
@@ -156,7 +157,7 @@ function Toolbar({ onCommand, onInsertHtml, onLink, onImage }: ToolbarProps) {
   }, [onCommand]);
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 rounded-t-xl border-b border-[#c5c0b1] bg-[#fffdf9] px-2 py-1.5">
+    <div className="flex flex-wrap items-center gap-0.5 rounded-t-lg border-b border-[#c5c0b1] bg-[#fffdf9] px-2 py-1.5">
       <ToolButton title="撤销" onClick={() => onCommand("undo")}>
         <Undo2 className="h-3.5 w-3.5" />
       </ToolButton>
@@ -236,7 +237,8 @@ interface ToolButtonProps {
 
 function ToolButton({ title, onClick, children }: ToolButtonProps) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       title={title}
       aria-label={title}
@@ -245,7 +247,7 @@ function ToolButton({ title, onClick, children }: ToolButtonProps) {
       className="flex h-7 w-7 items-center justify-center rounded text-[#36342e] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

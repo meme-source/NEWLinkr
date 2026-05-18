@@ -29,7 +29,7 @@ export function PricingSection({
 }: PricingSectionProps) {
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-[#c5c0b1] p-6 ring-1 ring-white/70 ring-inset"
+      className="relative overflow-hidden rounded-lg border border-[#c5c0b1] p-6 ring-1 ring-white/70 ring-inset"
       style={{
         backgroundImage: "linear-gradient(135deg, #fffdf9 0%, #fffdf9 60%, #f5f2ea 100%)",
       }}
@@ -78,7 +78,7 @@ function PlatformPriceCard({ platform, symbol, tierPrices, onChange }: PlatformP
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border bg-[#fffefb] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_1px_2px_rgba(32,21,21,0.04)]",
+        "overflow-hidden rounded-lg border bg-[#fffefb] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_1px_2px_rgba(32,21,21,0.04)]",
         platform.enabled ? "border-[#c5c0b1]" : "border-dashed border-[#c5c0b1] opacity-75",
       )}
     >
@@ -104,7 +104,7 @@ function PlatformPriceCard({ platform, symbol, tierPrices, onChange }: PlatformP
               </div>
               <div
                 className={cn(
-                  "flex items-center gap-1 rounded-xl border bg-[#fffdf9] px-2 py-1.5 transition-colors",
+                  "flex items-center gap-1 rounded-lg border bg-[#fffdf9] px-2 py-1.5 transition-colors",
                   platform.enabled
                     ? "border-[#c5c0b1] focus-within:border-[#ff4f00]/50 focus-within:bg-[#fffefb]"
                     : "border-[#c5c0b1]/60",

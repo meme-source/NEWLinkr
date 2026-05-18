@@ -4,12 +4,22 @@ import { useMemo } from "react";
 import type { Creator } from "@/types/api";
 import { dominantStatus, getActiveCollaboration } from "@/lib/creator";
 import { getCreators } from "@/features/creator/data";
+import { useCreatorOverrides } from "@/features/creator/components/creator-overrides-context";
 import type { LibraryScope, LibraryViewRow, StatusTab } from "@/features/library/types";
 
 // scope=project：只看包含 projectId 的博主
 // scope=all：返回全部博主，列表中的状态用 dominantStatus
+//
+// 应用 creator-overrides：抽屉里点「更新」后写入的评级 / 备注会通过 applyOverrides
+// 透传到表格行；deleteCreators() 软删除的博主在这里被过滤掉，不会出现在表格里。
 export function useLibraryRows(scope: LibraryScope, projectId: string): LibraryViewRow[] {
-  return useMemo(() => buildRows(getCreators(), scope, projectId), [scope, projectId]);
+  const { applyOverrides, isDeleted } = useCreatorOverrides();
+  return useMemo(() => {
+    const merged = getCreators()
+      .filter((c) => !isDeleted(c.id))
+      .map(applyOverrides);
+    return buildRows(merged, scope, projectId);
+  }, [scope, projectId, applyOverrides, isDeleted]);
 }
 
 export function buildRows(

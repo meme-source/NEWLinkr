@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -67,7 +68,8 @@ export function LibraryNotesCell({ value, onChange }: Props) {
   }
 
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onDoubleClick={(event) => {
         event.stopPropagation();
@@ -89,6 +91,6 @@ export function LibraryNotesCell({ value, onChange }: Props) {
         )}
       />
       <span className="truncate">{value || PLACEHOLDER}</span>
-    </button>
+    </Button>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail: boolean }) {
   const [copied, setCopied] = useState(false);
@@ -50,13 +51,14 @@ export function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail:
           }
         }}
         placeholder="输入邮箱地址"
-        className="h-[26px] min-w-0 flex-1 rounded-[13px] border border-[#c5c0b1] bg-[#fffefb] px-[9px] text-[11px] font-medium text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35"
+        className="h-7 min-w-0 flex-1 rounded-[8px] border border-[#c5c0b1] bg-[#fffefb] px-2 text-[11px] font-medium text-[#201515] transition-colors outline-none focus:border-[#ff4f00]/35"
       />
     );
   }
 
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={() => {
         if (effectiveHasEmail) {
@@ -72,9 +74,13 @@ export function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail:
       aria-label={effectiveHasEmail ? "复制邮箱" : "暂无邮箱，双击添加邮箱"}
       title={effectiveHasEmail ? effectiveEmail : "双击添加邮箱"}
       className={cn(
-        "flex h-[26px] min-w-0 flex-1 items-center gap-1.5 rounded-[13px] px-[9px] text-[11px] transition-all select-none",
-        copied ? "bg-emerald-50" : effectiveHasEmail ? "bg-[#eceae3]" : "bg-[#eceae3]",
-        effectiveHasEmail ? "cursor-pointer hover:bg-[#c5c0b1]" : "cursor-text",
+        "flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-[8px] border border-[#c5c0b1] px-2 text-[11px] transition-all select-none",
+        copied
+          ? "border-emerald-200 bg-emerald-50"
+          : effectiveHasEmail
+            ? "bg-[#fffefb] hover:bg-[#eceae3]"
+            : "bg-[#fffefb]",
+        effectiveHasEmail ? "cursor-pointer" : "cursor-text",
       )}
     >
       {copied ? (
@@ -95,6 +101,6 @@ export function SidebarEmailCopy({ email, hasEmail }: { email: string; hasEmail:
       >
         {copied ? "已复制" : effectiveHasEmail ? effectiveEmail : "双击添加邮箱"}
       </span>
-    </button>
+    </Button>
   );
 }

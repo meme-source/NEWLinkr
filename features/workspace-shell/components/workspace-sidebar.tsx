@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, type RefObject } from "react";
 import { Bell, ChevronDown, LogOut, MessageSquareHeart, User } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WORKSPACE_NAV_ITEMS } from "@/features/workspace-shell/data/nav";
 import {
@@ -18,6 +19,7 @@ import {
   ReleaseMark,
 } from "@/features/workspace-shell/components/sidebar-toggle-icons";
 import { FeedbackDialog } from "@/features/workspace-shell/components/feedback-dialog";
+import { AccountSettingsDialog } from "@/features/settings/components/account-settings-dialog";
 
 type Props = {
   notifOpen: boolean;
@@ -41,6 +43,7 @@ export function WorkspaceSidebar({
   );
   const [collapsed, setCollapsed] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   // Track which expandable sections are open
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["项目管理", "设置"]));
   // Track the last-clicked child label within each section so it stays highlighted
@@ -103,17 +106,18 @@ export function WorkspaceSidebar({
         )}
       >
         {collapsed ? (
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => setCollapsed(false)}
             title="展开侧边栏"
-            className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-[#eceae3]"
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[#eceae3]"
           >
             <ReleaseMark className="h-5 w-5 text-[#36342e]" />
-          </button>
+          </Button>
         ) : (
           <>
-            <Link href="/" className="flex items-center gap-2.5 rounded-xl py-1">
+            <Link href="/" className="flex items-center gap-2.5 rounded-lg py-1">
               <div className="relative h-8 w-8 shrink-0">
                 <Image
                   src="/linkr-logo.png"
@@ -125,14 +129,15 @@ export function WorkspaceSidebar({
               </div>
               <span className="text-base font-semibold text-[#201515]">Linkr</span>
             </Link>
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={() => setCollapsed(true)}
               title="收起侧边栏"
               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#939084] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
             >
               <CollapseMark className="h-5 w-5" />
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -154,7 +159,7 @@ export function WorkspaceSidebar({
                 <Link
                   href={item.href}
                   className={cn(
-                    "mx-auto flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
+                    "mx-auto flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
                     parentActive || anyChildActive
                       ? "bg-[#eceae3] text-[#ff4f00]"
                       : "text-[#36342e] hover:bg-[#eceae3] hover:text-[#201515]",
@@ -176,7 +181,7 @@ export function WorkspaceSidebar({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   parentActive
                     ? "bg-[#eceae3] text-[#ff4f00]"
                     : "text-[#36342e] hover:bg-[#eceae3] hover:text-[#201515]",
@@ -191,11 +196,12 @@ export function WorkspaceSidebar({
           // Item with children
           return (
             <div key={item.href}>
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => toggleSection(item.label)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                  "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   anyChildActive
                     ? "text-[#ff4f00]"
                     : "text-[#36342e] hover:bg-[#eceae3] hover:text-[#201515]",
@@ -209,7 +215,7 @@ export function WorkspaceSidebar({
                     isExpanded && "rotate-180",
                   )}
                 />
-              </button>
+              </Button>
 
               {isExpanded && (
                 <div className="mt-0.5 mb-1 ml-[22px] space-y-0.5 border-l border-[#c5c0b1] pl-3">
@@ -251,31 +257,33 @@ export function WorkspaceSidebar({
         <div className="relative">
           {collapsed ? (
             <div className="group relative">
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => {
                   setNotifOpen(!notifOpen);
                   setUserOpen(false);
                 }}
-                className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-xl text-[#36342e] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
+                className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-[#36342e] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
                   <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#ff4f00]" />
                 )}
-              </button>
+              </Button>
               <span className="pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 rounded-lg bg-[#201515] px-2.5 py-1.5 text-xs whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
                 通知{unreadCount > 0 ? `（${unreadCount}）` : ""}
               </span>
             </div>
           ) : (
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={() => {
                 setNotifOpen(!notifOpen);
                 setUserOpen(false);
               }}
-              className="relative flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-[#36342e] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
+              className="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#36342e] transition-colors hover:bg-[#eceae3] hover:text-[#201515]"
             >
               <Bell className="h-4 w-4" />
               通知
@@ -284,20 +292,21 @@ export function WorkspaceSidebar({
                   {unreadCount}
                 </span>
               )}
-            </button>
+            </Button>
           )}
 
           {notifOpen && (
-            <div className="absolute bottom-full left-0 z-50 mb-2 w-80 rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+            <div className="absolute bottom-full left-0 z-50 mb-2 w-80 rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
               <div className="flex items-center justify-between border-b border-[#c5c0b1] px-4 py-3">
                 <span className="text-sm font-semibold text-[#201515]">通知</span>
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={markAllRead}
                   className="text-xs text-[#ff4f00] hover:underline"
                 >
                   全部已读
-                </button>
+                </Button>
               </div>
               <div className="divide-y divide-[#eceae3]">
                 {notifications.map((n) => (
@@ -320,9 +329,13 @@ export function WorkspaceSidebar({
                 ))}
               </div>
               <div className="border-t border-[#c5c0b1] px-4 py-2.5">
-                <button type="button" className="text-xs text-[#36342e] hover:text-[#201515]">
+                <Button
+                  unstyled
+                  type="button"
+                  className="text-xs text-[#36342e] hover:text-[#201515]"
+                >
                   查看全部通知 →
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -332,55 +345,62 @@ export function WorkspaceSidebar({
         <div className="relative">
           {collapsed ? (
             <div className="group relative">
-              <button
+              <Button
+                unstyled
                 type="button"
                 onClick={() => {
                   setUserOpen(!userOpen);
                   setNotifOpen(false);
                 }}
-                className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-[#eceae3]"
+                className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[#eceae3]"
               >
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#ff4f00] text-[11px] font-semibold text-[#fffefb]">
                   {WORKSPACE_DEMO_USER.initial}
                 </div>
-              </button>
+              </Button>
               <span className="pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 rounded-lg bg-[#201515] px-2.5 py-1.5 text-xs whitespace-nowrap text-[#fffefb] opacity-0 transition-opacity group-hover:opacity-100">
                 {WORKSPACE_DEMO_USER.name}
               </span>
             </div>
           ) : (
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={() => {
                 setUserOpen(!userOpen);
                 setNotifOpen(false);
               }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-[#eceae3]"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-[#eceae3]"
             >
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#ff4f00] text-[11px] font-semibold text-[#fffefb]">
                 {WORKSPACE_DEMO_USER.initial}
               </div>
               <span className="text-sm text-[#36342e]">{WORKSPACE_DEMO_USER.name}</span>
               <ChevronDown className="ml-auto h-3.5 w-3.5 text-[#939084]" />
-            </button>
+            </Button>
           )}
 
           {userOpen && (
-            <div className="absolute bottom-full left-0 z-50 mb-2 w-48 rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+            <div className="absolute bottom-full left-0 z-50 mb-2 w-48 rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
               <div className="border-b border-[#eceae3] px-3 py-2.5">
                 <p className="text-sm font-medium text-[#201515]">{WORKSPACE_DEMO_USER.name}</p>
                 <p className="text-xs text-[#939084]">{WORKSPACE_DEMO_USER.email}</p>
               </div>
               <div className="p-1.5">
-                <Link
-                  href="/workspace/settings?tab=account"
-                  onClick={() => setUserOpen(false)}
+                <Button
+                  unstyled
+                  type="button"
+                  onClick={() => {
+                    setUserOpen(false);
+                    setAccountOpen(true);
+                  }}
                   className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-[#36342e] hover:bg-[#eceae3]"
                 >
                   <User className="h-3.5 w-3.5" />
                   账户设置
-                </Link>
-                <button
+                </Button>
+                <Button
+                  unstyled
                   type="button"
                   onClick={() => {
                     setUserOpen(false);
@@ -390,14 +410,15 @@ export function WorkspaceSidebar({
                 >
                   <MessageSquareHeart className="h-3.5 w-3.5" />
                   产品反馈
-                </button>
-                <button
+                </Button>
+                <Button
+                  unstyled
                   type="button"
                   className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-[#36342e] hover:bg-[#eceae3]"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   退出登录
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -405,6 +426,7 @@ export function WorkspaceSidebar({
       </div>
 
       {feedbackOpen && <FeedbackDialog onClose={() => setFeedbackOpen(false)} />}
+      {accountOpen && <AccountSettingsDialog onClose={() => setAccountOpen(false)} />}
     </aside>
   );
 }

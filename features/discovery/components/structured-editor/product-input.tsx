@@ -2,6 +2,8 @@
 
 import { Link as LinkIcon, X } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
+
+import { Button } from "@/components/ui/button";
 import { T } from "../../data/tokens";
 import type { ProductChip } from "./types";
 import { extractUrl, mockProductTitle, normalizeChipUrl } from "./url-extract";
@@ -230,7 +232,8 @@ function ChipPill({ chip, onRemove }: { chip: ProductChip; onRemove: () => void 
       >
         · {chip.loading ? "解析中..." : chip.title || "已识别产品"}
       </span>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onRemove}
         aria-label="移除产品"
@@ -241,7 +244,7 @@ function ChipPill({ chip, onRemove }: { chip: ProductChip; onRemove: () => void 
         }}
       >
         <X size={11} strokeWidth={2.4} />
-      </button>
+      </Button>
     </span>
   );
 }

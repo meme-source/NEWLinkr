@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Eye, EyeOff, Paperclip, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Creator } from "@/types/api";
 import { VARIABLE_TOKENS } from "@/features/library/data/outreach";
 import { formatFileSize, interpolate } from "./bulk-outreach-utils";
@@ -54,7 +55,8 @@ export function BulkOutreachBodyEditor({
       <div>
         <div className="mb-1 flex items-center justify-between">
           <label className="text-[11px] font-medium text-[#939084]">邮件正文</label>
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onTogglePreview}
             disabled={!previewCreator || body.trim().length === 0}
@@ -71,13 +73,14 @@ export function BulkOutreachBodyEditor({
                 预览首位收件人
               </>
             )}
-          </button>
+          </Button>
         </div>
 
         {!previewOn && (
           <div className="mb-1.5 flex flex-wrap gap-1">
             {VARIABLE_TOKENS.map((v) => (
-              <button
+              <Button
+                unstyled
                 key={v.token}
                 type="button"
                 onClick={() => handleInsertVariable(v.token)}
@@ -85,7 +88,7 @@ export function BulkOutreachBodyEditor({
                 title={`插入 ${v.label}`}
               >
                 <code className="font-mono text-[10.5px]">{v.token}</code>
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -97,7 +100,7 @@ export function BulkOutreachBodyEditor({
           disabled={previewOn}
           rows={10}
           placeholder={"Hi {{handle}},\n\n我注意到你最近的内容..."}
-          className="w-full rounded-xl border border-[#c5c0b1] bg-[#fffdf9] p-3 text-[13px] leading-[1.6] outline-none focus:border-[#ff4f00] disabled:cursor-not-allowed disabled:bg-[#eceae3]"
+          className="w-full rounded-lg border border-[#c5c0b1] bg-[#fffdf9] p-3 text-[13px] leading-[1.6] outline-none focus:border-[#ff4f00] disabled:cursor-not-allowed disabled:bg-[#eceae3]"
         />
         <div className="mt-1 flex items-center justify-between text-[10.5px] text-[#939084]">
           <span>
@@ -122,14 +125,15 @@ export function BulkOutreachBodyEditor({
           }}
         />
         <div className="flex flex-wrap items-center gap-1.5">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="inline-flex h-7 items-center gap-1 rounded-full border border-[#c5c0b1] bg-[#fffefb] px-2.5 text-[11px] text-[#36342e] transition-colors hover:border-[#ff4f00] hover:text-[#ff4f00]"
           >
             <Paperclip className="h-3 w-3" />
             添加附件
-          </button>
+          </Button>
           {attachments.map((file) => (
             <span
               key={`${file.name}-${file.size}-${file.lastModified}`}
@@ -137,14 +141,15 @@ export function BulkOutreachBodyEditor({
             >
               <span className="max-w-[160px] truncate">{file.name}</span>
               <span className="text-[#b5b2aa]">{formatFileSize(file.size)}</span>
-              <button
+              <Button
+                unstyled
                 type="button"
                 aria-label={`移除 ${file.name}`}
                 onClick={() => onRemoveAttachment(file)}
                 className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[#939084] hover:bg-[#eceae3] hover:text-[#36342e]"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </span>
           ))}
         </div>

@@ -3,10 +3,12 @@
 import { useCallback, useState } from "react";
 import { Camera, Check, Globe2, KeyRound, Mail, ShieldCheck, Trash2 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { WORKSPACE_DEMO_USER } from "@/features/workspace-shell/data/demo-user";
 import { cn } from "@/lib/utils";
 
-// §3.6.x 账户设置 — 用户头像菜单点击"账户设置"进入此页。
+// §3.6.x 账户设置 — 用户头像菜单点击"账户设置"以弹窗形式打开，
+// 同一份表单也用于 /workspace/settings?tab=account 长页面。
 // 后端 Phase 0 阶段未接入，所有表单仅做本地态展示。
 type Language = "zh-CN" | "en-US" | "ja-JP";
 type Timezone = "Asia/Shanghai" | "Asia/Tokyo" | "America/Los_Angeles" | "Europe/London";
@@ -32,10 +34,15 @@ const EMAIL_PREFS: { key: EmailPrefKey; label: string; desc: string }[] = [
   { key: "product", label: "产品更新", desc: "Linkr 新功能、版本更新及最佳实践" },
 ];
 
+// Design doc §5: inputs use 5px radius (Content tier).
 const INPUT_CLASS =
-  "w-full rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-sm text-[#201515] placeholder:text-[#939084] transition-colors focus:border-[#ff4f00] focus:outline-none";
+  "w-full rounded-[5px] border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-sm text-[#201515] placeholder:text-[#939084] transition-colors focus:border-[#ff4f00] focus:outline-none";
 
-export function AccountTab() {
+export type AccountForm = ReturnType<typeof useAccountForm>;
+
+// 表单状态独立成 hook，让弹窗和长页面共享同一份内部结构。
+// 弹窗会把保存条放进 dialog footer，因此必须能在 sections 之外触发 handleSave。
+export function useAccountForm() {
   const [name, setName] = useState(WORKSPACE_DEMO_USER.name);
   const [displayName, setDisplayName] = useState(WORKSPACE_DEMO_USER.name);
   const [company, setCompany] = useState("My Brand Co., Ltd.");
@@ -58,10 +65,49 @@ export function AccountTab() {
     setEmailPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
+  return {
+    name,
+    setName,
+    displayName,
+    setDisplayName,
+    company,
+    setCompany,
+    language,
+    setLanguage,
+    timezone,
+    setTimezone,
+    twoFactor,
+    setTwoFactor,
+    emailPrefs,
+    togglePref,
+    savedAt,
+    handleSave,
+  };
+}
+
+// 仅渲染四个区块；保存条由父组件控制（页面 sticky / 弹窗 footer）。
+export function AccountSections({ form }: { form: AccountForm }) {
+  const {
+    name,
+    setName,
+    displayName,
+    setDisplayName,
+    company,
+    setCompany,
+    language,
+    setLanguage,
+    timezone,
+    setTimezone,
+    twoFactor,
+    setTwoFactor,
+    emailPrefs,
+    togglePref,
+  } = form;
+
   return (
     <div className="w-full space-y-4">
       {/* 个人资料 */}
-      <section className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-6">
+      <section className="rounded-[5px] border border-[#c5c0b1] bg-[#fffefb] p-6">
         <header className="mb-5">
           <h3 className="text-sm font-semibold text-[#201515]">个人资料</h3>
           <p className="mt-1 text-xs text-[#939084]">
@@ -74,13 +120,14 @@ export function AccountTab() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ff4f00] text-2xl font-semibold text-[#fffefb]">
               {WORKSPACE_DEMO_USER.initial}
             </div>
-            <button
+            <Button
+              unstyled
               type="button"
               className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border border-[#c5c0b1] bg-[#fffefb] text-[#36342e] transition-colors hover:bg-[#eceae3] hover:text-[#ff4f00]"
               title="更换头像"
             >
               <Camera className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-[#201515]">{name}</p>
@@ -109,12 +156,13 @@ export function AccountTab() {
                 disabled
                 className={cn(INPUT_CLASS, "bg-[#fffdf9] text-[#939084]")}
               />
-              <button
+              <Button
+                unstyled
                 type="button"
-                className="shrink-0 rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-xs text-[#36342e] transition-colors hover:bg-[#eceae3]"
+                className="shrink-0 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-3 py-2 text-xs text-[#36342e] transition-colors hover:bg-[#eceae3]"
               >
                 更换
-              </button>
+              </Button>
             </div>
           </FormField>
           <FormField label="公司 / 品牌">
@@ -128,7 +176,7 @@ export function AccountTab() {
       </section>
 
       {/* 安全 */}
-      <section className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-6">
+      <section className="rounded-[5px] border border-[#c5c0b1] bg-[#fffefb] p-6">
         <header className="mb-5">
           <h3 className="text-sm font-semibold text-[#201515]">登录与安全</h3>
           <p className="mt-1 text-xs text-[#939084]">保护账户登录凭证</p>
@@ -163,7 +211,7 @@ export function AccountTab() {
       </section>
 
       {/* 偏好 */}
-      <section className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-6">
+      <section className="rounded-[5px] border border-[#c5c0b1] bg-[#fffefb] p-6">
         <header className="mb-5">
           <h3 className="text-sm font-semibold text-[#201515]">偏好设置</h3>
           <p className="mt-1 text-xs text-[#939084]">界面语言、时区及邮件通知</p>
@@ -207,7 +255,7 @@ export function AccountTab() {
             {EMAIL_PREFS.map((p) => (
               <label
                 key={p.key}
-                className="flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[#fffdf9]"
+                className="flex cursor-pointer items-start gap-3 rounded-[5px] px-3 py-2.5 transition-colors hover:bg-[#fffdf9]"
               >
                 <input
                   type="checkbox"
@@ -226,44 +274,74 @@ export function AccountTab() {
       </section>
 
       {/* 危险区 */}
-      <section className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb] p-6">
+      <section className="rounded-[5px] border border-[#c5c0b1] bg-[#fffefb] p-6">
         <header className="mb-4">
           <h3 className="text-sm font-semibold text-[#201515]">注销账户</h3>
           <p className="mt-1 text-xs text-[#939084]">
             删除后将清除所有项目、博主库和邮件历史。此操作不可恢复。
           </p>
         </header>
-        <button
+        <Button
+          unstyled
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-[#ff4f00]/30 bg-[#fffefb] px-4 py-2 text-sm text-[#ff4f00] transition-colors hover:bg-[#ff4f00] hover:text-[#fffefb]"
+          className="inline-flex items-center gap-1.5 rounded border border-[#ff4f00]/30 bg-[#fffefb] px-4 py-2 text-sm text-[#ff4f00] transition-colors hover:bg-[#ff4f00] hover:text-[#fffefb]"
         >
           <Trash2 className="h-3.5 w-3.5" />
           注销账户
-        </button>
+        </Button>
       </section>
+    </div>
+  );
+}
 
-      {/* 保存条 */}
-      <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-2xl border border-[#c5c0b1] bg-[#fffefb] px-4 py-3 shadow-[0_4px_18px_-12px_rgba(32,21,21,0.18)]">
-        {savedAt !== null && (
-          <span className="flex items-center gap-1 text-xs text-emerald-600">
-            <Check className="h-3.5 w-3.5" />
-            已保存
-          </span>
-        )}
-        <button
-          type="button"
-          className="rounded-xl border border-[#c5c0b1] bg-[#fffefb] px-4 py-2 text-sm text-[#36342e] transition-colors hover:bg-[#eceae3]"
-        >
-          取消
-        </button>
-        <button
-          type="button"
-          onClick={handleSave}
-          className="rounded-xl bg-[#201515] px-5 py-2 text-sm font-medium text-[#fffefb] transition-colors hover:bg-[#36342e]"
-        >
-          保存修改
-        </button>
-      </div>
+type AccountFooterProps = {
+  form: AccountForm;
+  // "sticky"：长页面用，浮在内容上方；"flat"：弹窗 footer 用，与对话框边缘齐平。
+  variant: "sticky" | "flat";
+  onCancel?: () => void;
+};
+
+export function AccountFooter({ form, variant, onCancel }: AccountFooterProps) {
+  const containerCls =
+    variant === "sticky"
+      ? "sticky bottom-4 flex items-center justify-end gap-3 rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-4 py-3 shadow-[0_4px_18px_-12px_rgba(32,21,21,0.18)]"
+      : "flex shrink-0 items-center justify-end gap-3 border-t border-[#eceae3] bg-[#fffefb] px-5 py-3";
+
+  return (
+    <div className={containerCls}>
+      {form.savedAt !== null && (
+        <span className="flex items-center gap-1 text-xs text-emerald-600">
+          <Check className="h-3.5 w-3.5" />
+          已保存
+        </span>
+      )}
+      <Button
+        unstyled
+        type="button"
+        onClick={onCancel}
+        className="rounded-lg border border-[#c5c0b1] bg-[#fffefb] px-4 py-2 text-sm text-[#36342e] transition-colors hover:bg-[#eceae3]"
+      >
+        取消
+      </Button>
+      <Button
+        unstyled
+        type="button"
+        onClick={form.handleSave}
+        className="rounded-lg bg-[#201515] px-5 py-2 text-sm font-medium text-[#fffefb] transition-colors hover:bg-[#36342e]"
+      >
+        保存修改
+      </Button>
+    </div>
+  );
+}
+
+// 长页面入口：组合 hook + sections + sticky footer。
+export function AccountTab() {
+  const form = useAccountForm();
+  return (
+    <div className="w-full space-y-4">
+      <AccountSections form={form} />
+      <AccountFooter form={form} variant="sticky" />
     </div>
   );
 }
@@ -302,10 +380,10 @@ function SecurityRow({
   onAction,
 }: SecurityRowProps) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-[#eceae3] bg-[#fffdf9] px-4 py-3">
+    <div className="flex items-center gap-4 rounded-[5px] border border-[#eceae3] bg-[#fffdf9] px-4 py-3">
       <div
         className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
           highlight ? "bg-[#ff4f00]/10 text-[#ff4f00]" : "bg-[#eceae3] text-[#36342e]",
         )}
       >
@@ -315,18 +393,19 @@ function SecurityRow({
         <p className="text-sm font-medium text-[#201515]">{title}</p>
         <p className="mt-0.5 text-xs text-[#939084]">{desc}</p>
       </div>
-      <button
+      <Button
+        unstyled
         type="button"
         onClick={onAction}
         className={cn(
-          "shrink-0 rounded-xl border px-3.5 py-1.5 text-xs transition-colors",
+          "shrink-0 rounded-md border px-3.5 py-1.5 text-xs transition-colors",
           highlight
             ? "border-[#ff4f00] bg-[#ff4f00] text-[#fffefb] hover:bg-[#e64700]"
             : "border-[#c5c0b1] bg-[#fffefb] text-[#36342e] hover:bg-[#eceae3]",
         )}
       >
         {action}
-      </button>
+      </Button>
     </div>
   );
 }

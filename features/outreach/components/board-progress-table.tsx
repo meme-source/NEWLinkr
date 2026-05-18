@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Mail, MessageCircle } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { CollaborationStatusCell } from "@/features/creator/components/collaboration-status-cell";
 import type { OUTREACH_CREATORS } from "@/features/outreach/data/outreach-creators";
 import {
@@ -32,6 +33,7 @@ type Creator = CreatorList[number];
 // Today is hard-pinned to the project's `currentDate` so the followup labels
 // stay deterministic against the mock data set. Once a real backend lands,
 // swap to `new Date()`.
+// TODO(progress-today): 与 board-progress.tsx 共用同一份 mock 当日，真实日期接入后两处统一删除。
 const TODAY_ISO = "2026-05-06";
 
 function followupView(creator: Creator): {
@@ -94,7 +96,7 @@ export function BoardProgressTable({
   };
 
   return (
-    <div className="rounded-2xl border border-[#c5c0b1] bg-[#fffefb]">
+    <div className="overflow-hidden rounded-lg border border-[#c5c0b1] bg-[#fffefb]">
       <div className="flex flex-wrap items-center gap-1.5 border-b border-[#c5c0b1] px-3 py-2">
         <StatusTab
           label="全部"
@@ -186,13 +188,14 @@ export function BoardProgressTable({
                       />
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
+                      <Button
+                        unstyled
                         type="button"
                         onClick={() => goToChat(c)}
                         className="rounded-lg border border-[#c5c0b1] px-2.5 py-1 text-[11px] text-[#36342e] hover:bg-[#eceae3]"
                       >
                         查看
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );
@@ -214,7 +217,8 @@ interface StatusTabProps {
 
 function StatusTab({ label, count, active, onClick }: StatusTabProps) {
   return (
-    <button
+    <Button
+      unstyled
       type="button"
       onClick={onClick}
       aria-pressed={active}
@@ -229,7 +233,7 @@ function StatusTab({ label, count, active, onClick }: StatusTabProps) {
       <span className={cn("ml-1.5 tabular-nums", active ? "text-[#ff4f00]" : "text-[#939084]")}>
         {count}
       </span>
-    </button>
+    </Button>
   );
 }
 
